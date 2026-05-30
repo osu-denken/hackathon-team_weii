@@ -35,86 +35,7 @@
       color: #a5f3fc;
     }
 
-    .top-bar {
-      display: grid;
-      grid-template-columns: minmax(280px, 320px) 1fr;
-      gap: 18px;
-      padding: 0 24px 16px;
-      align-items: end;
-    }
-
-    .qr-panel {
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-    }
-
-    .qr-panel h2,
-    .info-panel h2 {
-      margin: 0 0 10px;
-      font-size: 0.95rem;
-      letter-spacing: 0.08em;
-    }
-
-    .qr-frame {
-      width: 100%;
-      max-width: 260px;
-      aspect-ratio: 1;
-      border-radius: 18px;
-      overflow: hidden;
-      background: #fff;
-      border: 1px solid #d1d5db;
-      margin-bottom: 12px;
-      display: grid;
-      place-items: center;
-    }
-
-    .qr-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .link {
-      display: inline-block;
-      color: #2563eb;
-      text-decoration: none;
-      word-break: break-all;
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-
-    .info-panel {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.92);
-      border-radius: 18px;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-    }
-
-    .info-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: #f8fafc;
-      color: #0f172a;
-      font-size: 0.96rem;
-    }
-
-    .info-item span {
-      font-weight: 700;
-    }
+    /* top-bar and side panels removed; styles cleaned */
 
     .game-summary {
       display: grid;
@@ -319,28 +240,7 @@
       display: block;
     }
 
-    .status-badge {
-      position: absolute;
-      left: 18px;
-      top: 18px;
-      padding: 10px 14px;
-      border-radius: 16px;
-      background: rgba(15, 23, 42, 0.16);
-      color: #fff;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      backdrop-filter: blur(8px);
-    }
-
-    .status-badge.connected {
-      background: rgba(16, 185, 129, 0.92);
-    }
-
-    .status-badge.disconnected {
-      background: rgba(244, 63, 94, 0.92);
-    }
+    /* status-badge removed; overlay-status is used instead */
 
     @media (max-width: 920px) {
       .top-bar {
@@ -364,40 +264,6 @@
 </head>
 <body>
   <header>Game Monitor</header>
-  <div class="top-bar">
-    <section class="qr-panel">
-      <h2>スマホ操作用 QR</h2>
-      <div class="qr-frame">
-        <img id="qr" alt="スマホ操作画面へのQRコード" />
-      </div>
-      <a id="client-link" class="link" target="_blank" rel="noreferrer noopener"></a>
-    </section>
-
-    <section class="info-panel">
-      <h2>リアルタイムステータス</h2>
-      <div class="info-list">
-        <div class="info-item">接続: <span id="status-text">disconnected</span></div>
-        <div class="info-item">プレイヤー: <span id="player-count">0</span> / 2</div>
-        <div class="info-item">敵: <span id="enemy-count">0</span></div>
-        <div class="info-item">弾: <span id="bullet-count">0</span></div>
-      </div>
-      <div class="game-summary">
-        <div class="score-row">
-          <div>合計スコア</div>
-          <div><strong id="total-score">0</strong> / <strong id="target-score">100</strong></div>
-        </div>
-        <div class="score-gauge">
-          <div class="gauge-track"><div class="gauge-fill" id="score-fill"></div></div>
-          <div class="gauge-label"><span id="score-percent">0%</span></div>
-        </div>
-        <div class="game-meta">
-          <div>残り時間: <strong id="time-remaining">00:00</strong></div>
-          <div>クリア: <strong id="clear-status">NO</strong></div>
-        </div>
-        <div class="player-summary" id="player-summary"></div>
-      </div>
-    </section>
-  </div>
 
   <div class="frame">
     <div class="stage-wrapper">
@@ -423,17 +289,6 @@
     const MAX_PLAYERS = 4;
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
-    const statusText = document.getElementById('status-text');
-    const playerCount = document.getElementById('player-count');
-    const totalScoreEl = document.getElementById('total-score');
-    const targetScoreEl = document.getElementById('target-score');
-    const timeRemainingEl = document.getElementById('time-remaining');
-    const clearStatusEl = document.getElementById('clear-status');
-    const scoreFill = document.getElementById('score-fill');
-    const scorePercent = document.getElementById('score-percent');
-    const playerSummary = document.getElementById('player-summary');
-    const clientLink = document.getElementById('client-link');
-    const qrImage = document.getElementById('qr');
 
     /* overlay elements */
     const overlayPlayerCount = document.getElementById('overlay-player-count');
@@ -466,7 +321,6 @@
     };
 
     const renderPlayerSummary = () => {
-      playerSummary.innerHTML = '';
       overlayBottom.innerHTML = '';
 
       state.characters.forEach((player, index) => {
@@ -486,7 +340,7 @@
             <div class="player-bar"><div class="player-bar-fill" style="width: ${Math.round(healthRatio * 100)}%; background: linear-gradient(90deg, ${color}, #ffffff);"></div></div>
           </div>
         `;
-        playerSummary.appendChild(card);
+        // no side panel; only bottom overlay
 
         // bottom overlay (horizontal)
         const bottom = document.createElement('div');
@@ -511,20 +365,13 @@
 
     const updateGameUI = () => {
       const { totalScore, targetScore, timeRemainingMs, cleared } = state.game;
-      totalScoreEl.textContent = totalScore;
-      targetScoreEl.textContent = targetScore;
       const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
-      scoreFill.style.width = `${percent}%`;
-      scorePercent.textContent = `${percent}%`;
-      timeRemainingEl.textContent = formatTime(timeRemainingMs);
-      clearStatusEl.textContent = cleared ? 'YES' : 'NO';
-      clearStatusEl.style.color = cleared ? '#34d399' : '#f87171';
-      // overlay updates
-      if (overlayPlayerCount) overlayPlayerCount.textContent = `${state.characters.length} / ${MAX_PLAYERS}`;
+      // overlay updates (no side panel elements)
       if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
       if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
       if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
-
+      // overlay updates
+      if (overlayPlayerCount) overlayPlayerCount.textContent = `${state.characters.length} / ${MAX_PLAYERS}`;
       renderPlayerSummary();
     };
 
@@ -540,19 +387,14 @@
     resize();
 
     const clientUrl = `${window.location.protocol}//${window.location.host}/client/`;
-    clientLink.textContent = clientUrl;
-    clientLink.href = clientUrl;
-    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(clientUrl)}`;
-    // overlay QR (no URL text shown)
+    // overlay QR only
     if (qrOverlay) qrOverlay.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(clientUrl)}`;
-    if (clientLink) clientLink.style.display = 'none';
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const wsUrl = `${wsProtocol}://${window.location.hostname}:3001`;
     const socket = new WebSocket(wsUrl);
 
     const setConnected = (connected) => {
-      if (statusText) statusText.textContent = connected ? 'connected' : 'disconnected';
       if (overlayStatus) {
         overlayStatus.textContent = connected ? 'connected' : 'disconnected';
         overlayStatus.className = `overlay-status ${connected ? 'connected' : 'disconnected'}`;
@@ -597,9 +439,6 @@
             }
           : state.game;
 
-        playerCount.textContent = state.characters.length;
-        enemyCount.textContent = state.enemies.length;
-        bulletCount.textContent = state.bullets.length;
         updateGameUI();
       }
     });
