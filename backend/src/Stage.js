@@ -1,8 +1,8 @@
-import { PlayerEntity, DEFAULT_HP, BASE_ATTACK, POWER_ATTACK } from './PlayerEntity.js';
-import { EnemyEntity } from './EnemyEntity.js';
-import { BulletEntity } from './BulletEntity.js';
+import { PlayerEntity, DEFAULT_HP, BASE_ATTACK, POWER_ATTACK } from './entities/PlayerEntity.js';
+import { EnemyEntity } from './entities/EnemyEntity.js';
+import { BulletEntity } from './entities/BulletEntity.js';
 import { Item } from './item.js';
-import { ItemEntity } from './ItemEntity.js';
+import { ItemEntity } from './entities/ItemEntity.js';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 

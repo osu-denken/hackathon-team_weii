@@ -1,4 +1,4 @@
-import { LivingEntity } from './entities/LivingEntity.js';
+import { LivingEntity } from './LivingEntity.js';
 
 class EnemyEntity extends LivingEntity {
   static SPEED = 0.05;

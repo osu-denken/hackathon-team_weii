@@ -1,4 +1,4 @@
-import { Entity } from './entities/Entity.js';
+import { Entity } from './Entity.js';
 
 class BulletEntity extends Entity {
   static SPEED = 0.2;

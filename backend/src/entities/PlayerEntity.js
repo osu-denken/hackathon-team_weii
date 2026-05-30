@@ -1,4 +1,4 @@
-import { LivingEntity } from './entities/LivingEntity.js';
+import { LivingEntity } from './LivingEntity.js';
 
 const DEFAULT_HP = 5;
 const BASE_ATTACK = 1;
