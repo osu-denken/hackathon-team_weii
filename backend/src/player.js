@@ -27,6 +27,7 @@ const join = (ws, id) => {
     lastShotAt: 0,
     number: playerNumber,
     color,
+    heldItem: null,
   };
 
   players.set(id, player);
@@ -93,6 +94,41 @@ const damage = (id, amount) => {
 };
 
 const listRaw = () => Array.from(players.values());
+
+const setHeldItem = (id, item) => {
+  const player = players.get(id);
+  if (!player || player.heldItem) {
+    return false;
+  }
+
+  player.heldItem = item;
+  return true;
+};
+
+const consumeHeldItem = (id) => {
+  const player = players.get(id);
+  if (!player || !player.heldItem) {
+    return null;
+  }
+
+  const item = player.heldItem;
+  player.heldItem = null;
+  return item;
+};
+
+const getHeldItem = (id) => {
+  const player = players.get(id);
+  if (!player) {
+    return null;
+  }
+
+  return player.heldItem;
+};
+
+const hasHeldItem = (id) => {
+  const player = players.get(id);
+  return !!(player && player.heldItem);
+};
 
 const applyPower = (id, now, durationMs) => {
   const player = players.get(id);
@@ -172,6 +208,10 @@ export {
   heal,
   damage,
   listRaw,
+  setHeldItem,
+  consumeHeldItem,
+  getHeldItem,
+  hasHeldItem,
   applyPower,
   updatePowers,
   canShoot,

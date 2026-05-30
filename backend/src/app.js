@@ -78,6 +78,7 @@ const sendStateToPlayers = () => {
                 powerRemainingMs: Math.max(0, player.powerUntil - now),
                 number: player.number,
                 color: player.color,
+                heldItem: players.getHeldItem(player.id),
                 bulletsActive: bullets.countByOwner(player.id),
                 bulletsMax: MAX_ACTIVE_BULLETS_PER_PLAYER,
                 canShoot: players.canShoot(player.id, now, SHOOT_COOLDOWN_MS),
@@ -149,7 +150,7 @@ const handleUseItem = (ws) => {
         return;
     }
 
-    const item = items.take();
+    const item = players.consumeHeldItem(player.id);
     if (!item) {
         return;
     }
@@ -233,6 +234,7 @@ setInterval(() => {
     const bulletList = bullets.getAll();
     const hitRange = 0.5;
     const playerHitRange = 0.7;
+    const itemHitRange = 0.6;
     const enemiesToRemove = new Set();
     const bulletsToRemove = new Set();
     const kills = [];
@@ -264,6 +266,31 @@ setInterval(() => {
             }
         });
     });
+
+    const groundItem = items.list()[0] || null;
+    if (groundItem) {
+        playerList.forEach((player) => {
+            if (players.hasHeldItem(player.id)) {
+                return;
+            }
+
+            const dx = Math.abs(groundItem.x - player.x);
+            const dy = Math.abs(groundItem.y - 0);
+            if (dx <= itemHitRange && dy <= itemHitRange) {
+                const picked = items.take();
+                if (!picked) {
+                    return;
+                }
+
+                if (picked.type === 'heal') {
+                    players.heal(player.id, HEAL_AMOUNT);
+                    return;
+                }
+
+                players.setHeldItem(player.id, picked);
+            }
+        });
+    }
 
     kills.forEach((kill) => {
         if (kill.ownerId) {

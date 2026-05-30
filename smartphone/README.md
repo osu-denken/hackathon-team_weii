@@ -77,6 +77,7 @@
     "powerRemainingMs": 0,
     "number": 1,
     "color": "#2563eb",
+    "heldItem": null,
     "bulletsActive": 2,
     "bulletsMax": 12,
     "canShoot": true,
@@ -98,8 +99,21 @@
 }
 ```
 
+heldItemは未所持ならnull、所持中は以下の形式
+
+```json
+{
+  "id": "<アイテムのuuid>",
+  "type": "heal",
+  "x": 0,
+  "y": 2
+}
+```
+
+回復アイテム(heal)は取得した瞬間に回復し、heldItemには入らない
+
 ## 債務
-- アイテム表示 (回復/攻撃力アップ) とタップで使用
+- アイテム表示 (回復は自動消費、その他はタップで使用)
 - ショットのクールダウン表示、長押し連射対応
 - 残弾やクールダウンの視覚化
 - プレイヤーHPやスコア表示の追加
