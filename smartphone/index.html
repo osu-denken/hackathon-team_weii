@@ -53,6 +53,8 @@
         const playerNumberText = document.getElementById('player-number-text');
         let _currentHeldItem = null;
 
+        let neutralBeta = null; // 傾きのニュートラル位置（初期値はnullで、最初のセンサーイベントで設定）
+
         const assetBase = `${window.location.protocol}//${window.location.host}/asset/images/`;
         const itemIconMap = {
             health_potion: `${assetBase}health_potion.png`,
@@ -78,13 +80,6 @@
             }
 
             try {
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    const response = await DeviceMotionEvent.requestPermission();
-                    if (response !== 'granted') {
-                        alert('センサーの使用が許可されませんでした');
-                        return;
-                    }
-                }
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     const response = await DeviceOrientationEvent.requestPermission();
                     if (response !== 'granted') {
@@ -93,7 +88,6 @@
                     }
                 }
 
-                window.addEventListener('devicemotion', handleMotion); 
                 window.addEventListener('deviceorientation', handleOrientation); 
             } catch (error) {
                 console.error('センサーの許可エラー:', error);
@@ -109,6 +103,8 @@
             ws = new WebSocket(url);
 
             ws.onopen = () => {
+                neutralBeta = null;
+
                 updateUI(true);
                 const joinData = {
                     type: "join",
@@ -184,70 +180,35 @@
         // --- 4. 移動量検知と送信 (move) ---
         function handleOrientation(event) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
-            
-            const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
-                ? screen.orientation.angle
-                : (typeof window.orientation === 'number' ? window.orientation : 0);
 
-            let steer = 0;
+            if (event.beta == null) return;
 
-            // スマホの向きに応じて「右に傾ければプラス(右移動)」になるよう標準化
-            if (angle === 90) {
-                // ホームボタンが右（カメラ左）の場合
-                steer = -event.beta;
-            } else if (angle === -90 || angle === 270) {
-                // ホームボタンが左（カメラ右）の場合
-                steer = event.beta;
-            } else if (angle === 180) {
-                steer = -event.gamma;
-            } else {
-                steer = event.gamma;
+            if (neutralBeta === null) {
+                neutralBeta = event.beta;
+                return;
             }
 
-            if (steer === null || steer === undefined) return;
+            let steer = event.beta - neutralBeta;
+
+            const DEAD_ZONE = 5;
+
+            if (Math.abs(steer) < DEAD_ZONE) {
+                steer = 0;
+            }
 
             const MAX_TILT = 45;
-            if (steer > MAX_TILT) steer = MAX_TILT;
-            if (steer < -MAX_TILT) steer = -MAX_TILT;
 
-            const delta = Math.round((-1 * steer / MAX_TILT) * 1000) / 1000;
-            sendMove(delta);
+            steer = Math.max(-MAX_TILT, Math.min(MAX_TILT, steer));
+
+            const delta = Math.round((steer / MAX_TILT) * 1000) / 1000;
+
+            sendMove(delta, 0, event.beta, event.gamma);
         }
 
-        function handleMotion(event) {
-            if (!ws || ws.readyState !== WebSocket.OPEN) return;
-            const rotation = event.rotationRate;
-            if (!rotation) return;
-
-            const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
-                ? screen.orientation.angle
-                : (typeof window.orientation === 'number' ? window.orientation : 0);
-
-            let steerRate = 0;
-
-            if (angle === 90) {
-                steerRate = -rotation.beta;
-            } else if (angle === -90 || angle === 270) {
-                steerRate = rotation.beta;
-            } else if (angle === 180) {
-                steerRate = -rotation.gamma;
-            } else {
-                steerRate = rotation.gamma;
-            }
-
-            if (steerRate === null || steerRate === undefined) return;
-
-            const MAX_RATE = 90;
-            if (steerRate > MAX_RATE) steerRate = MAX_RATE;
-            if (steerRate < -MAX_RATE) steerRate = -MAX_RATE;
-
-            sendMove(Math.round((-1 * steerRate / MAX_RATE) * 1000) / 1000);
-        }
-
-        function sendMove(delta) {
+        function sendMove(delta, angle, beta, gamma) {
             const now = Date.now();
             if (now - lastMoveSendTime > THROTTLE_MS) {
-                const moveData = { type: "move", delta: delta };
+                const moveData = { type: "move", delta: delta, angle: angle, beta: beta, gamma: gamma };
                 ws.send(JSON.stringify(moveData));
                 lastMoveSendTime = now;
             }
@@ -304,7 +265,6 @@
             
             if (!isConnected) {
                 window.removeEventListener('deviceorientation', handleOrientation);
-                window.removeEventListener('devicemotion', handleMotion);
             }
         }
 
