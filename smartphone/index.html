@@ -131,7 +131,8 @@
             let gamma = event.gamma;
             if (gamma > MAX_TILT) gamma = MAX_TILT;
             if (gamma < -MAX_TILT) gamma = -MAX_TILT;
-            const delta = Math.round((gamma / MAX_TILT) * 1000) / 1000;
+            // 左右反転: 値の符号を反転して送信
+            const delta = Math.round((-gamma / MAX_TILT) * 1000) / 1000;
             sendMove(delta);
         }
 
@@ -144,7 +145,8 @@
             const MAX_RATE = 90;
             if (delta > MAX_RATE) delta = MAX_RATE;
             if (delta < -MAX_RATE) delta = -MAX_RATE;
-            sendMove(Math.round((delta / MAX_RATE) * 1000) / 1000);
+            // 左右反転: 符号を反転して送信
+            sendMove(Math.round((-delta / MAX_RATE) * 1000) / 1000);
         }
 
         function sendMove(delta) {
