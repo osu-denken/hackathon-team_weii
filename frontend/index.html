@@ -26,15 +26,6 @@
       color: #e2e8f0;
     }
 
-    header {
-      padding: 18px 24px 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #a5f3fc;
-    }
-
     /* top-bar and side panels removed; styles cleaned */
 
     .game-summary {
@@ -135,7 +126,6 @@
 
     .frame {
       flex: 1;
-      padding: 0 24px 24px;
       display: grid;
     }
 
@@ -143,13 +133,11 @@
       position: relative;
       width: 100%;
       min-height: 420px;
-      border-radius: 24px;
       overflow: hidden;
       background-image:
         radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.12), transparent 30%),
         radial-gradient(circle at 85% 15%, rgba(16, 185, 129, 0.10), transparent 16%),
         linear-gradient(180deg, #08122d 0%, #040716 72%, #01050f 100%);
-      box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.12), 0 24px 60px rgba(8, 15, 30, 0.25);
     }
 
     canvas { z-index: 0; }
@@ -247,24 +235,9 @@
         grid-template-columns: 1fr;
       }
     }
-
-    @media (max-width: 640px) {
-      header {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      .top-bar,
-      .frame {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>Game Monitor</header>
-
   <div class="frame">
     <div class="stage-wrapper">
       <canvas id="stage"></canvas>
