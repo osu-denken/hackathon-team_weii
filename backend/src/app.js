@@ -228,6 +228,7 @@ setInterval(() => {
     enemies.maybeSpawn(now);
     enemies.update();
     bullets.update();
+    items.update();
     const enemyList = enemies.list();
     const bulletList = bullets.getAll();
     const hitRange = 0.5;
