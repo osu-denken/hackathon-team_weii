@@ -26,6 +26,11 @@
                 <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
                 <div id="delta-display">Delta (移動量): 0.00</div>
             </div>
+            <div class="control-panel">
+                <label style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="invert-x" checked> 左右マッピングを反転
+                </label>
+            </div>
         </div>
 
         <div class="controller-area">
@@ -153,10 +158,12 @@
             if (rawTilt > MAX_TILT) rawTilt = MAX_TILT;
             if (rawTilt < -MAX_TILT) rawTilt = -MAX_TILT;
 
-            // カメラが左側なら rawTilt の符号をそのまま使用して、
-            // 右に傾けると正（右移動）になるようにする。
-            // カメラが右側なら反転する。
-            const sign = CAMERA_LEFT ? 1 : -1;
+            // カメラが左側にある前提で、右に傾けると正（右移動）となるように基準符号を設定
+            // ユーザーがチェックボックスで左右マッピングを反転できるようにする
+            const invertCheckbox = document.getElementById('invert-x');
+            const invert = invertCheckbox && invertCheckbox.checked ? -1 : 1;
+            const baseSign = CAMERA_LEFT ? -1 : 1; // CAMERA_LEFT=true の場合、基準符号は -1 とする
+            const sign = baseSign * invert;
             const delta = Math.round((sign * rawTilt / MAX_TILT) * 1000) / 1000;
             sendMove(delta);
         }
@@ -190,7 +197,10 @@
             if (rawRate > MAX_RATE) rawRate = MAX_RATE;
             if (rawRate < -MAX_RATE) rawRate = -MAX_RATE;
 
-            const sign = CAMERA_LEFT ? 1 : -1;
+            const invertCheckbox = document.getElementById('invert-x');
+            const invert = invertCheckbox && invertCheckbox.checked ? -1 : 1;
+            const baseSign = CAMERA_LEFT ? -1 : 1;
+            const sign = baseSign * invert;
             sendMove(Math.round((sign * rawRate / MAX_RATE) * 1000) / 1000);
         }
 
