@@ -5,6 +5,9 @@
 - スマートフォンのタップで射撃
 - 時々現れるアイテムを取ると即時回復もしくは使うと一定時間無敵、3点バーストショット、スコア2倍などの効果が得られる
 
+<img width="1919" height="1199" alt="image" src="https://github.com/user-attachments/assets/734bacab-c780-4ecd-bc75-2adda2da4eb2" />
+
+
 ## 技術構成
 ### モニター (フロントエンド)
 - HTML/CSS/JavaScript/Canvas/WebSocket
