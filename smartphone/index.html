@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>スマホコントローラー</title>
+    <style>
+        /* CSS: スマートフォン向けのUI設定 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1e1e24;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            touch-action: manipulation; /* ダブルタップズーム防止 */
+            user-select: none; /* テキスト選択防止 */
+        }
+        header {
+            padding: 15px;
+            background-color: #2b2b36;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .connection-panel {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+        }
+        #btn-connect { background-color: #007bff; }
+        #btn-connect:disabled { background-color: #555; }
+        #btn-leave { background-color: #dc3545; }
+        #btn-leave:disabled { background-color: #555; }
+        
+        .info-panel {
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 18px;
+            background-color: #222;
+        }
+        .status { font-weight: bold; }
+        .status.disconnected { color: #ff6b6b; }
+        .status.connected { color: #51cf66; }
+
+        .controller-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #btn-shoot {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: #ff4757;
+            border: 8px solid #ff6b81;
+            font-size: 32px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        #btn-shoot:active {
+            transform: scale(0.95);
+            background-color: #ff6b81;
+        }
+        #btn-shoot:disabled {
+            background-color: #555;
+            border-color: #777;
+            box-shadow: none;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>Controller</h2>
+    </header>
+
+    <div class="connection-panel">
+        <input type="text" id="ws-url" value="ws://localhost:8080" placeholder="WebSocket URLを入力">
+        <div class="btn-group">
+            <button id="btn-connect">CONNECT</button>
+            <button id="btn-leave" disabled>LEAVE</button>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
+        <div id="delta-display">Delta (移動量): 0.00</div>
+    </div>
+
+    <div class="controller-area">
+        <button id="btn-shoot" disabled>SHOOT</button>
+    </div>
+
+    <script>
+        // --- 1. UUIDの生成 ---
+        // 注意: crypto.randomUUID() はセキュリティの観点から HTTPS環境 または localhost でのみ動作します
+        const myUUID = window.crypto && crypto.randomUUID ? crypto.randomUUID() : "local-test-uuid";
+
+        // --- 変数定義 ---
+        let ws = null;
+        let lastMoveSendTime = 0;
+        const THROTTLE_MS = 100; // 移動量送信の間隔（ミリ秒）
+
+        // --- DOM要素 ---
+        const wsUrlInput = document.getElementById('ws-url');
+        const btnConnect = document.getElementById('btn-connect');
+        const btnLeave = document.getElementById('btn-leave');
+        const btnShoot = document.getElementById('btn-shoot');
+        const statusDisplay = document.getElementById('status');
+        const deltaDisplay = document.getElementById('delta-display');
+
+        // --- 2. WebSocket 接続と iOS センサー許可 ---
+        btnConnect.addEventListener('click', () => {
+            // iOS 13以降のジャイロセンサー許可ダイアログ対応
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            connectWebSocket();
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        } else {
+                            alert('センサーの使用が許可されませんでした');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // AndroidやPCなど
+                connectWebSocket();
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        });
+
+        function connectWebSocket() {
+            const url = wsUrlInput.value;
+            ws = new WebSocket(url);
+
+            ws.onopen = () => {
+                updateUI(true);
+                // 参加データの送信 (join)
+                const joinData = {
+                    type: "join",
+                    id: myUUID
+                };
+                ws.send(JSON.stringify(joinData));
+            };
+
+            ws.onclose = () => {
+                updateUI(false);
+            };
+
+            ws.onerror = (error) => {
+                console.error("WebSocket Error:", error);
+                alert("WebSocket接続エラー。サーバーが起動しているか確認してください。");
+                updateUI(false);
+            };
+        }
+
+        // --- 3. 離脱 (leave) ---
+        btnLeave.addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const leaveData = { type: "leave" };
+                ws.send(JSON.stringify(leaveData));
+                ws.close();
+            }
+        });
+
+        // --- 4. 移動量検知と送信 (move) ---
+        function handleOrientation(event) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+            // スマホを縦持ちした際の左右の傾きを取得 (gamma: -90 ～ 90)
+            let gamma = event.gamma; 
+            if (gamma === null) return;
+
+            // 操作しやすいように -45度 ～ 45度 の範囲を -1.0 ～ 1.0 にマッピング
+            const MAX_TILT = 45;
+            if (gamma > MAX_TILT) gamma = MAX_TILT;
+            if (gamma < -MAX_TILT) gamma = -MAX_TILT;
+            
+            // deltaの計算 (-1.0 ～ 1.0)
+            let delta = gamma / MAX_TILT;
+            
+            // 小数点第3位までに丸める
+            delta = Math.round(delta * 1000) / 1000;
+            
+            deltaDisplay.textContent = `Delta (移動量): ${delta.toFixed(2)}`;
+
+            // 通信負荷軽減のため、100ミリ秒に1回だけ送信 (スロットリング)
+            const now = Date.now();
+            if (now - lastMoveSendTime > THROTTLE_MS) {
+                const moveData = {
+                    type: "move",
+                    delta: delta
+                };
+                ws.send(JSON.stringify(moveData));
+                lastMoveSendTime = now;
+            }
+        }
+
+        // --- 5. 射撃 (shoot) ---
+        // touchstartイベントを使用して、スマホでのタップ遅延を無くす
+        const shootAction = (e) => {
+            e.preventDefault(); // クリックイベントの重複発火を防ぐ
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const shootData = { type: "shoot" };
+                ws.send(JSON.stringify(shootData));
+            }
+        };
+        btnShoot.addEventListener('touchstart', shootAction, { passive: false });
+        btnShoot.addEventListener('mousedown', shootAction); // PCでのテスト用
+
+        // --- UI更新ユーティリティ ---
+        function updateUI(isConnected) {
+            btnConnect.disabled = isConnected;
+            wsUrlInput.disabled = isConnected;
+            btnLeave.disabled = !isConnected;
+            btnShoot.disabled = !isConnected;
+            
+            statusDisplay.textContent = isConnected ? "Connected" : "Disconnected";
+            statusDisplay.className = isConnected ? "status connected" : "status disconnected";
+            
+            if (!isConnected) {
+                window.removeEventListener('deviceorientation', handleOrientation);
+                deltaDisplay.textContent = "Delta (移動量): 0.00";
+            }
+        }
+
+        // ページを閉じる際にも離脱処理を送る
+        window.addEventListener('beforeunload', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "leave" }));
+                ws.close();
+            }
+        });
+    </script>
+</body>
+</html>
