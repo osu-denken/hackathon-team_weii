@@ -1,4 +1,4 @@
-import { PlayerEntity, DEFAULT_HP } from './PlayerEntity.js';
+import { PlayerEntity, DEFAULT_HP, BASE_ATTACK, POWER_ATTACK } from './PlayerEntity.js';
 import { EnemyEntity } from './EnemyEntity.js';
 import { BulletEntity } from './BulletEntity.js';
 import { Item } from './item.js';
@@ -9,22 +9,7 @@ const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const X_MIN = -5;
 const X_MAX = 5;
 
-const BASE_ATTACK = 1;
-const POWER_ATTACK = 2;
-
 const PLAYER_COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6'];
-
-const ENEMY_SPEED = 0.05;
-const ENEMY_SPAWN_LIMIT = 5;
-const ENEMY_SPAWN_INTERVAL_MS = 1000;
-const BIG_ENEMY_HP = 3;
-const NORMAL_ENEMY_HP = 1;
-const BIG_ENEMY_EVERY = 8;
-
-const BULLET_SPEED = 0.2;
-const BULLET_SPREAD = 0.05;
-
-const ITEM_SPEED = 0.06;
 
 const SHOOT_COOLDOWN_MS = 250;
 const MAX_ACTIVE_BULLETS_PER_PLAYER = 12;
@@ -239,16 +224,16 @@ class Stage {
   }
 
   maybeSpawnEnemy(now) {
-    if (this.enemies.size >= ENEMY_SPAWN_LIMIT) {
+    if (this.enemies.size >= EnemyEntity.SPAWN_LIMIT) {
       return;
     }
 
-    if (now - this.lastEnemySpawnAt < ENEMY_SPAWN_INTERVAL_MS) {
+    if (now - this.lastEnemySpawnAt < EnemyEntity.SPAWN_INTERVAL_MS) {
       return;
     }
 
-    const type = this.enemyCounter % BIG_ENEMY_EVERY === 0 ? 'big' : 'normal';
-    const hp = type === 'big' ? BIG_ENEMY_HP : NORMAL_ENEMY_HP;
+    const type = this.enemyCounter % EnemyEntity.BIG_EVERY === 0 ? 'big' : 'normal';
+    const hp = type === 'big' ? EnemyEntity.BIG_HP : EnemyEntity.NORMAL_HP;
     const enemy = new EnemyEntity({
       id: `enemy-${this.enemyCounter++}`,
       x: (Math.random() * 6) - 3,
@@ -263,7 +248,7 @@ class Stage {
 
   updateEnemies() {
     this.enemies.forEach((enemy, id) => {
-      enemy.update(ENEMY_SPEED);
+      enemy.update(EnemyEntity.SPEED);
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }
@@ -273,7 +258,7 @@ class Stage {
   updateBullets() {
     this.bullets.forEach((bullet, id) => {
       bullet.update();
-      if (bullet.y > 6 || bullet.x < -6 || bullet.x > 6) {
+      if (bullet.y > BulletEntity.MAX_Y || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
         this.bullets.delete(id);
       }
     });
@@ -284,7 +269,7 @@ class Stage {
       return;
     }
 
-    this.itemEntity.update(ITEM_SPEED);
+    this.itemEntity.update(ItemEntity.SPEED);
     if (this.itemEntity.y < -5) {
       this.itemEntity = null;
     }
@@ -382,7 +367,7 @@ class Stage {
       x: player.x,
       y: 0,
       vx: 0,
-      vy: BULLET_SPEED,
+      vy: BulletEntity.SPEED,
       ownerId: player.id,
       damage,
     });
@@ -390,13 +375,13 @@ class Stage {
   }
 
   spawnTripleBullets(player, damage) {
-    [-BULLET_SPREAD, 0, BULLET_SPREAD].forEach((vx) => {
+    [-BulletEntity.SPREAD, 0, BulletEntity.SPREAD].forEach((vx) => {
       const bullet = new BulletEntity({
         id: `bullet-${this.bulletCounter++}`,
         x: player.x,
         y: 0,
         vx,
-        vy: BULLET_SPEED,
+        vy: BulletEntity.SPEED,
         ownerId: player.id,
         damage,
       });

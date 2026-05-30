@@ -1,6 +1,8 @@
 import { Entity } from './entities/Entity.js';
 
 class ItemEntity extends Entity {
+  static SPEED = 0.06;
+
   constructor({ id, item, x, y }) {
     super({ id, x, y });
     this.item = item;

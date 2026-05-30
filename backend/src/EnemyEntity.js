@@ -1,6 +1,13 @@
 import { LivingEntity } from './entities/LivingEntity.js';
 
 class EnemyEntity extends LivingEntity {
+  static SPEED = 0.05;
+  static NORMAL_HP = 1;
+  static BIG_HP = 3;
+  static BIG_EVERY = 8;
+  static SPAWN_LIMIT = 5;
+  static SPAWN_INTERVAL_MS = 1000;
+
   constructor({ id, x, y, type, hp, maxHp }) {
     super({ id, x, y, hp, maxHp });
     this.type = type;

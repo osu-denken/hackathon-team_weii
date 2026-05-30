@@ -1,12 +1,14 @@
 import { LivingEntity } from './entities/LivingEntity.js';
 
 const DEFAULT_HP = 5;
+const BASE_ATTACK = 1;
+const POWER_ATTACK = 2;
 
 class PlayerEntity extends LivingEntity {
   constructor({ id, number, color, maxHp = DEFAULT_HP }) {
     super({ id, x: 0, y: 0, hp: maxHp, maxHp });
     this.score = 0;
-    this.attackPower = 1;
+    this.attackPower = BASE_ATTACK;
     this.powerUntil = 0;
     this.shieldUntil = 0;
     this.tripleShotUntil = 0;
@@ -101,4 +103,9 @@ class PlayerEntity extends LivingEntity {
   }
 }
 
-export { PlayerEntity, DEFAULT_HP };
+export {
+  PlayerEntity,
+  DEFAULT_HP,
+  BASE_ATTACK,
+  POWER_ATTACK,
+};
