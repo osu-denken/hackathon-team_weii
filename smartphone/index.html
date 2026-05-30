@@ -17,14 +17,18 @@
             <div class="connection-panel">
                 <input type="text" id="ws-url" value="ws://localhost:8080" placeholder="WebSocket URLを入力">
                 <div class="btn-group">
-                    <button id="btn-connect">CONNECT</button>
-                    <button id="btn-leave" disabled>LEAVE</button>
+                    <button id="btn-join">JOIN</button>
                 </div>
             </div>
 
             <div class="info-panel">
                 <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
                 <div id="delta-display">Delta (移動量): 0.00</div>
+            </div>
+            <div class="control-panel">
+                <label style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="invert-x"> 左右マッピングを反転
+                </label>
             </div>
         </div>
 
@@ -47,8 +51,7 @@
 
         // --- DOM要素 ---
         const wsUrlInput = document.getElementById('ws-url');
-        const btnConnect = document.getElementById('btn-connect');
-        const btnLeave = document.getElementById('btn-leave');
+        const btnJoin = document.getElementById('btn-join');
         const btnShoot = document.getElementById('btn-shoot');
         const statusDisplay = document.getElementById('status');
         const deltaDisplay = document.getElementById('delta-display');
@@ -59,8 +62,16 @@
         wsUrlInput.value = defaultWsUrl;
 
         // --- 2. WebSocket 接続と iOS センサー許可 ---
-        btnConnect.addEventListener('click', async (e) => {
+        btnJoin.addEventListener('click', async (e) => {
             e.preventDefault();
+
+            // 接続済みなら離脱（leave）を送って切断
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const leaveData = { type: "leave" };
+                ws.send(JSON.stringify(leaveData));
+                ws.close();
+                return;
+            }
 
             try {
                 // iOS 13+
@@ -117,13 +128,7 @@
         }
 
         // --- 3. 離脱 (leave) ---
-        btnLeave.addEventListener('click', () => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const leaveData = { type: "leave" };
-                ws.send(JSON.stringify(leaveData));
-                ws.close();
-            }
-        });
+        // Handled by the single `btnJoin` click handler which sends leave when connected.
 
         // --- 4. 移動量検知と送信 (move) ---
         function handleOrientation(event) {
@@ -153,10 +158,12 @@
             if (rawTilt > MAX_TILT) rawTilt = MAX_TILT;
             if (rawTilt < -MAX_TILT) rawTilt = -MAX_TILT;
 
-            // カメラが左側なら rawTilt の符号をそのまま使用して、
-            // 右に傾けると正（右移動）になるようにする。
-            // カメラが右側なら反転する。
-            const sign = CAMERA_LEFT ? 1 : -1;
+            // カメラが左側にある前提で、右に傾けると正（右移動）となるように基準符号を設定
+            // ユーザーがチェックボックスで左右マッピングを反転できるようにする
+            const invertCheckbox = document.getElementById('invert-x');
+            const invert = invertCheckbox && invertCheckbox.checked ? -1 : 1;
+            const baseSign = CAMERA_LEFT ? -1 : 1; // CAMERA_LEFT=true の場合、基準符号は -1 とする
+            const sign = baseSign * invert;
             const delta = Math.round((sign * rawTilt / MAX_TILT) * 1000) / 1000;
             sendMove(delta);
         }
@@ -190,7 +197,10 @@
             if (rawRate > MAX_RATE) rawRate = MAX_RATE;
             if (rawRate < -MAX_RATE) rawRate = -MAX_RATE;
 
-            const sign = CAMERA_LEFT ? 1 : -1;
+            const invertCheckbox = document.getElementById('invert-x');
+            const invert = invertCheckbox && invertCheckbox.checked ? -1 : 1;
+            const baseSign = CAMERA_LEFT ? -1 : 1;
+            const sign = baseSign * invert;
             sendMove(Math.round((sign * rawRate / MAX_RATE) * 1000) / 1000);
         }
 
@@ -221,9 +231,8 @@
 
         // --- UI更新ユーティリティ ---
         function updateUI(isConnected) {
-            btnConnect.disabled = isConnected;
             wsUrlInput.disabled = isConnected;
-            btnLeave.disabled = !isConnected;
+            btnJoin.textContent = isConnected ? 'LEAVE' : 'JOIN';
             btnShoot.disabled = !isConnected;
             
             statusDisplay.textContent = isConnected ? "Connected" : "Disconnected";

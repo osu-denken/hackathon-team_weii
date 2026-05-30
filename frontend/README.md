@@ -14,23 +14,35 @@
   "characters": [
     {
       "id": "<端末のuuid>",
-      "x": 3
+      "x": 3,
+      "hp": 5,
+      "maxHp": 5,
+      "score": 12
     },
     {
       "id": "<端末のuuid>",
-      "x": -2
+      "x": -2,
+      "hp": 4,
+      "maxHp": 5,
+      "score": 8
     }
   ],
   "enemies": [
     {
       "id": "<敵のuuid>",
       "x": 1,
-      "y": 2
+      "y": 2,
+      "hp": 1,
+      "maxHp": 1,
+      "type": "normal"
     },
     {
       "id": "<敵のuuid>",
       "x": -1,
-      "y": 3
+      "y": 3,
+      "hp": 3,
+      "maxHp": 3,
+      "type": "big"
     }
   ],
   "bullets": [
@@ -44,6 +56,29 @@
       "x": 2,
       "y": 3
     }
-  ]
+  ],
+  "items": [
+    {
+      "id": "<アイテムのuuid>",
+      "type": "heal",
+      "x": 0,
+      "y": 2
+    }
+  ],
+  "game": {
+    "totalScore": 20,
+    "targetScore": 100,
+    "timeLimitMs": 120000,
+    "timeRemainingMs": 65000,
+    "cleared": false
+  }
 }
 ```
+
+## 債務
+- スコア表示をゲージ化し、数値を重ねて表示
+- HPバーの描画 (プレイヤー/敵)
+- 大きい敵の見た目とアイテム落下の演出
+- アイテムの描画 (回復/攻撃力アップ)
+- 制限時間・クリア条件のUI表示
+- プレイヤーごとのスコアと合計スコアの表示
