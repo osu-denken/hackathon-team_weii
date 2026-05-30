@@ -1,145 +1,365 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Viewer Prototype</title>
-    <style>
-      :root {
-        color-scheme: light;
-      }
+﻿<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Viewer</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: #e7eef8;
+    }
 
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: radial-gradient(circle at top, #f2f7ff, #cfd6e6 60%, #b9c0d0);
-        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-      }
+    * {
+      box-sizing: border-box;
+    }
 
-      .frame {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        height: 100%;
-      }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #f7fbff 0%, #dfe7f3 55%, #c3c9da 100%);
+      color: #1f2a44;
+    }
 
+    header {
+      padding: 18px 24px 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+
+    .top-bar {
+      display: grid;
+      grid-template-columns: minmax(280px, 320px) 1fr;
+      gap: 18px;
+      padding: 0 24px 16px;
+      align-items: end;
+    }
+
+    .qr-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .qr-panel h2,
+    .info-panel h2 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+    }
+
+    .qr-frame {
+      width: 100%;
+      max-width: 260px;
+      aspect-ratio: 1;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      margin-bottom: 12px;
+      display: grid;
+      place-items: center;
+    }
+
+    .qr-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .link {
+      display: inline-block;
+      color: #2563eb;
+      text-decoration: none;
+      word-break: break-all;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .info-panel {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 18px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 0.96rem;
+    }
+
+    .info-item span {
+      font-weight: 700;
+    }
+
+    .frame {
+      flex: 1;
+      padding: 0 24px 24px;
+      display: grid;
+    }
+
+    .stage-wrapper {
+      position: relative;
+      width: 100%;
+      min-height: 420px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #eff6ff 0%, #e2e8f0 72%, #cbd5e1 100%);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06), 0 24px 50px rgba(15, 23, 42, 0.12);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .status-badge {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.16);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .status-badge.connected {
+      background: rgba(16, 185, 129, 0.92);
+    }
+
+    .status-badge.disconnected {
+      background: rgba(244, 63, 94, 0.92);
+    }
+
+    @media (max-width: 920px) {
+      .top-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
       header {
-        padding: 12px 20px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #1f2a44;
+        padding-left: 16px;
+        padding-right: 16px;
       }
 
-      canvas {
-        width: 100%;
-        height: 100%;
-        display: block;
+      .top-bar,
+      .frame {
+        padding-left: 16px;
+        padding-right: 16px;
       }
+    }
+  </style>
+</head>
+<body>
+  <header>Game Monitor</header>
+  <div class="top-bar">
+    <section class="qr-panel">
+      <h2>スマホ操作用 QR</h2>
+      <div class="qr-frame">
+        <img id="qr" alt="スマホ操作画面へのQRコード" />
+      </div>
+      <a id="client-link" class="link" target="_blank" rel="noreferrer noopener"></a>
+    </section>
 
-      .status {
-        position: fixed;
-        right: 16px;
-        top: 14px;
-        padding: 6px 10px;
-        border-radius: 12px;
-        background: rgba(15, 23, 42, 0.12);
-        color: #1f2a44;
-        font-size: 12px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="frame">
-      <header>Viewer Prototype</header>
+    <section class="info-panel">
+      <h2>リアルタイムステータス</h2>
+      <div class="info-list">
+        <div class="info-item">接続: <span id="status-text">disconnected</span></div>
+        <div class="info-item">プレイヤー: <span id="player-count">0</span> / 2</div>
+        <div class="info-item">敵: <span id="enemy-count">0</span></div>
+        <div class="info-item">弾: <span id="bullet-count">0</span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="frame">
+    <div class="stage-wrapper">
       <canvas id="stage"></canvas>
+      <div class="status-badge disconnected" id="status-badge">disconnected</div>
     </div>
-    <div class="status" id="status">disconnected</div>
+  </div>
 
-    <script>
-      const canvas = document.getElementById('stage');
-      const statusEl = document.getElementById('status');
-      const ctx = canvas.getContext('2d');
+  <script>
+    const MAX_PLAYERS = 2;
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const statusText = document.getElementById('status-text');
+    const statusBadge = document.getElementById('status-badge');
+    const playerCount = document.getElementById('player-count');
+    const enemyCount = document.getElementById('enemy-count');
+    const bulletCount = document.getElementById('bullet-count');
+    const clientLink = document.getElementById('client-link');
+    const qrImage = document.getElementById('qr');
 
-      const state = {
-        characters: [],
-        bullets: [],
-      };
+    const state = {
+      characters: [],
+      enemies: [],
+      bullets: [],
+    };
 
-      const resize = () => {
-        const { width, height } = canvas.getBoundingClientRect();
-        const scale = window.devicePixelRatio || 1;
-        canvas.width = Math.floor(width * scale);
-        canvas.height = Math.floor(height * scale);
-        ctx.setTransform(scale, 0, 0, scale, 0, 0);
-      };
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const scale = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * scale);
+      canvas.height = Math.floor(rect.height * scale);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    };
 
-      window.addEventListener('resize', resize);
-      resize();
+    window.addEventListener('resize', resize);
+    resize();
 
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://${window.location.hostname}:3001`;
-      const socket = new WebSocket(wsUrl);
+    const clientUrl = `${window.location.protocol}//${window.location.host}/client/`;
+    clientLink.textContent = clientUrl;
+    clientLink.href = clientUrl;
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(clientUrl)}`;
 
-      socket.addEventListener('open', () => {
-        statusEl.textContent = 'connected';
-        socket.send(JSON.stringify({ type: 'viewer' }));
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsProtocol}://${window.location.hostname}:3001`;
+    const socket = new WebSocket(wsUrl);
+
+    const setConnected = (connected) => {
+      statusText.textContent = connected ? 'connected' : 'disconnected';
+      statusBadge.textContent = connected ? 'connected' : 'disconnected';
+      statusBadge.className = `status-badge ${connected ? 'connected' : 'disconnected'}`;
+    };
+
+    socket.addEventListener('open', () => {
+      setConnected(true);
+      socket.send(JSON.stringify({ type: 'viewer' }));
+    });
+
+    socket.addEventListener('close', () => {
+      setConnected(false);
+    });
+
+    socket.addEventListener('error', () => {
+      setConnected(false);
+    });
+
+    socket.addEventListener('message', (event) => {
+      let payload;
+      try {
+        payload = JSON.parse(event.data);
+      } catch (error) {
+        return;
+      }
+
+      if (payload.type === 'update') {
+        state.characters = Array.isArray(payload.characters)
+          ? payload.characters.slice(0, MAX_PLAYERS)
+          : [];
+        state.enemies = Array.isArray(payload.enemies) ? payload.enemies : [];
+        state.bullets = Array.isArray(payload.bullets) ? payload.bullets : [];
+        playerCount.textContent = state.characters.length;
+        enemyCount.textContent = state.enemies.length;
+        bulletCount.textContent = state.bullets.length;
+      }
+    });
+
+    const toCanvasX = (x, width) => width / 2 + x * 70;
+    const toCanvasY = (y, height) => height - 120 - y * 42;
+
+    const drawGrid = (width, height) => {
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.08)';
+      ctx.lineWidth = 1;
+      for (let gx = width / 2 - 280; gx <= width / 2 + 280; gx += 70) {
+        ctx.beginPath();
+        ctx.moveTo(gx, 40);
+        ctx.lineTo(gx, height - 100);
+        ctx.stroke();
+      }
+      for (let gy = height - 120; gy >= 40; gy -= 42) {
+        ctx.beginPath();
+        ctx.moveTo(40, gy);
+        ctx.lineTo(width - 40, gy);
+        ctx.stroke();
+      }
+    };
+
+    const draw = () => {
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(0, 0, width, height);
+
+      drawGrid(width, height);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(40, height - 90, width - 80, 6);
+
+      state.enemies.forEach((enemy) => {
+        const x = toCanvasX(enemy.x, width);
+        const y = toCanvasY(enemy.y, height);
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(x, y, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('E', x, y + 4);
       });
 
-      socket.addEventListener('close', () => {
-        statusEl.textContent = 'disconnected';
-      });
-
-      socket.addEventListener('message', (event) => {
-        let payload;
-        try {
-          payload = JSON.parse(event.data);
-        } catch (error) {
-          return;
-        }
-
-        if (payload.type === 'update') {
-          if (Array.isArray(payload.characters)) {
-            state.characters = payload.characters;
-          }
-          if (Array.isArray(payload.bullets)) {
-            state.bullets = payload.bullets;
-          }
-        }
-      });
-
-      const toCanvasX = (x) => {
-        const width = canvas.getBoundingClientRect().width;
-        return width / 2 + x * 60;
-      };
-
-      const draw = () => {
-        const { width, height } = canvas.getBoundingClientRect();
-        ctx.clearRect(0, 0, width, height);
-
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, height - 90, width, 4);
-
-        ctx.fillStyle = '#2563eb';
-        state.characters.forEach((player) => {
-          ctx.beginPath();
-          ctx.arc(toCanvasX(player.x), height - 120, 18, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
+      state.bullets.forEach((bullet) => {
+        const x = toCanvasX(bullet.x, width);
+        const y = toCanvasY(bullet.y, height);
         ctx.fillStyle = '#f97316';
-        state.bullets.forEach((bullet) => {
-          const y = height - 120 - bullet.y * 40;
-          ctx.beginPath();
-          ctx.arc(toCanvasX(bullet.x), y, 6, 0, Math.PI * 2);
-          ctx.fill();
-        });
+        ctx.beginPath();
+        ctx.arc(x, y, 7, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
-        requestAnimationFrame(draw);
-      };
+      const colors = ['#2563eb', '#f59e0b'];
+      state.characters.forEach((player, index) => {
+        const x = toCanvasX(player.x, width);
+        const y = height - 120;
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`P${index + 1}`, x, y + 5);
+      });
 
-      draw();
-    </script>
-  </body>
+      requestAnimationFrame(draw);
+    };
+
+    draw();
+  </script>
+</body>
 </html>
