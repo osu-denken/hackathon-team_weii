@@ -194,7 +194,7 @@
       <h2>リアルタイムステータス</h2>
       <div class="info-list">
         <div class="info-item">接続: <span id="status-text">disconnected</span></div>
-        <div class="info-item">プレイヤー: <span id="player-count">0</span> / 2</div>
+        <div class="info-item">プレイヤー: <span id="player-count">0</span> / 4</div>
         <div class="info-item">敵: <span id="enemy-count">0</span></div>
         <div class="info-item">弾: <span id="bullet-count">0</span></div>
       </div>
@@ -209,7 +209,7 @@
   </div>
 
   <script>
-    const MAX_PLAYERS = 2;
+    const MAX_PLAYERS = 4;
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
     const statusText = document.getElementById('status-text');
@@ -342,7 +342,7 @@
         ctx.fill();
       });
 
-      const colors = ['#2563eb', '#f59e0b'];
+      const colors = ['#2563eb', '#f59e0b', '#10b981', '#8b5cf6'];
       state.characters.forEach((player, index) => {
         const x = toCanvasX(player.x, width);
         const y = height - 120;
