@@ -76,10 +76,17 @@ button {
     color: white;
     cursor: pointer;
 }
-#btn-connect { background-color: #007bff; }
-#btn-connect:disabled { background-color: #555; }
-#btn-leave { background-color: #dc3545; }
-#btn-leave:disabled { background-color: #555; }
+#btn-join.join-state {
+    background-color: #a6d8ff;
+    color: #0a2d43;
+}
+#btn-join.leave-state {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+#btn-join:disabled {
+    background-color: #555;
+}
 
 .info-panel {
     padding: 10px 15px;
