@@ -15,7 +15,7 @@ const stage = new Stage();
 const socketToPlayerId = new Map();
 let viewer = null; // モニター用のWebSocket接続
 
-const TICK_MS = 40; // ゲームの状態を更新してクライアントに送る間隔 (40ms = 25fps)
+const TICK_MS = 40; // ゲームの状態を更新してViewer(フロントエンド)に送る間隔 (40ms = 25fps)
 
 const sendToViewer = (data) => {
   const payload = JSON.stringify(data);
@@ -24,11 +24,13 @@ const sendToViewer = (data) => {
   }
 };
 
+// ゲームの状態を更新してViewer(フロントエンド)に送る
 const sendState = () => {
   const payload = stage.buildViewerPayload(Date.now());
   sendToViewer(payload);
 };
 
+// 各プレイヤー(スマートフォン)に自分の状態を送る
 const sendStateToPlayers = () => {
   const now = Date.now();
   socketToPlayerId.forEach((id, ws) => {
