@@ -3,6 +3,9 @@ const socketToPlayerId = new Map();
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+const X_MIN = -5;
+const X_MAX = 5;
+
 const join = (ws, id) => {
   players.set(id, { id, x: 0 });
   socketToPlayerId.set(ws, id);
@@ -30,7 +33,7 @@ const move = (ws, delta) => {
   }
 
   const moveDelta = clamp(Number(delta) || 0, -1, 1);
-  player.x += moveDelta;
+  player.x = clamp(player.x + moveDelta, X_MIN, X_MAX);
 };
 
 const getPlayerBySocket = (ws) => {
