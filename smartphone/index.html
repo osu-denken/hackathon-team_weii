@@ -42,6 +42,8 @@
         let ws = null;
         let lastMoveSendTime = 0;
         const THROTTLE_MS = 100; // 移動量送信の間隔（ミリ秒）
+        // スマホのカメラが左側にある前提（ユーザー指定）
+        const CAMERA_LEFT = true;
 
         // --- DOM要素 ---
         const wsUrlInput = document.getElementById('ws-url');
@@ -126,13 +128,36 @@
         // --- 4. 移動量検知と送信 (move) ---
         function handleOrientation(event) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
-            if (event.gamma === null) return;
+            // screen orientation angle を使ってランドスケープ時の軸を選択
+            const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
+                ? screen.orientation.angle
+                : (typeof window.orientation === 'number' ? window.orientation : 0);
+
+            // rawTilt: 正の値が「右へ傾く」方向になるように調整する
+            let rawTilt = 0;
+            if (angle === 0) {
+                rawTilt = event.gamma; // portrait
+            } else if (angle === 180) {
+                rawTilt = -event.gamma; // upside-down portrait
+            } else if (angle === 90) {
+                rawTilt = event.beta; // landscape (rotated 90deg)
+            } else if (angle === -90 || angle === 270) {
+                rawTilt = -event.beta; // landscape flipped
+            } else {
+                rawTilt = event.gamma;
+            }
+
+            if (rawTilt === null || rawTilt === undefined) return;
+
             const MAX_TILT = 45;
-            let gamma = event.gamma;
-            if (gamma > MAX_TILT) gamma = MAX_TILT;
-            if (gamma < -MAX_TILT) gamma = -MAX_TILT;
-            // 左右反転: 値の符号を反転して送信
-            const delta = Math.round((-gamma / MAX_TILT) * 1000) / 1000;
+            if (rawTilt > MAX_TILT) rawTilt = MAX_TILT;
+            if (rawTilt < -MAX_TILT) rawTilt = -MAX_TILT;
+
+            // カメラが左側なら rawTilt の符号をそのまま使用して、
+            // 右に傾けると正（右移動）になるようにする。
+            // カメラが右側なら反転する。
+            const sign = CAMERA_LEFT ? 1 : -1;
+            const delta = Math.round((sign * rawTilt / MAX_TILT) * 1000) / 1000;
             sendMove(delta);
         }
 
@@ -140,13 +165,33 @@
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
             const rotation = event.rotationRate;
             if (!rotation) return;
-            let delta = rotation.gamma;
-            if (delta === null || delta === undefined) return;
+
+            const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
+                ? screen.orientation.angle
+                : (typeof window.orientation === 'number' ? window.orientation : 0);
+
+            // rotationRate の適切な軸を選ぶ（ランドスケープ対応）
+            let rawRate = 0;
+            if (angle === 0) {
+                rawRate = rotation.gamma;
+            } else if (angle === 180) {
+                rawRate = -rotation.gamma;
+            } else if (angle === 90) {
+                rawRate = rotation.beta;
+            } else if (angle === -90 || angle === 270) {
+                rawRate = -rotation.beta;
+            } else {
+                rawRate = rotation.gamma;
+            }
+
+            if (rawRate === null || rawRate === undefined) return;
+
             const MAX_RATE = 90;
-            if (delta > MAX_RATE) delta = MAX_RATE;
-            if (delta < -MAX_RATE) delta = -MAX_RATE;
-            // 左右反転: 符号を反転して送信
-            sendMove(Math.round((-delta / MAX_RATE) * 1000) / 1000);
+            if (rawRate > MAX_RATE) rawRate = MAX_RATE;
+            if (rawRate < -MAX_RATE) rawRate = -MAX_RATE;
+
+            const sign = CAMERA_LEFT ? 1 : -1;
+            sendMove(Math.round((sign * rawRate / MAX_RATE) * 1000) / 1000);
         }
 
         function sendMove(delta) {
