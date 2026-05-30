@@ -10,6 +10,7 @@ const wss = new WebSocketServer({ server });
 // clientとviewerも同じサーバーでホストする
 app.use('/client', express.static('../smartphone'));
 app.use('/viewer', express.static('../frontend'));
+app.use('/asset', express.static('../asset'));
 
 const stage = new Stage();
 const socketToPlayerId = new Map();

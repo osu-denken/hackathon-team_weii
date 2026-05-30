@@ -4,238 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Game Viewer</title>
-  <style>
-    :root {
-      color-scheme: light;
-      font-family: "Segoe UI", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-      background: #e7eef8;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 18%),
-        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.10), transparent 20%),
-        linear-gradient(180deg, #020613 0%, #08112c 35%, #061027 100%);
-      color: #e2e8f0;
-    }
-
-    /* top-bar and side panels removed; styles cleaned */
-
-    .game-summary {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      background: rgba(15, 23, 42, 0.06);
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .score-row,
-    .game-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.95rem;
-      color: #e2e8f0;
-    }
-
-    .score-gauge {
-      display: grid;
-      gap: 6px;
-    }
-
-    .gauge-track {
-      width: 100%;
-      height: 14px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .gauge-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #38bdf8, #8b5cf6);
-      border-radius: 999px;
-      transition: width 240ms ease;
-    }
-
-    .gauge-label {
-      font-size: 0.82rem;
-      color: #cbd5e1;
-      text-align: right;
-    }
-
-    .player-summary {
-      display: grid;
-      gap: 10px;
-    }
-
-    .player-card {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
-      align-items: center;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(15, 23, 42, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #e2e8f0;
-      font-size: 0.92rem;
-    }
-
-    .player-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-      color: #040916;
-      background: linear-gradient(135deg, #38bdf8, #8b5cf6);
-      border: 2px solid rgba(255, 255, 255, 0.16);
-    }
-
-    .player-info {
-      display: grid;
-      gap: 4px;
-    }
-
-    .player-bar {
-      width: 100%;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .player-bar-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #34d399, #10b981);
-    }
-
-    .frame {
-      flex: 1;
-      display: grid;
-    }
-
-    .stage-wrapper {
-      position: relative;
-      width: 100%;
-      min-height: 420px;
-      overflow: hidden;
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.12), transparent 30%),
-        radial-gradient(circle at 85% 15%, rgba(16, 185, 129, 0.10), transparent 16%),
-        linear-gradient(180deg, #08122d 0%, #040716 72%, #01050f 100%);
-    }
-
-    canvas { z-index: 0; }
-
-    /* Overlays on top of the stage */
-    .overlay-qr {
-      position: absolute;
-      left: 12px;
-      top: 12px;
-      width: 80px;
-      height: 80px;
-      opacity: 0.72;
-      border-radius: 8px;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: 30;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-      display: grid;
-      place-items: center;
-      backdrop-filter: blur(4px);
-    }
-
-    .overlay-qr img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-    .overlay-top {
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 40;
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 12px;
-      background: rgba(2,6,20,0.36);
-      backdrop-filter: blur(6px);
-      color: #e6f6ff;
-      font-weight: 700;
-    }
-
-    .overlay-player-count { font-size: 14px; letter-spacing: 0.04em; }
-
-    .overlay-score { display: flex; gap: 8px; align-items: center; }
-    .overlay-score .gauge-track { width: 220px; height: 12px; }
-    .overlay-score .gauge-label { width: 48px; text-align: right; }
-
-    .overlay-time { font-size: 13px; color: #cfeffd; }
-
-    .overlay-status { font-size: 13px; padding: 6px 8px; border-radius: 8px; }
-    .overlay-status.connected { background: rgba(34,197,94,0.12); color: #86efac; }
-    .overlay-status.disconnected { background: rgba(244,63,94,0.08); color: #ffd6de; }
-
-    .overlay-bottom {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 40;
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 6px;
-      pointer-events: none;
-      width: calc(100% - 48px);
-    }
-
-    .player-card-bottom {
-      pointer-events: auto;
-      min-width: 120px;
-      max-width: 220px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border: 1px solid rgba(255,255,255,0.04);
-      color: #eaf6ff;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* status-badge removed; overlay-status is used instead */
-
-    @media (max-width: 920px) {
-      .top-bar {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="frame">
@@ -284,6 +53,24 @@
         timeRemainingMs: 0,
         cleared: false,
       },
+    };
+
+    const spritePaths = {
+      1: '/asset/images/character-1.png',
+      2: '/asset/images/character-2.png',
+      3: '/asset/images/character-3.png',
+      4: '/asset/images/character-4.png',
+      5: '/asset/images/character-5.png',
+    };
+
+    const spriteCache = new Map();
+
+    const loadSprites = () => {
+      Object.entries(spritePaths).forEach(([key, src]) => {
+        const img = new Image();
+        img.src = src;
+        spriteCache.set(Number(key), img);
+      });
     };
 
     const formatTime = (ms) => {
@@ -358,6 +145,7 @@
 
     window.addEventListener('resize', resize);
     resize();
+    loadSprites();
 
     const clientUrl = `${window.location.protocol}//${window.location.host}/client/`;
     // overlay QR only
@@ -528,34 +316,48 @@
       const hp = player.hp ?? 0;
       const maxHp = player.maxHp ?? 1;
       const hpRatio = Math.max(0, Math.min(1, hp / maxHp));
+      const number = player.number ?? index + 1;
+      const sprite = spriteCache.get(number);
+      const spriteSize = 56;
 
-      ctx.save();
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(x, y, 22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+      if (sprite && sprite.complete) {
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 18;
+        ctx.drawImage(sprite, x - spriteSize / 2, y - spriteSize / 2, spriteSize, spriteSize);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
 
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(x, y, 22, 0, Math.PI * 2);
-      ctx.stroke();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.stroke();
+      }
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`P${player.number ?? index + 1}`, x, y + 5);
+      ctx.fillText(`P${number}`, x, y + 52);
 
+      const barWidth = 60;
+      const barHeight = 10;
+      const barY = y - 52;
       ctx.fillStyle = '#0f172a';
-      ctx.fillRect(x - 30, y + 26, 60, 10);
+      ctx.fillRect(x - barWidth / 2, barY, barWidth, barHeight);
       ctx.fillStyle = '#34d399';
-      ctx.fillRect(x - 30, y + 26, 60 * hpRatio, 10);
+      ctx.fillRect(x - barWidth / 2, barY, barWidth * hpRatio, barHeight);
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1;
-      ctx.strokeRect(x - 30, y + 26, 60, 10);
+      ctx.strokeRect(x - barWidth / 2, barY, barWidth, barHeight);
     };
 
     const draw = () => {
