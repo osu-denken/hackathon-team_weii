@@ -42,3 +42,4 @@
 ```
 
 識別のためにcrypto.randomUUID()で端末のuuidを生成しておく, WebSocketで実装する
+

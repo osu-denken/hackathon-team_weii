@@ -49,23 +49,27 @@
 
         // --- 2. WebSocket 接続と iOS センサー許可 ---
         btnConnect.addEventListener('click', () => {
-            // iOS 13以降のジャイロセンサー許可ダイアログ対応
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            connectWebSocket();
-                            window.addEventListener('deviceorientation', handleOrientation);
-                        } else {
-                            alert('センサーの使用が許可されませんでした');
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                // AndroidやPCなど
-                connectWebSocket();
-                window.addEventListener('deviceorientation', handleOrientation);
-            }
+            const requestSensorPermission = () => {
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    return DeviceMotionEvent.requestPermission();
+                }
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    return DeviceOrientationEvent.requestPermission();
+                }
+                return Promise.resolve('granted');
+            };
+
+            requestSensorPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        connectWebSocket();
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        window.addEventListener('devicemotion', handleMotion);
+                    } else {
+                        alert('センサーの使用が許可されませんでした');
+                    }
+                })
+                .catch(console.error);
         });
 
         function connectWebSocket() {
@@ -105,25 +109,29 @@
         // --- 4. 移動量検知と送信 (move) ---
         function handleOrientation(event) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
-
-            // スマホを縦持ちした際の左右の傾きを取得 (gamma: -90 ～ 90)
-            let gamma = event.gamma; 
-            if (gamma === null) return;
-
-            // 操作しやすいように -45度 ～ 45度 の範囲を -1.0 ～ 1.0 にマッピング
+            if (event.gamma === null) return;
             const MAX_TILT = 45;
+            let gamma = event.gamma;
             if (gamma > MAX_TILT) gamma = MAX_TILT;
             if (gamma < -MAX_TILT) gamma = -MAX_TILT;
-            
-            // deltaの計算 (-1.0 ～ 1.0)
-            let delta = gamma / MAX_TILT;
-            
-            // 小数点第3位までに丸める
-            delta = Math.round(delta * 1000) / 1000;
-            
-            deltaDisplay.textContent = `Delta (移動量): ${delta.toFixed(2)}`;
+            const delta = Math.round((gamma / MAX_TILT) * 1000) / 1000;
+            sendMove(delta);
+        }
 
-            // 通信負荷軽減のため、100ミリ秒に1回だけ送信 (スロットリング)
+        function handleMotion(event) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            const rotation = event.rotationRate;
+            if (!rotation) return;
+            let delta = rotation.gamma;
+            if (delta === null || delta === undefined) return;
+            const MAX_RATE = 90;
+            if (delta > MAX_RATE) delta = MAX_RATE;
+            if (delta < -MAX_RATE) delta = -MAX_RATE;
+            sendMove(Math.round((delta / MAX_RATE) * 1000) / 1000);
+        }
+
+        function sendMove(delta) {
+            deltaDisplay.textContent = `Delta (移動量): ${delta.toFixed(2)}`;
             const now = Date.now();
             if (now - lastMoveSendTime > THROTTLE_MS) {
                 const moveData = {
@@ -159,6 +167,7 @@
             
             if (!isConnected) {
                 window.removeEventListener('deviceorientation', handleOrientation);
+                window.removeEventListener('devicemotion', handleMotion);
                 deltaDisplay.textContent = "Delta (移動量): 0.00";
             }
         }
