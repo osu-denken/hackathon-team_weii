@@ -329,22 +329,31 @@ class Stage {
       return;
     }
 
-    this.players.forEach((player) => {
-      const dx = Math.abs(this.itemEntity.x - player.x);
-      const dy = Math.abs(this.itemEntity.y - player.y);
+    const itemEntity = this.itemEntity;
+    if (!itemEntity) {
+      return;
+    }
+
+    for (const player of this.players.values()) {
+      const dx = Math.abs(itemEntity.x - player.x);
+      const dy = Math.abs(itemEntity.y - player.y);
       if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE) {
-        const payload = this.itemEntity.toPayload();
+        const payload = itemEntity.toPayload();
         if (payload.type === 'heal') {
           player.heal(HEAL_AMOUNT);
-        } else {
-          if (player.heldItem) {
-            return;
-          }
-          player.setHeldItem(payload);
+          this.itemEntity = null;
+          break;
         }
+
+        if (player.heldItem) {
+          continue;
+        }
+
+        player.setHeldItem(payload);
         this.itemEntity = null;
+        break;
       }
-    });
+    }
   }
 
   spawnSingleBullet(player, damage) {
