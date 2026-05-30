@@ -10,51 +10,36 @@
 
     <div class="main-layout">
         <div class="left-panel">
-            <div class="connection-panel">
-                <input type="hidden" id="ws-url" value="ws://localhost:8080">
-                <div class="btn-group">
-                    <button id="btn-join" class="join-state">JOIN</button>
-                </div>
-            </div>
+            <input type="hidden" id="ws-url" value="">
+            <button id="btn-join" class="btn-flat join-state">JOIN</button>
 
-            <div class="info-panel">
-                <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
-                <div id="delta-display">Delta (移動量): 0.00</div>
-            </div>
-            <div class="player-info" aria-hidden="true">
-                <div id="player-badge" class="player-badge" style="display:none;">
+            <div class="player-info" id="player-info" style="visibility: hidden;">
+                <div id="player-badge" class="player-badge">
                     <span id="player-number">1</span>
                 </div>
-                <div id="player-label" class="player-label" style="display:none;">Player <span id="player-number-text">1</span></div>
+                <div id="player-label" class="player-label">Player <span id="player-number-text">1</span></div>
             </div>
-            <div class="control-panel">
-                <label style="display:flex;align-items:center;gap:8px;">
-                    <input type="checkbox" id="invert-x"> 左右マッピングを反転
-                </label>
-                <div style="margin-top:8px;">
-                    <button id="btn-use-item" class="item-slot" disabled>
-                        <img id="item-icon" alt="" />
-                    </button>
-                </div>
+
+            <div class="item-section">
+                <button id="btn-use-item" class="item-slot" disabled>
+                    <img id="item-icon" alt="" />
+                </button>
             </div>
         </div>
 
         <div class="controller-area">
-        <button id="btn-shoot" disabled>SHOOT</button>
-    </div>
+            <button id="btn-shoot" disabled>SHOOT</button>
+        </div>
     </div>
 
     <script>
         // --- 1. UUIDの生成 ---
-        // 注意: crypto.randomUUID() はセキュリティの観点から HTTPS環境 または localhost でのみ動作します
         const myUUID = window.crypto && crypto.randomUUID ? crypto.randomUUID() : "local-test-uuid";
 
         // --- 変数定義 ---
         let ws = null;
         let lastMoveSendTime = 0;
-        const THROTTLE_MS = 100; // 移動量送信の間隔（ミリ秒）
-        // スマホのカメラが左側にある前提（ユーザー指定）
-        const CAMERA_LEFT = true;
+        const THROTTLE_MS = 100; 
 
         // --- DOM要素 ---
         const wsUrlInput = document.getElementById('ws-url');
@@ -62,11 +47,9 @@
         const btnShoot = document.getElementById('btn-shoot');
         const btnUseItem = document.getElementById('btn-use-item');
         const itemIcon = document.getElementById('item-icon');
-        const statusDisplay = document.getElementById('status');
-        const deltaDisplay = document.getElementById('delta-display');
+        const playerInfoContainer = document.getElementById('player-info');
         const playerBadge = document.getElementById('player-badge');
         const playerNumberSpan = document.getElementById('player-number');
-        const playerLabel = document.getElementById('player-label');
         const playerNumberText = document.getElementById('player-number-text');
         let _currentHeldItem = null;
 
@@ -79,7 +62,6 @@
             empty: `${assetBase}empty.png`
         };
 
-        // ws-urlを現在のurlに合わせる (例: http://localhost:3000/client/ なら ws://localhost:3000) (/client/は削除する)
         const currentUrl = window.location.href;
         const defaultWsUrl = currentUrl.replace(/^http/, 'ws').replace(/\/client\/?$/, '');
         wsUrlInput.value = defaultWsUrl;
@@ -88,7 +70,6 @@
         btnJoin.addEventListener('click', async (e) => {
             e.preventDefault();
 
-            // 接続済みなら離脱（leave）を送って切断
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const leaveData = { type: "leave" };
                 ws.send(JSON.stringify(leaveData));
@@ -97,7 +78,6 @@
             }
 
             try {
-                // iOS 13+
                 if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                     const response = await DeviceMotionEvent.requestPermission();
                     if (response !== 'granted') {
@@ -105,7 +85,6 @@
                         return;
                     }
                 }
-
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     const response = await DeviceOrientationEvent.requestPermission();
                     if (response !== 'granted') {
@@ -114,8 +93,8 @@
                     }
                 }
 
-                window.addEventListener('devicemotion', handleMotion); // 加速度や回転速度
-                window.addEventListener('deviceorientation', handleOrientation); // 傾き
+                window.addEventListener('devicemotion', handleMotion); 
+                window.addEventListener('deviceorientation', handleOrientation); 
             } catch (error) {
                 console.error('センサーの許可エラー:', error);
                 alert('センサーの使用が許可されませんでした');
@@ -131,7 +110,6 @@
 
             ws.onopen = () => {
                 updateUI(true);
-                // 参加データの送信 (join)
                 const joinData = {
                     type: "join",
                     id: myUUID
@@ -139,17 +117,16 @@
                 ws.send(JSON.stringify(joinData));
             };
 
-                // メッセージ受信ハンドラ: joinAck / playerState を受け取ってUIを更新
-                ws.onmessage = (ev) => {
-                    try {
-                        const data = JSON.parse(ev.data);
-                        if (data && data.player) {
-                            updatePlayerInfo(data.player);
-                        }
-                    } catch (err) {
-                        console.error('ws.onmessage parse error', err);
+            ws.onmessage = (ev) => {
+                try {
+                    const data = JSON.parse(ev.data);
+                    if (data && data.player) {
+                        updatePlayerInfo(data.player);
                     }
-                };
+                } catch (err) {
+                    console.error('ws.onmessage parse error', err);
+                }
+            };
 
             ws.onclose = () => {
                 updateUI(false);
@@ -166,8 +143,7 @@
         // --- プレイヤー表示更新ユーティリティ ---
         function updatePlayerInfo(player) {
             if (!player) {
-                if (playerBadge) playerBadge.style.display = 'none';
-                if (playerLabel) playerLabel.style.display = 'none';
+                playerInfoContainer.style.visibility = 'hidden';
                 _currentHeldItem = null;
                 if (btnUseItem) btnUseItem.disabled = true;
                 if (itemIcon) {
@@ -176,30 +152,25 @@
                 }
                 return;
             }
+            playerInfoContainer.style.visibility = 'visible';
             const num = player.number || player.id || '';
             const color = player.color || '#888';
             _currentHeldItem = player.heldItem || null;
+            
             if (playerNumberSpan) playerNumberSpan.textContent = num;
             if (playerNumberText) playerNumberText.textContent = num;
-            if (playerBadge) {
-                playerBadge.style.backgroundColor = color;
-                playerBadge.style.display = 'flex';
-            }
-            if (playerLabel) playerLabel.style.display = 'block';
+            if (playerBadge) playerBadge.style.backgroundColor = color;
+            
             if (btnUseItem) btnUseItem.disabled = !_currentHeldItem;
             if (itemIcon) {
-                const iconSrc = _currentHeldItem
-                    ? itemIconMap[_currentHeldItem.type]
-                    : itemIconMap.empty;
+                const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : itemIconMap.empty;
                 itemIcon.src = iconSrc || itemIconMap.empty;
                 itemIcon.style.opacity = _currentHeldItem ? 1 : 0.3;
             }
         }
 
         const tryUseItem = (e) => {
-            if (e) {
-                e.preventDefault();
-            }
+            if (e) e.preventDefault();
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
             if (!_currentHeldItem) return;
             ws.send(JSON.stringify({ type: "useItem" }));
@@ -210,44 +181,36 @@
             btnUseItem.addEventListener('touchstart', tryUseItem, { passive: false });
         }
 
-        // --- 3. 離脱 (leave) ---
-        // Handled by the single `btnJoin` click handler which sends leave when connected.
-
         // --- 4. 移動量検知と送信 (move) ---
         function handleOrientation(event) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
-            // screen orientation angle を使ってランドスケープ時の軸を選択
+            
             const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
                 ? screen.orientation.angle
                 : (typeof window.orientation === 'number' ? window.orientation : 0);
 
-            // rawTilt: 正の値が「右へ傾く」方向になるように調整する
-            let rawTilt = 0;
-            if (angle === 0) {
-                rawTilt = event.gamma; // portrait
-            } else if (angle === 180) {
-                rawTilt = -event.gamma; // upside-down portrait
-            } else if (angle === 90) {
-                rawTilt = event.beta; // landscape (rotated 90deg)
+            let steer = 0;
+
+            // スマホの向きに応じて「右に傾ければプラス(右移動)」になるよう標準化
+            if (angle === 90) {
+                // ホームボタンが右（カメラ左）の場合
+                steer = -event.beta;
             } else if (angle === -90 || angle === 270) {
-                rawTilt = -event.beta; // landscape flipped
+                // ホームボタンが左（カメラ右）の場合
+                steer = event.beta;
+            } else if (angle === 180) {
+                steer = -event.gamma;
             } else {
-                rawTilt = event.gamma;
+                steer = event.gamma;
             }
 
-            if (rawTilt === null || rawTilt === undefined) return;
+            if (steer === null || steer === undefined) return;
 
             const MAX_TILT = 45;
-            if (rawTilt > MAX_TILT) rawTilt = MAX_TILT;
-            if (rawTilt < -MAX_TILT) rawTilt = -MAX_TILT;
+            if (steer > MAX_TILT) steer = MAX_TILT;
+            if (steer < -MAX_TILT) steer = -MAX_TILT;
 
-            // カメラが左側にある前提で、右に傾けると正（右移動）となるように基準符号を設定
-            // ユーザーがチェックボックスで左右マッピングを反転できるようにする
-            const invertCheckbox = document.getElementById('invert-x');
-            const invert = invertCheckbox && invertCheckbox.checked ? -1 : 1;
-            const baseSign = CAMERA_LEFT ? -1 : 1; // CAMERA_LEFT=true の場合、基準符号は -1 とする
-            const sign = baseSign * invert;
-            const delta = Math.round((sign * rawTilt / MAX_TILT) * 1000) / 1000;
+            const delta = Math.round((-1 * steer / MAX_TILT) * 1000) / 1000;
             sendMove(delta);
         }
 
@@ -260,49 +223,38 @@
                 ? screen.orientation.angle
                 : (typeof window.orientation === 'number' ? window.orientation : 0);
 
-            // rotationRate の適切な軸を選ぶ（ランドスケープ対応）
-            let rawRate = 0;
-            if (angle === 0) {
-                rawRate = rotation.gamma;
-            } else if (angle === 180) {
-                rawRate = -rotation.gamma;
-            } else if (angle === 90) {
-                rawRate = rotation.beta;
+            let steerRate = 0;
+
+            if (angle === 90) {
+                steerRate = -rotation.beta;
             } else if (angle === -90 || angle === 270) {
-                rawRate = -rotation.beta;
+                steerRate = rotation.beta;
+            } else if (angle === 180) {
+                steerRate = -rotation.gamma;
             } else {
-                rawRate = rotation.gamma;
+                steerRate = rotation.gamma;
             }
 
-            if (rawRate === null || rawRate === undefined) return;
+            if (steerRate === null || steerRate === undefined) return;
 
             const MAX_RATE = 90;
-            if (rawRate > MAX_RATE) rawRate = MAX_RATE;
-            if (rawRate < -MAX_RATE) rawRate = -MAX_RATE;
+            if (steerRate > MAX_RATE) steerRate = MAX_RATE;
+            if (steerRate < -MAX_RATE) steerRate = -MAX_RATE;
 
-            const invertCheckbox = document.getElementById('invert-x');
-            const invert = invertCheckbox && invertCheckbox.checked ? -1 : 1;
-            const baseSign = CAMERA_LEFT ? -1 : 1;
-            const sign = baseSign * invert;
-            sendMove(Math.round((sign * rawRate / MAX_RATE) * 1000) / 1000);
+            sendMove(Math.round((-1 * steerRate / MAX_RATE) * 1000) / 1000);
         }
 
         function sendMove(delta) {
-            deltaDisplay.textContent = `Delta (移動量): ${delta.toFixed(2)}`;
             const now = Date.now();
             if (now - lastMoveSendTime > THROTTLE_MS) {
-                const moveData = {
-                    type: "move",
-                    delta: delta
-                };
+                const moveData = { type: "move", delta: delta };
                 ws.send(JSON.stringify(moveData));
                 lastMoveSendTime = now;
             }
         }
 
         // --- 5. 射撃 (shoot) ---
-        // 長押しで連射、離すと停止する。タッチ/マウス両対応。二重送信抑止あり。
-        const SHOOT_INTERVAL_MS = 300; // 連射間隔（ミリ秒）: 必要ならここを変更
+        const SHOOT_INTERVAL_MS = 300;
         let _shootTimer = null;
         let _isHolding = false;
         let _lastTouchTime = 0;
@@ -315,13 +267,10 @@
 
         function startShooting(e) {
             if (e) e.preventDefault();
-            // タッチ直後の mousedown を無視するためのタイムスタンプ
             if (e && e.type === 'touchstart') _lastTouchTime = Date.now();
             if (_isHolding) return;
             _isHolding = true;
-            // 最初の弾はすぐに送る
             sendShoot();
-            // 継続送信を開始
             _shootTimer = setInterval(sendShoot, SHOOT_INTERVAL_MS);
         }
 
@@ -334,41 +283,31 @@
             }
         }
 
-        // タッチイベント（スマホ）
         btnShoot.addEventListener('touchstart', startShooting, { passive: false });
         btnShoot.addEventListener('touchend', stopShooting);
         btnShoot.addEventListener('touchcancel', stopShooting);
 
-        // マウスイベント（PCテスト用） — 直前にタッチが発生していれば無視
         btnShoot.addEventListener('mousedown', (e) => {
-            if (Date.now() - _lastTouchTime < 500) return; // touch の後の mouse を無視
+            if (Date.now() - _lastTouchTime < 500) return; 
             startShooting(e);
         });
         document.addEventListener('mouseup', stopShooting);
         btnShoot.addEventListener('mouseleave', stopShooting);
 
-        // --- アイテム使用 ---
-        // handled by tryUseItem above
-
         // --- UI更新ユーティリティ ---
         function updateUI(isConnected) {
-            wsUrlInput.disabled = isConnected;
             btnJoin.textContent = isConnected ? 'LEAVE' : 'JOIN';
             btnShoot.disabled = !isConnected;
             
-            statusDisplay.textContent = isConnected ? "Connected" : "Disconnected";
-            statusDisplay.className = isConnected ? "status connected" : "status disconnected";
             btnJoin.classList.toggle('leave-state', isConnected);
             btnJoin.classList.toggle('join-state', !isConnected);
             
             if (!isConnected) {
                 window.removeEventListener('deviceorientation', handleOrientation);
                 window.removeEventListener('devicemotion', handleMotion);
-                deltaDisplay.textContent = "Delta (移動量): 0.00";
             }
         }
 
-        // ページを閉じる際にも離脱処理を送る
         window.addEventListener('beforeunload', () => {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: "leave" }));

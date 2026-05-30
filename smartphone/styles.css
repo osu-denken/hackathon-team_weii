@@ -3,197 +3,167 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #1e1e24;
+    background-color: #151515; /* よりソリッドな黒へ */
     color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    touch-action: manipulation; /* ダブルタップズーム防止 */
-    user-select: none; /* テキスト選択防止 */
+    /* 画面全体に収め、スクロールやズームを完全に防止 */
+    height: 100dvh;
+    width: 100dvw;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .main-layout {
-    flex: 1;
     display: flex;
     flex-direction: row;
-    align-items: stretch;
-    gap: 20px;
-    padding: 20px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+    gap: 15px;
+}
+
+/* 左側パネル: 丸みと影を排除したフラットデザイン */
+.left-panel {
+    width: 30%;
+    min-width: 200px;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #222222;
+    border: 1px solid #333333;
+    padding: 15px;
     box-sizing: border-box;
 }
 
-.left-panel {
-    width: 360px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-width: 320px;
-}
-
-.connection-panel,
-.info-panel {
+/* 接続ボタン群 */
+.btn-flat {
     width: 100%;
+    padding: 15px 0;
+    background-color: #007acc;
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-flat.leave-state {
+    background-color: #555555;
+}
+.btn-flat:disabled {
+    background-color: #333333;
+    color: #666666;
 }
 
-.controller-area {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
+/* プレイヤー情報 */
 .player-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 0;
+    background-color: #1a1a1a;
+    padding: 10px;
+    border: 1px solid #333333;
 }
 .player-badge {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    color: #ffffff;
-    font-size: 18px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    box-sizing: border-box;
+    font-weight: bold;
+    font-size: 16px;
 }
 .player-label {
-    color: #ddd;
     font-size: 16px;
+    color: #dddddd;
 }
 
-.item-slot {
-    width: 100%;
-    height: 120px;
-    margin-top: 6px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-    border: 2px solid rgba(255,255,255,0.12);
-    display: grid;
-    place-items: center;
-    padding: 0;
-}
-
-.item-slot:disabled {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.06);
-}
-
-#item-icon {
-    width: 72px;
-    height: 72px;
-    object-fit: contain;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    image-rendering: pixelated;
-}
-header {
-    padding: 15px;
-    background-color: #2b2b36;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-.connection-panel {
-    padding: 15px;
+/* アイテムスロット: 下部に配置 */
+.item-section {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    justify-content: flex-end;
 }
-input[type="text"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #555;
-    background-color: #333;
-    color: #fff;
-    font-size: 16px;
-}
-.btn-group {
+.item-slot {
+    width: 100%;
+    height: 100px;
+    background-color: #1a1a1a;
+    border: 1px solid #444444;
     display: flex;
-    gap: 10px;
-}
-button {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
     cursor: pointer;
 }
-#btn-join.join-state {
-    background-color: #a6d8ff;
-    color: #0a2d43;
+.item-slot:disabled {
+    background-color: #151515;
+    border-color: #222222;
+    cursor: default;
 }
-#btn-join.leave-state {
-    background-color: #6c757d;
-    color: #ffffff;
-}
-#btn-join:disabled {
-    background-color: #555;
+#item-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    transition: opacity 0.2s ease;
 }
 
-.info-panel {
-    padding: 10px 15px;
-    text-align: center;
-    font-size: 18px;
-    background-color: #222;
-}
-.status { font-weight: bold; }
-.status.disconnected { color: #ff6b6b; }
-.status.connected { color: #51cf66; }
-
+/* 右側: 射撃ボタンのエリア */
 .controller-area {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
 }
+
+/* SHOOTボタン: デザインはそのまま、はみ出しを防ぐレスポンシブ設計 */
 #btn-shoot {
-    flex: none;
-    width: 260px;
-    height: 260px;
-    padding: 0;
+    width: 55vmin;
+    height: 55vmin;
+    max-width: 260px;
+    max-height: 260px;
+    
+    /* 指定されたデザイン */
     border-radius: 50%;
     background-color: #ff0000;
     border: 10px solid #cc0000;
+    color: #ffffff;
     font-size: 36px;
-    line-height: 260px;
-    text-align: center;
-    box-sizing: border-box;
+    font-weight: bold;
     box-shadow: 0 12px 24px rgba(0,0,0,0.5);
     transition: transform 0.1s;
+    
+    /* line-heightの代わりにflexで常にテキストを中央配置 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
 }
 #btn-shoot:active {
     transform: scale(0.95);
     background-color: #cc0000;
 }
 #btn-shoot:disabled {
-    background-color: #555;
-    border-color: #777;
+    background-color: #444444;
+    border-color: #555555;
+    color: #888888;
     box-shadow: none;
     transform: none;
 }
 
-/* 縦画面（ポートレート）時に画面を90度回転させて横画面のように見せるスタイル */
+/* 縦画面（ポートレート）時に画面を90度回転させるハック */
 @media screen and (orientation: portrait) {
     body {
         transform: rotate(90deg);
         transform-origin: left top;
-        width: 100vh;
-        height: 100vw;
+        width: 100dvh;
+        height: 100dvw;
         position: absolute;
         top: 0;
-        left: 100%;
-        overflow: hidden;
-        min-height: auto;
+        left: 100vw;
     }
 }
-
-
