@@ -21,6 +21,12 @@
                 <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
                 <div id="delta-display">Delta (移動量): 0.00</div>
             </div>
+            <div class="player-info" aria-hidden="true">
+                <div id="player-badge" class="player-badge" style="display:none;">
+                    <span id="player-number">1</span>
+                </div>
+                <div id="player-label" class="player-label" style="display:none;">Player <span id="player-number-text">1</span></div>
+            </div>
             <div class="control-panel">
                 <label style="display:flex;align-items:center;gap:8px;">
                     <input type="checkbox" id="invert-x"> 左右マッピングを反転
@@ -51,6 +57,10 @@
         const btnShoot = document.getElementById('btn-shoot');
         const statusDisplay = document.getElementById('status');
         const deltaDisplay = document.getElementById('delta-display');
+        const playerBadge = document.getElementById('player-badge');
+        const playerNumberSpan = document.getElementById('player-number');
+        const playerLabel = document.getElementById('player-label');
+        const playerNumberText = document.getElementById('player-number-text');
 
         // ws-urlを現在のurlに合わせる (例: http://localhost:3000/client/ なら ws://localhost:3000) (/client/は削除する)
         const currentUrl = window.location.href;
@@ -112,8 +122,21 @@
                 ws.send(JSON.stringify(joinData));
             };
 
+                // メッセージ受信ハンドラ: joinAck / playerState を受け取ってUIを更新
+                ws.onmessage = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.data);
+                        if (data && data.player) {
+                            updatePlayerInfo(data.player);
+                        }
+                    } catch (err) {
+                        console.error('ws.onmessage parse error', err);
+                    }
+                };
+
             ws.onclose = () => {
                 updateUI(false);
+                updatePlayerInfo(null);
             };
 
             ws.onerror = (error) => {
@@ -121,6 +144,24 @@
                 alert("WebSocket接続エラー。サーバーが起動しているか確認してください。");
                 updateUI(false);
             };
+        }
+
+        // --- プレイヤー表示更新ユーティリティ ---
+        function updatePlayerInfo(player) {
+            if (!player) {
+                if (playerBadge) playerBadge.style.display = 'none';
+                if (playerLabel) playerLabel.style.display = 'none';
+                return;
+            }
+            const num = player.number || player.id || '';
+            const color = player.color || '#888';
+            if (playerNumberSpan) playerNumberSpan.textContent = num;
+            if (playerNumberText) playerNumberText.textContent = num;
+            if (playerBadge) {
+                playerBadge.style.backgroundColor = color;
+                playerBadge.style.display = 'flex';
+            }
+            if (playerLabel) playerLabel.style.display = 'block';
         }
 
         // --- 3. 離脱 (leave) ---
