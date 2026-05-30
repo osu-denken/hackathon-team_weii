@@ -1,0 +1,94 @@
+/* CSS: スマートフォン向けのUI設定 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #1e1e24;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    touch-action: manipulation; /* ダブルタップズーム防止 */
+    user-select: none; /* テキスト選択防止 */
+}
+header {
+    padding: 15px;
+    background-color: #2b2b36;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.connection-panel {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+input[type="text"] {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #fff;
+    font-size: 16px;
+}
+.btn-group {
+    display: flex;
+    gap: 10px;
+}
+button {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+#btn-connect { background-color: #007bff; }
+#btn-connect:disabled { background-color: #555; }
+#btn-leave { background-color: #dc3545; }
+#btn-leave:disabled { background-color: #555; }
+
+.info-panel {
+    padding: 10px 15px;
+    text-align: center;
+    font-size: 18px;
+    background-color: #222;
+}
+.status { font-weight: bold; }
+.status.disconnected { color: #ff6b6b; }
+.status.connected { color: #51cf66; }
+
+.controller-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+#btn-shoot {
+    flex: none;
+    width: 260px;
+    height: 260px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: #ff0000;
+    border: 10px solid #cc0000;
+    font-size: 36px;
+    line-height: 260px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+    transition: transform 0.1s;
+}
+#btn-shoot:active {
+    transform: scale(0.95);
+    background-color: #cc0000;
+}
+#btn-shoot:disabled {
+    background-color: #555;
+    border-color: #777;
+    box-shadow: none;
+    transform: none;
+}
