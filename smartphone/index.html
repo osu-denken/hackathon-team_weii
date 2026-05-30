@@ -214,16 +214,51 @@
         }
 
         // --- 5. 射撃 (shoot) ---
-        // touchstartイベントを使用して、スマホでのタップ遅延を無くす
-        const shootAction = (e) => {
-            e.preventDefault(); // クリックイベントの重複発火を防ぐ
+        // 長押しで連射、離すと停止する。タッチ/マウス両対応。二重送信抑止あり。
+        const SHOOT_INTERVAL_MS = 300; // 連射間隔（ミリ秒）: 必要ならここを変更
+        let _shootTimer = null;
+        let _isHolding = false;
+        let _lastTouchTime = 0;
+
+        function sendShoot() {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const shootData = { type: "shoot" };
-                ws.send(JSON.stringify(shootData));
+                ws.send(JSON.stringify({ type: "shoot" }));
             }
-        };
-        btnShoot.addEventListener('touchstart', shootAction, { passive: false });
-        btnShoot.addEventListener('mousedown', shootAction); // PCでのテスト用
+        }
+
+        function startShooting(e) {
+            if (e) e.preventDefault();
+            // タッチ直後の mousedown を無視するためのタイムスタンプ
+            if (e && e.type === 'touchstart') _lastTouchTime = Date.now();
+            if (_isHolding) return;
+            _isHolding = true;
+            // 最初の弾はすぐに送る
+            sendShoot();
+            // 継続送信を開始
+            _shootTimer = setInterval(sendShoot, SHOOT_INTERVAL_MS);
+        }
+
+        function stopShooting(e) {
+            if (e) e.preventDefault();
+            _isHolding = false;
+            if (_shootTimer) {
+                clearInterval(_shootTimer);
+                _shootTimer = null;
+            }
+        }
+
+        // タッチイベント（スマホ）
+        btnShoot.addEventListener('touchstart', startShooting, { passive: false });
+        btnShoot.addEventListener('touchend', stopShooting);
+        btnShoot.addEventListener('touchcancel', stopShooting);
+
+        // マウスイベント（PCテスト用） — 直前にタッチが発生していれば無視
+        btnShoot.addEventListener('mousedown', (e) => {
+            if (Date.now() - _lastTouchTime < 500) return; // touch の後の mouse を無視
+            startShooting(e);
+        });
+        document.addEventListener('mouseup', stopShooting);
+        btnShoot.addEventListener('mouseleave', stopShooting);
 
         // --- UI更新ユーティリティ ---
         function updateUI(isConnected) {
