@@ -90,6 +90,7 @@ body {
     object-fit: contain;
     pointer-events: none;
     transition: opacity 0.2s ease;
+    image-rendering: pixelated;
 }
 header {
     padding: 15px;

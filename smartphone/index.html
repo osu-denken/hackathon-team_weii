@@ -75,7 +75,8 @@
             health_potion: `${assetBase}health_potion.png`,
             score_up: `${assetBase}score_up.png`,
             shield: `${assetBase}shield.png`,
-            triple_shot: `${assetBase}triple_shot.png`
+            triple_shot: `${assetBase}triple_shot.png`,
+            empty: `${assetBase}empty.png`
         };
 
         // ws-urlを現在のurlに合わせる (例: http://localhost:3000/client/ なら ws://localhost:3000) (/client/は削除する)
@@ -170,7 +171,7 @@
                 _currentHeldItem = null;
                 if (btnUseItem) btnUseItem.disabled = true;
                 if (itemIcon) {
-                    itemIcon.src = '';
+                    itemIcon.src = itemIconMap.empty;
                     itemIcon.style.opacity = 0.3;
                 }
                 return;
@@ -187,8 +188,10 @@
             if (playerLabel) playerLabel.style.display = 'block';
             if (btnUseItem) btnUseItem.disabled = !_currentHeldItem;
             if (itemIcon) {
-                const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : '';
-                itemIcon.src = iconSrc || '';
+                const iconSrc = _currentHeldItem
+                    ? itemIconMap[_currentHeldItem.type]
+                    : itemIconMap.empty;
+                itemIcon.src = iconSrc || itemIconMap.empty;
                 itemIcon.style.opacity = _currentHeldItem ? 1 : 0.3;
             }
         }
