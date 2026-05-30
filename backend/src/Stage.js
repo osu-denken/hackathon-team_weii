@@ -1,7 +1,7 @@
 import { PlayerEntity, DEFAULT_HP } from './PlayerEntity.js';
 import { EnemyEntity } from './EnemyEntity.js';
 import { BulletEntity } from './BulletEntity.js';
-import { Item } from './Item.js';
+import { Item } from './item.js';
 import { ItemEntity } from './ItemEntity.js';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -28,8 +28,10 @@ const ITEM_SPEED = 0.06;
 
 const SHOOT_COOLDOWN_MS = 250;
 const MAX_ACTIVE_BULLETS_PER_PLAYER = 12;
-const POWER_DURATION_MS = 5000;
+const TRIPLE_SHOT_DURATION_MS = 5000;
+const SHIELD_DURATION_MS = 5000;
 const HEAL_AMOUNT = 2;
+const SCORE_UP_AMOUNT = 10;
 
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
@@ -106,10 +108,10 @@ class Stage {
       return false;
     }
 
-    if (player.powerUntil > now) {
-      this.spawnTripleBullets(player, POWER_ATTACK);
+    if (player.hasTripleShot(now)) {
+      this.spawnTripleBullets(player, player.attackPower);
     } else {
-      this.spawnSingleBullet(player, BASE_ATTACK);
+      this.spawnSingleBullet(player, player.attackPower);
     }
 
     player.markShot(now);
@@ -127,8 +129,19 @@ class Stage {
       return;
     }
 
-    if (item.type === 'power') {
-      player.applyPower(now, POWER_DURATION_MS, POWER_ATTACK);
+    if (item.type === 'score_up') {
+      player.score += SCORE_UP_AMOUNT;
+      return;
+    }
+
+    if (item.type === 'shield') {
+      player.applyShield(now, SHIELD_DURATION_MS);
+      return;
+    }
+
+    if (item.type === 'triple_shot') {
+      player.applyTripleShot(now, TRIPLE_SHOT_DURATION_MS);
+      return;
     }
   }
 
@@ -139,7 +152,7 @@ class Stage {
     this.updateBullets();
     this.updateItem();
     this.handleBulletCollisions();
-    this.handleEnemyTouches();
+    this.handleEnemyTouches(now);
     this.handleItemPickup();
   }
 
@@ -179,6 +192,8 @@ class Stage {
         score: player.score,
         attackPower: player.attackPower,
         powerRemainingMs: Math.max(0, player.powerUntil - now),
+        shieldRemainingMs: Math.max(0, player.shieldUntil - now),
+        tripleShotRemainingMs: Math.max(0, player.tripleShotUntil - now),
         number: player.number,
         color: player.color,
         heldItem: player.heldItem,
@@ -219,6 +234,7 @@ class Stage {
   updatePlayerPowers(now) {
     this.players.forEach((player) => {
       player.updatePower(now, BASE_ATTACK);
+      player.updateTimers(now);
     });
   }
 
@@ -311,13 +327,17 @@ class Stage {
     });
   }
 
-  handleEnemyTouches() {
+  handleEnemyTouches(now) {
     this.enemies.forEach((enemy, enemyId) => {
       this.players.forEach((player) => {
         const dx = Math.abs(enemy.x - player.x);
         const dy = Math.abs(enemy.y - player.y);
         if (dx <= PLAYER_HIT_RANGE && dy <= PLAYER_HIT_RANGE) {
-          player.damage(1);
+          if (player.hasShield(now)) {
+            player.consumeShield();
+          } else {
+            player.damage(1);
+          }
           this.enemies.delete(enemyId);
         }
       });
@@ -339,7 +359,7 @@ class Stage {
       const dy = Math.abs(itemEntity.y - player.y);
       if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE) {
         const payload = itemEntity.toPayload();
-        if (payload.type === 'heal') {
+        if (payload.type === 'health_potion') {
           player.heal(HEAL_AMOUNT);
           this.itemEntity = null;
           break;

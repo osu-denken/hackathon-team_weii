@@ -4,7 +4,9 @@ class Item {
   }
 
   static random() {
-    return new Item(Math.random() < 0.5 ? 'heal' : 'power');
+    const types = ['health_potion', 'score_up', 'shield', 'triple_shot'];
+    const index = Math.floor(Math.random() * types.length);
+    return new Item(types[index]);
   }
 }
 

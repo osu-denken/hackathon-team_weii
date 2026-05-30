@@ -85,7 +85,7 @@
   },
   "item": {
     "id": "<アイテムのuuid>",
-    "type": "heal",
+    "type": "health_potion",
     "x": 0,
     "y": 2
   },
@@ -104,7 +104,7 @@ heldItemは未所持ならnull、所持中は以下の形式
 ```json
 {
   "id": "<アイテムのuuid>",
-  "type": "heal",
+  "type": "health_potion",
   "x": 0,
   "y": 2
 }

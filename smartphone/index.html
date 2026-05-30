@@ -32,7 +32,9 @@
                     <input type="checkbox" id="invert-x"> 左右マッピングを反転
                 </label>
                 <div style="margin-top:8px;">
-                    <button id="btn-use-item" disabled>USE ITEM</button>
+                    <button id="btn-use-item" class="item-slot" disabled>
+                        <img id="item-icon" alt="item" />
+                    </button>
                 </div>
             </div>
         </div>
@@ -59,6 +61,7 @@
         const btnJoin = document.getElementById('btn-join');
         const btnShoot = document.getElementById('btn-shoot');
         const btnUseItem = document.getElementById('btn-use-item');
+        const itemIcon = document.getElementById('item-icon');
         const statusDisplay = document.getElementById('status');
         const deltaDisplay = document.getElementById('delta-display');
         const playerBadge = document.getElementById('player-badge');
@@ -66,6 +69,13 @@
         const playerLabel = document.getElementById('player-label');
         const playerNumberText = document.getElementById('player-number-text');
         let _currentHeldItem = null;
+
+        const itemIconMap = {
+            health_potion: '/asset/images/health_potion.png',
+            score_up: '/asset/images/score_up.png',
+            shield: '/asset/images/shield.png',
+            triple_shot: '/asset/images/triple_shot.png'
+        };
 
         // ws-urlを現在のurlに合わせる (例: http://localhost:3000/client/ なら ws://localhost:3000) (/client/は削除する)
         const currentUrl = window.location.href;
@@ -158,6 +168,10 @@
                 if (playerLabel) playerLabel.style.display = 'none';
                 _currentHeldItem = null;
                 if (btnUseItem) btnUseItem.disabled = true;
+                if (itemIcon) {
+                    itemIcon.src = '';
+                    itemIcon.style.opacity = 0.3;
+                }
                 return;
             }
             const num = player.number || player.id || '';
@@ -171,6 +185,25 @@
             }
             if (playerLabel) playerLabel.style.display = 'block';
             if (btnUseItem) btnUseItem.disabled = !_currentHeldItem;
+            if (itemIcon) {
+                const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : '';
+                itemIcon.src = iconSrc || '';
+                itemIcon.style.opacity = _currentHeldItem ? 1 : 0.3;
+            }
+        }
+
+        const tryUseItem = (e) => {
+            if (e) {
+                e.preventDefault();
+            }
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            if (!_currentHeldItem) return;
+            ws.send(JSON.stringify({ type: "useItem" }));
+        };
+
+        if (btnUseItem) {
+            btnUseItem.addEventListener('click', tryUseItem);
+            btnUseItem.addEventListener('touchstart', tryUseItem, { passive: false });
         }
 
         // --- 3. 離脱 (leave) ---

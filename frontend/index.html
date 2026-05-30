@@ -62,8 +62,16 @@
       5: '/asset/images/character-5.png',
     };
 
+    const itemSpritePaths = {
+      health_potion: '/asset/images/health_potion.png',
+      score_up: '/asset/images/score_up.png',
+      shield: '/asset/images/shield.png',
+      triple_shot: '/asset/images/triple_shot.png',
+    };
+
     const spriteCache = new Map();
     const spriteColors = new Map();
+    const itemSpriteCache = new Map();
 
     const sampleSpriteColor = (img) => {
       if (!img.naturalWidth || !img.naturalHeight) {
@@ -93,6 +101,12 @@
         };
         img.src = src;
         spriteCache.set(Number(key), img);
+      });
+
+      Object.entries(itemSpritePaths).forEach(([key, src]) => {
+        const img = new Image();
+        img.src = src;
+        itemSpriteCache.set(key, img);
       });
     };
 
@@ -254,8 +268,18 @@
     const drawItem = (item, width, height) => {
       const x = toCanvasX(item.x, width);
       const y = toCanvasY(item.y, height);
+      const sprite = itemSpriteCache.get(item.type);
+      if (sprite && sprite.complete) {
+        const size = 36;
+        ctx.save();
+        ctx.shadowColor = 'rgba(255,255,255,0.35)';
+        ctx.shadowBlur = 16;
+        ctx.drawImage(sprite, x - size / 2, y - size / 2, size, size);
+        ctx.restore();
+        return;
+      }
       ctx.save();
-      if (item.type === 'heal') {
+      if (item.type === 'health_potion') {
         ctx.shadowColor = '#34d399';
         ctx.shadowBlur = 18;
         ctx.fillStyle = '#22c55e';
@@ -263,6 +287,20 @@
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(x - 3, y - 8, 6, 16);
         ctx.fillRect(x - 8, y - 3, 16, 6);
+      } else if (item.type === 'score_up') {
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (item.type === 'shield') {
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = '#0ea5e9';
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.fill();
       } else {
         ctx.shadowColor = '#a855f7';
         ctx.shadowBlur = 18;

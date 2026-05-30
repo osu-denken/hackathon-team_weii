@@ -8,6 +8,8 @@ class PlayerEntity extends LivingEntity {
     this.score = 0;
     this.attackPower = 1;
     this.powerUntil = 0;
+    this.shieldUntil = 0;
+    this.tripleShotUntil = 0;
     this.lastShotAt = 0;
     this.number = number;
     this.color = color;
@@ -23,11 +25,40 @@ class PlayerEntity extends LivingEntity {
     this.powerUntil = now + durationMs;
   }
 
+  applyShield(now, durationMs) {
+    this.shieldUntil = Math.max(this.shieldUntil, now + durationMs);
+  }
+
+  applyTripleShot(now, durationMs) {
+    this.tripleShotUntil = Math.max(this.tripleShotUntil, now + durationMs);
+  }
+
   updatePower(now, baseAttack) {
     if (this.attackPower !== baseAttack && this.powerUntil <= now) {
       this.attackPower = baseAttack;
       this.powerUntil = 0;
     }
+  }
+
+  updateTimers(now) {
+    if (this.shieldUntil > 0 && this.shieldUntil <= now) {
+      this.shieldUntil = 0;
+    }
+    if (this.tripleShotUntil > 0 && this.tripleShotUntil <= now) {
+      this.tripleShotUntil = 0;
+    }
+  }
+
+  hasShield(now) {
+    return this.shieldUntil > now;
+  }
+
+  consumeShield() {
+    this.shieldUntil = 0;
+  }
+
+  hasTripleShot(now) {
+    return this.tripleShotUntil > now;
   }
 
   canShoot(now, cooldownMs) {

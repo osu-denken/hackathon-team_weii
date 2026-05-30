@@ -64,7 +64,7 @@
   "items": [
     {
       "id": "<アイテムのuuid>",
-      "type": "heal",
+      "type": "health_potion",
       "x": 0,
       "y": 2
     }

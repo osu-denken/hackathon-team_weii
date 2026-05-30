@@ -67,19 +67,29 @@ body {
     font-size: 16px;
 }
 
-#btn-use-item {
+.item-slot {
     width: 100%;
-    padding: 10px 12px;
+    height: 120px;
     margin-top: 6px;
-    border-radius: 8px;
-    background-color: #ffb84d;
-    color: #08141a;
-    font-weight: 700;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border: 2px solid rgba(255,255,255,0.12);
+    display: grid;
+    place-items: center;
+    padding: 0;
 }
 
-#btn-use-item:disabled {
-    background-color: #444;
-    color: #999;
+.item-slot:disabled {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.06);
+}
+
+#item-icon {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
 }
 header {
     padding: 15px;
