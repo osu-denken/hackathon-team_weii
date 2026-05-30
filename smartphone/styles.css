@@ -7,9 +7,40 @@ body {
     color: #ffffff;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
     touch-action: manipulation; /* ダブルタップズーム防止 */
     user-select: none; /* テキスト選択防止 */
+}
+
+.main-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.left-panel {
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 320px;
+}
+
+.connection-panel,
+.info-panel {
+    width: 100%;
+}
+
+.controller-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
 header {
     padding: 15px;
