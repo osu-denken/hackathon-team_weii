@@ -17,14 +17,18 @@
       "x": 3,
       "hp": 5,
       "maxHp": 5,
-      "score": 12
+      "score": 12,
+      "number": 1,
+      "color": "#2563eb"
     },
     {
       "id": "<端末のuuid>",
       "x": -2,
       "hp": 4,
       "maxHp": 5,
-      "score": 8
+      "score": 8,
+      "number": 2,
+      "color": "#10b981"
     }
   ],
   "enemies": [
