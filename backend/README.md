@@ -3,6 +3,19 @@
 言語: Node.js + JavaScript
 フレームワーク: Express
 
+## ngrokで公開する
+1. ngrokのCLIをインストールしてログイン
+2. サーバー起動
+3. ngrokでトンネルを作成
+
+```bash
+npm run dev
+```
+
+```bash
+npm run ngrok
+```
+
 ## パッケージ
 - express
 - ws
@@ -76,6 +89,7 @@ WebSocketで実装する。クライアント(スマートフォン)からのメ
 ### 離脱
 ```json
 {
+
   "type": "leave"
 }
 ```
