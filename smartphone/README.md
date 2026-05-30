@@ -51,6 +51,19 @@
 識別のためにcrypto.randomUUID()で端末のuuidを生成しておく, WebSocketで実装する
 
 ## 受信データ
+### 参加応答
+参加したときにバックエンドから送られてくる
+```json
+{
+  "type": "joinAck",
+  "player": {
+    "id": "<端末のuuid>",
+    "number": 1,
+    "color": "#2563eb"
+  }
+}
+```
+
 ### プレイヤー状態
 ```json
 {
@@ -62,6 +75,8 @@
     "score": 12,
     "attackPower": 1,
     "powerRemainingMs": 0,
+    "number": 1,
+    "color": "#2563eb",
     "bulletsActive": 2,
     "bulletsMax": 12,
     "canShoot": true,

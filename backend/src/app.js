@@ -76,6 +76,8 @@ const sendStateToPlayers = () => {
                 score: player.score,
                 attackPower: player.attackPower,
                 powerRemainingMs: Math.max(0, player.powerUntil - now),
+                number: player.number,
+                color: player.color,
                 bulletsActive: bullets.countByOwner(player.id),
                 bulletsMax: MAX_ACTIVE_BULLETS_PER_PLAYER,
                 canShoot: players.canShoot(player.id, now, SHOOT_COOLDOWN_MS),
@@ -97,7 +99,17 @@ const handleJoin = (ws, msg) => {
         return;
     }
 
-    players.join(ws, msg.id);
+    const player = players.join(ws, msg.id);
+    if (player && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            type: 'joinAck',
+            player: {
+                id: player.id,
+                number: player.number,
+                color: player.color,
+            },
+        }));
+    }
 };
 
 const handleLeave = (ws) => {

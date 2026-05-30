@@ -10,8 +10,13 @@ const BASE_ATTACK = 1;
 const POWER_ATTACK = 2;
 const MAX_HP = 5;
 
+const PLAYER_COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6'];
+let nextPlayerNumber = 1;
+
 const join = (ws, id) => {
-  players.set(id, {
+  const playerNumber = nextPlayerNumber++;
+  const color = PLAYER_COLORS[(playerNumber - 1) % PLAYER_COLORS.length];
+  const player = {
     id,
     x: 0,
     hp: MAX_HP,
@@ -20,8 +25,13 @@ const join = (ws, id) => {
     attackPower: BASE_ATTACK,
     powerUntil: 0,
     lastShotAt: 0,
-  });
+    number: playerNumber,
+    color,
+  };
+
+  players.set(id, player);
   socketToPlayerId.set(ws, id);
+  return player;
 };
 
 const leave = (ws) => {
@@ -32,6 +42,10 @@ const leave = (ws) => {
 
   players.delete(id);
   socketToPlayerId.delete(ws);
+
+  if (players.size === 0) {
+    nextPlayerNumber = 1;
+  }
 };
 
 const move = (ws, delta) => {
@@ -121,6 +135,8 @@ const list = () => Array.from(players.values()).map((player) => ({
   hp: player.hp,
   maxHp: player.maxHp,
   score: player.score,
+  number: player.number,
+  color: player.color,
 }));
 
 const forEachSocket = (callback) => {
