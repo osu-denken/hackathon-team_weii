@@ -5,6 +5,9 @@
 - スマートフォンのタップで射撃
 - 時々現れるアイテムを取ると即時回復もしくは使うと一定時間無敵、3点バーストショット、スコア2倍などの効果が得られる
 
+<img width="1919" height="1199" alt="image" src="https://github.com/user-attachments/assets/734bacab-c780-4ecd-bc75-2adda2da4eb2" />
+
+
 ## 技術構成
 ### モニター (フロントエンド)
 - HTML/CSS/JavaScript/Canvas/WebSocket
@@ -24,3 +27,14 @@
 ゲームのシステムを実装する。<br>
 スマートフォンから受け取ったデータを処理して、ゲームの状態を更新し、モニターに描画する指示データを送信する。<br>
 ゲームの状態は、プレイヤーの位置やHP、スコア、敵の位置やHP、弾の位置などを管理する。
+
+# 起動手順
+```bash
+cd backend
+npm install
+npm run dev
+npm run ngrok
+```
+
+バックエンドを起動すると自動的にフロントエンド側もパスが通されます。<br>
+フロントエンド側はモニターが/viewer, スマートフォンが/clientとなります。
