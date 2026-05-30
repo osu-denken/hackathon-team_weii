@@ -67,35 +67,28 @@ const handleJoin = (ws, msg) => {
 
 const handleLeave = (ws) => {
   const id = socketToPlayerId.get(ws);
-  if (id) {
-    stage.removePlayer(id);
-  }
+  if (id) stage.removePlayer(id);
+
   socketToPlayerId.delete(ws);
 };
 
 const handleMove = (ws, msg) => {
   const id = socketToPlayerId.get(ws);
-  if (!id) {
-    return;
-  }
+  if (!id) return;
 
   stage.movePlayer(id, msg.delta);
 };
 
 const handleShoot = (ws) => {
   const id = socketToPlayerId.get(ws);
-  if (!id) {
-    return;
-  }
+  if (!id) return;
 
   stage.shootPlayer(id, Date.now());
 };
 
 const handleUseItem = (ws) => {
   const id = socketToPlayerId.get(ws);
-  if (!id) {
-    return;
-  }
+  if (!id) return;
 
   stage.useHeldItem(id, Date.now());
 };
