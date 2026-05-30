@@ -19,7 +19,7 @@
 スマートフォンのタップを検知して、サーバーに射撃の指示などを送信する。
 
 # サーバー (バックエンド)
-- Node.js + WebSocket + Express + JavaScript
+- JavaScript/Node.js/WebSocket/Express
 
 ゲームのシステムを実装する。<br>
 スマートフォンから受け取ったデータを処理して、ゲームの状態を更新し、モニターに描画する指示データを送信する。<br>
