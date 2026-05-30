@@ -121,6 +121,25 @@ setInterval(() => {
     enemies.maybeSpawn(now);
     enemies.update();
     bullets.update();
+    const enemyList = enemies.list();
+    const bulletList = bullets.list();
+    const hitRange = 0.5;
+    const enemiesToRemove = new Set();
+    const bulletsToRemove = new Set();
+
+    bulletList.forEach((bullet) => {
+        enemyList.forEach((enemy) => {
+            const dx = Math.abs(bullet.x - enemy.x);
+            const dy = Math.abs(bullet.y - enemy.y);
+            if (dx <= hitRange && dy <= hitRange) {
+                enemiesToRemove.add(enemy.id);
+                bulletsToRemove.add(bullet.id);
+            }
+        });
+    });
+
+    enemiesToRemove.forEach((id) => enemies.removeById(id));
+    bulletsToRemove.forEach((id) => bullets.removeById(id));
     sendState();
 }, TICK_MS);
 

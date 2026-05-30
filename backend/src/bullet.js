@@ -28,8 +28,13 @@ const list = () => Array.from(bullets.values()).map((bullet) => ({
   y: bullet.y,
 }));
 
+const removeById = (id) => {
+  bullets.delete(id);
+};
+
 export {
   spawn,
   update,
   list,
+  removeById,
 };

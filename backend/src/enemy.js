@@ -39,8 +39,13 @@ const list = () => Array.from(enemies.values()).map((enemy) => ({
   y: enemy.y,
 }));
 
+const removeById = (id) => {
+  enemies.delete(id);
+};
+
 export {
   maybeSpawn,
   update,
   list,
+  removeById,
 };
