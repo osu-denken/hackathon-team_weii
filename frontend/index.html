@@ -65,6 +65,7 @@
       const state = {
         characters: [],
         bullets: [],
+        enemies: [],
       };
 
       const resize = () => {
@@ -106,6 +107,9 @@
           if (Array.isArray(payload.bullets)) {
             state.bullets = payload.bullets;
           }
+          if (Array.isArray(payload.enemies)) {
+            state.enemies = payload.enemies;
+          }
         }
       });
 
@@ -116,11 +120,15 @@
 
       const draw = () => {
         const { width, height } = canvas.getBoundingClientRect();
+
+        // 画面をクリア
         ctx.clearRect(0, 0, width, height);
 
+        // 地面
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(0, height - 90, width, 4);
 
+        // プレイヤー
         ctx.fillStyle = '#2563eb';
         state.characters.forEach((player) => {
           ctx.beginPath();
@@ -128,6 +136,7 @@
           ctx.fill();
         });
 
+        // 弾
         ctx.fillStyle = '#f97316';
         state.bullets.forEach((bullet) => {
           const y = height - 120 - bullet.y * 40;
@@ -136,6 +145,16 @@
           ctx.fill();
         });
 
+        // 敵
+        ctx.fillStyle = '#ef4444';
+        state.enemies.forEach((enemy) => {
+          const y = height - 120 - enemy.y * 40;
+          ctx.beginPath();
+          ctx.arc(toCanvasX(enemy.x), y, 12, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // 次のフレームを要求
         requestAnimationFrame(draw);
       };
 
