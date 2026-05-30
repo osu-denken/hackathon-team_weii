@@ -83,6 +83,17 @@ const heal = (id, amount) => {
   player.hp = clamp(player.hp + amount, 0, player.maxHp);
 };
 
+const damage = (id, amount) => {
+  const player = players.get(id);
+  if (!player) {
+    return;
+  }
+
+  player.hp = clamp(player.hp - amount, 0, player.maxHp);
+};
+
+const listRaw = () => Array.from(players.values());
+
 const applyPower = (id, now, durationMs) => {
   const player = players.get(id);
   if (!player) {
@@ -159,6 +170,8 @@ export {
   addScore,
   totalScore,
   heal,
+  damage,
+  listRaw,
   applyPower,
   updatePowers,
   canShoot,

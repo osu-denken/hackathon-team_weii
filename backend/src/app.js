@@ -231,6 +231,7 @@ setInterval(() => {
     const enemyList = enemies.list();
     const bulletList = bullets.getAll();
     const hitRange = 0.5;
+    const playerHitRange = 0.7;
     const enemiesToRemove = new Set();
     const bulletsToRemove = new Set();
     const kills = [];
@@ -250,6 +251,18 @@ setInterval(() => {
     });
 
     bulletsToRemove.forEach((id) => bullets.removeById(id));
+
+    const playerList = players.listRaw();
+    enemyList.forEach((enemy) => {
+        playerList.forEach((player) => {
+            const dx = Math.abs(enemy.x - player.x);
+            const dy = Math.abs(enemy.y - 0);
+            if (dx <= playerHitRange && dy <= playerHitRange) {
+                players.damage(player.id, 1);
+                enemies.removeById(enemy.id);
+            }
+        });
+    });
 
     kills.forEach((kill) => {
         if (kill.ownerId) {
