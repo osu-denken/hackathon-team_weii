@@ -18,7 +18,7 @@ const spawn = (type) => {
   enemies.set(id, {
     id,
     x: (Math.random() * 6) - 3,
-    y: 5,
+    y: 10,
     hp: maxHp,
     maxHp,
     type,
