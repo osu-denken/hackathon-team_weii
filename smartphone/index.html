@@ -12,21 +12,25 @@
         <h2>Controller</h2>
     </header>
 
-    <div class="connection-panel">
-        <input type="text" id="ws-url" value="ws://localhost:8080" placeholder="WebSocket URLを入力">
-        <div class="btn-group">
-            <button id="btn-connect">CONNECT</button>
-            <button id="btn-leave" disabled>LEAVE</button>
+    <div class="main-layout">
+        <div class="left-panel">
+            <div class="connection-panel">
+                <input type="text" id="ws-url" value="ws://localhost:8080" placeholder="WebSocket URLを入力">
+                <div class="btn-group">
+                    <button id="btn-connect">CONNECT</button>
+                    <button id="btn-leave" disabled>LEAVE</button>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
+                <div id="delta-display">Delta (移動量): 0.00</div>
+            </div>
         </div>
-    </div>
 
-    <div class="info-panel">
-        <div>Status: <span id="status" class="status disconnected">Disconnected</span></div>
-        <div id="delta-display">Delta (移動量): 0.00</div>
-    </div>
-
-    <div class="controller-area">
+        <div class="controller-area">
         <button id="btn-shoot" disabled>SHOOT</button>
+    </div>
     </div>
 
     <script>
