@@ -32,27 +32,63 @@ const sendToViewer = (data) => {
     }
 };
 
-const sendState = () => {
-    const now = Date.now();
+const buildGameState = (now) => {
     const totalScore = players.totalScore();
     const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - GAME_START_AT));
     const cleared = totalScore >= TARGET_SCORE && timeRemainingMs > 0;
+
+    return {
+        totalScore,
+        targetScore: TARGET_SCORE,
+        timeLimitMs: TIME_LIMIT_MS,
+        timeRemainingMs,
+        cleared,
+    };
+};
+
+const sendState = () => {
+    const now = Date.now();
     const payload = {
         type: 'update',
         characters: players.list(),
         enemies: enemies.list(),
         bullets: bullets.list(),
         items: items.list(),
-        game: {
-            totalScore,
-            targetScore: TARGET_SCORE,
-            timeLimitMs: TIME_LIMIT_MS,
-            timeRemainingMs,
-            cleared,
-        },
+        game: buildGameState(now),
     };
 
     sendToViewer(payload);
+};
+
+const sendStateToPlayers = () => {
+    const now = Date.now();
+    const availableItem = items.list()[0] || null;
+    const gameState = buildGameState(now);
+
+    players.forEachSocket((ws, player) => {
+        const cooldownRemainingMs = Math.max(0, SHOOT_COOLDOWN_MS - (now - player.lastShotAt));
+        const payload = {
+            type: 'playerState',
+            player: {
+                id: player.id,
+                hp: player.hp,
+                maxHp: player.maxHp,
+                score: player.score,
+                attackPower: player.attackPower,
+                powerRemainingMs: Math.max(0, player.powerUntil - now),
+                bulletsActive: bullets.countByOwner(player.id),
+                bulletsMax: MAX_ACTIVE_BULLETS_PER_PLAYER,
+                canShoot: players.canShoot(player.id, now, SHOOT_COOLDOWN_MS),
+                cooldownRemainingMs,
+            },
+            item: availableItem,
+            game: gameState,
+        };
+
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(payload));
+        }
+    });
 };
 
 const handleJoin = (ws, msg) => {
@@ -209,6 +245,7 @@ setInterval(() => {
         }
     });
     sendState();
+    sendStateToPlayers();
 }, TICK_MS);
 
 const PORT = 3001;

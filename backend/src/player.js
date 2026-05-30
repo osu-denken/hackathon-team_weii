@@ -123,6 +123,17 @@ const list = () => Array.from(players.values()).map((player) => ({
   score: player.score,
 }));
 
+const forEachSocket = (callback) => {
+  socketToPlayerId.forEach((id, ws) => {
+    const player = players.get(id);
+    if (!player) {
+      return;
+    }
+
+    callback(ws, player);
+  });
+};
+
 export {
   join,
   leave,
@@ -136,4 +147,5 @@ export {
   updatePowers,
   canShoot,
   markShot,
+  forEachSocket,
 };
