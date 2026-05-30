@@ -123,3 +123,20 @@ button {
     box-shadow: none;
     transform: none;
 }
+
+/* 縦画面（ポートレート）時に画面を90度回転させて横画面のように見せるスタイル */
+@media screen and (orientation: portrait) {
+    body {
+        transform: rotate(90deg);
+        transform-origin: left top;
+        width: 100vh;
+        height: 100vw;
+        position: absolute;
+        top: 0;
+        left: 100%;
+        overflow: hidden;
+        min-height: auto;
+    }
+}
+
+
