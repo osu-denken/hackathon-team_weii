@@ -123,7 +123,11 @@ const handleShoot = (ws, msg) => {
         return;
     }
 
-    bullets.spawnTriple(player.x, player.id, player.attackPower);
+    if (player.powerUntil > now) {
+        bullets.spawnTriple(player.x, player.id, player.attackPower);
+    } else {
+        bullets.spawnSingle(player.x, player.id, player.attackPower);
+    }
     players.markShot(player.id, now);
 };
 

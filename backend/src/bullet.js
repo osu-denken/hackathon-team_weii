@@ -18,6 +18,10 @@ const createBullet = (x, ownerId, damage, vx) => {
   });
 };
 
+const spawnSingle = (x, ownerId, damage = 1) => {
+  createBullet(x, ownerId, damage, 0);
+};
+
 const spawnTriple = (x, ownerId, damage = 1) => {
   createBullet(x, ownerId, damage, -BULLET_SPREAD);
   createBullet(x, ownerId, damage, 0);
@@ -58,6 +62,7 @@ const removeById = (id) => {
 };
 
 export {
+  spawnSingle,
   spawnTriple,
   update,
   list,
