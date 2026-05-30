@@ -33,7 +33,7 @@
                 </label>
                 <div style="margin-top:8px;">
                     <button id="btn-use-item" class="item-slot" disabled>
-                        <img id="item-icon" alt="item" />
+                        <img id="item-icon" alt="" />
                     </button>
                 </div>
             </div>
@@ -70,11 +70,12 @@
         const playerNumberText = document.getElementById('player-number-text');
         let _currentHeldItem = null;
 
+        const assetBase = `${window.location.protocol}//${window.location.host}/asset/images/`;
         const itemIconMap = {
-            health_potion: '/asset/images/health_potion.png',
-            score_up: '/asset/images/score_up.png',
-            shield: '/asset/images/shield.png',
-            triple_shot: '/asset/images/triple_shot.png'
+            health_potion: `${assetBase}health_potion.png`,
+            score_up: `${assetBase}score_up.png`,
+            shield: `${assetBase}shield.png`,
+            triple_shot: `${assetBase}triple_shot.png`
         };
 
         // ws-urlを現在のurlに合わせる (例: http://localhost:3000/client/ なら ws://localhost:3000) (/client/は削除する)
@@ -344,20 +345,7 @@
         btnShoot.addEventListener('mouseleave', stopShooting);
 
         // --- アイテム使用 ---
-        if (btnUseItem) {
-            btnUseItem.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (ws && ws.readyState === WebSocket.OPEN && _currentHeldItem) {
-                    ws.send(JSON.stringify({ type: 'useItem' }));
-                    // 一時的にボタンを無効化して多重送信を避ける
-                    btnUseItem.disabled = true;
-                    setTimeout(() => {
-                        // 再度有効化はサーバーからの playerState 更新で行われる想定
-                        if (_currentHeldItem) btnUseItem.disabled = false;
-                    }, 500);
-                }
-            });
-        }
+        // handled by tryUseItem above
 
         // --- UI更新ユーティリティ ---
         function updateUI(isConnected) {
