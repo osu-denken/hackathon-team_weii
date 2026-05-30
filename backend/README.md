@@ -1,6 +1,12 @@
 # バックエンド (通信制御, システム)
 
 言語: Node.js + JavaScript
+フレームワーク: Express
+
+## パッケージ
+- express
+- ws
+- nodemon (開発用)
 
 - ゲームのシステム (座標管理など)
 - 通信制御
