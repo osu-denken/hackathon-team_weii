@@ -17,7 +17,7 @@
             <div class="connection-panel">
                 <input type="hidden" id="ws-url" value="ws://localhost:8080">
                 <div class="btn-group">
-                    <button id="btn-join">JOIN</button>
+                    <button id="btn-join" class="join-state">JOIN</button>
                 </div>
             </div>
 
@@ -237,6 +237,8 @@
             
             statusDisplay.textContent = isConnected ? "Connected" : "Disconnected";
             statusDisplay.className = isConnected ? "status connected" : "status disconnected";
+            btnJoin.classList.toggle('leave-state', isConnected);
+            btnJoin.classList.toggle('join-state', !isConnected);
             
             if (!isConnected) {
                 window.removeEventListener('deviceorientation', handleOrientation);
