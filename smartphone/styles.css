@@ -66,6 +66,21 @@ body {
     color: #ddd;
     font-size: 16px;
 }
+
+#btn-use-item {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border-radius: 8px;
+    background-color: #ffb84d;
+    color: #08141a;
+    font-weight: 700;
+}
+
+#btn-use-item:disabled {
+    background-color: #444;
+    color: #999;
+}
 header {
     padding: 15px;
     background-color: #2b2b36;
