@@ -172,9 +172,8 @@ loadSprites();
 
 const fallbackClientUrl = `${window.location.protocol}//${window.location.host}/client/`;
 const setQrOverlay = (clientUrl) => {
-  if (qrOverlay) {
+  if (qrOverlay)
     qrOverlay.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(clientUrl)}`;
-  }
 };
 
 const loadClientUrl = async () => {

@@ -8,13 +8,14 @@ import os from 'os';
 import path from 'path';
 
 const app = express();
+
+const USE_HTTPS = false;
 const opt = {
   key: fs.readFileSync('../shared/server-key.pem'),
   cert: fs.readFileSync('../shared/server.pem')
 };
 
-// const server = http.createServer(app);
-const server = https.createServer(opt, app);
+const server = USE_HTTPS ? https.createServer(opt, app) : http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // clientとviewerも同じサーバーでホストする
@@ -51,8 +52,9 @@ const PREFERRED_INTERFACE_PATTERNS = [
   /local area connection/i,
 ];
 
-const FRONTEND_URL = null; // nullの場合は自動に
+// const FRONTEND_URL = null; // nullの場合は自動に
 // const FRONTEND_URL = 'https://hackathon-team-weii.fly.dev/client/';
+const FRONTEND_URL = "https://obtundent-britteny-handily.ngrok-free.dev/viewer/";
 
 const getLanIPv4 = () => {
   const interfaces = os.networkInterfaces();
