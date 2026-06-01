@@ -22,50 +22,6 @@ body {
   color: #ffffff;
 }
 
-.play-shell {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  width: 100vw;
-  height: 100vh;
-}
-
-.play-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
-  padding: 14px 20px;
-  border-bottom: 1px solid #333333;
-  background-color: #151515;
-}
-
-.play-title {
-  display: grid;
-  gap: 4px;
-}
-
-.play-title h1 {
-  margin: 0;
-  font-size: clamp(1.1rem, 2vw, 1.45rem);
-  letter-spacing: 0.02em;
-}
-
-.play-title p {
-  margin: 0;
-  color: #94a3b8;
-  font-size: 0.92rem;
-}
-
-.connection-chip {
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid #333333;
-  background-color: #1a1a1a;
-  font-size: 0.9rem;
-  color: #ffffff;
-  white-space: nowrap;
-}
-
 .play-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -78,7 +34,6 @@ body {
 .viewer-panel,
 .control-panel {
   min-height: 0;
-  border-radius: 6px;
   border: 1px solid #333333;
   background-color: #222222; /* smartphone panel */
   overflow: hidden;
@@ -119,7 +74,6 @@ body {
   display: grid;
   gap: 10px;
   padding: 14px;
-  border-radius: 6px;
   background-color: #1a1a1a;
   border: 1px solid #333333;
 }
@@ -150,7 +104,6 @@ body {
 .action-button {
   appearance: none;
   border: 0;
-  border-radius: 6px;
   padding: 12px 14px;
   font-size: 1rem;
   font-weight: 700;
@@ -179,7 +132,6 @@ body {
   display: grid;
   place-items: center;
   min-height: 118px;
-  border-radius: 6px;
   background-color: #1a1a1a;
   border: 1px solid #333333;
 }
@@ -242,11 +194,6 @@ body {
 @media (max-width: 960px) {
   body {
     overflow: auto;
-  }
-
-  .play-shell {
-    min-height: 100vh;
-    height: auto;
   }
 
   .play-main {

@@ -216,7 +216,22 @@ btnJoin.addEventListener('click', () => {
   connect();
 });
 
-btnShoot.addEventListener('mousedown', sendShoot);
+// Ensure shoot fires reliably while moving: prevent focus stealing and
+// support multiple pointer events.
+btnShoot.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  sendShoot();
+});
+btnShoot.addEventListener('pointerdown', (e) => {
+  // pointerdown covers mouse/touch/pen; preventDefault to avoid focus change
+  e.preventDefault();
+  sendShoot();
+});
+btnShoot.addEventListener('click', (e) => {
+  // fallback for environments where click is preferred
+  e.preventDefault();
+  sendShoot();
+});
 btnShoot.addEventListener('touchstart', (event) => {
   event.preventDefault();
   sendShoot();
