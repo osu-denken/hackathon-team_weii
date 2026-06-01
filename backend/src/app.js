@@ -12,6 +12,11 @@ app.use('/client', express.static('../smartphone'));
 app.use('/viewer', express.static('../frontend'));
 app.use('/asset', express.static('../asset'));
 
+app.get('/play', (req, res) => {
+  res.sendFile(__dirname + '/frontend/play.html');
+});
+
+
 const stage = new Stage();
 const socketToPlayerId = new Map();
 let viewer = null; // モニター用のWebSocket接続
