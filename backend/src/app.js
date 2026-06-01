@@ -54,7 +54,7 @@ const PREFERRED_INTERFACE_PATTERNS = [
 
 // const FRONTEND_URL = null; // nullの場合は自動に
 // const FRONTEND_URL = 'https://hackathon-team-weii.fly.dev/client/';
-const FRONTEND_URL = "https://obtundent-britteny-handily.ngrok-free.dev/viewer/";
+const FRONTEND_URL = "https://obtundent-britteny-handily.ngrok-free.dev/client/";
 
 const getLanIPv4 = () => {
   const interfaces = os.networkInterfaces();
