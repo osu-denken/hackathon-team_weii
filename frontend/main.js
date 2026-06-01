@@ -193,7 +193,7 @@ const loadClientUrl = async () => {
 loadClientUrl().then(setQrOverlay);
 
 const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const wsUrl = `${wsProtocol}://${window.location.hostname}:3001`;
+const wsUrl = `${wsProtocol}://${window.location.host}`;
 const socket = new WebSocket(wsUrl);
 
 const setConnected = (connected) => {
