@@ -35,9 +35,8 @@ body {
   gap: 16px;
   align-items: center;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(2, 6, 23, 0.72);
-  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: #071022; /* flat header */
 }
 
 .play-title {
@@ -79,10 +78,9 @@ body {
 .viewer-panel,
 .control-panel {
   min-height: 0;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(2, 6, 23, 0.64);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #041026; /* flat panel */
   overflow: hidden;
 }
 
@@ -121,9 +119,9 @@ body {
   display: grid;
   gap: 10px;
   padding: 14px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 6px;
+  background: #071022;
+  border: 1px solid rgba(148, 163, 184, 0.06);
 }
 
 .status-list {
@@ -152,32 +150,23 @@ body {
 .action-button {
   appearance: none;
   border: 0;
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 6px;
+  padding: 12px 14px;
   font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: #f8fafc;
-  background: linear-gradient(180deg, #0f172a, #1e293b);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  background: #0b1220; /* flat button */
+  border: 1px solid rgba(148, 163, 184, 0.06);
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
-}
-
-.action-button:hover {
-  transform: translateY(-1px);
-}
-
-.action-button:active {
-  transform: translateY(1px) scale(0.99);
 }
 
 .action-button.primary {
-  background: linear-gradient(180deg, #0891b2, #0369a1);
+  background: #087b9a;
 }
 
 .action-button.danger {
-  background: linear-gradient(180deg, #dc2626, #991b1b);
+  background: #b02a2a;
 }
 
 .action-button:disabled {
@@ -190,9 +179,9 @@ body {
   display: grid;
   place-items: center;
   min-height: 118px;
-  border-radius: 16px;
-  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.88));
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 6px;
+  background: #061122;
+  border: 1px solid rgba(148, 163, 184, 0.06);
 }
 
 .item-box img {
@@ -248,13 +237,6 @@ body {
   border: 1px solid rgba(148, 163, 184, 0.16);
   color: #f8fafc;
   font-weight: 700;
-}
-
-.footer-note {
-  margin-top: auto;
-  font-size: 0.84rem;
-  line-height: 1.55;
-  color: #94a3b8;
 }
 
 @media (max-width: 960px) {

@@ -10,7 +10,8 @@
     <div class="play-shell">
       <main class="play-main">
         <section class="viewer-panel" aria-label="viewer">
-          <iframe src="/viewer/" title="viewer"></iframe>
+          <iframe src="/viewer/" title="viewer" tabindex="-1"></iframe>
+          <div class="iframe-block" aria-hidden="true"></div>
         </section>
 
         <aside class="control-panel" aria-label="controls">
@@ -42,9 +43,6 @@
               <div class="key-row"><span><span class="key">D</span> / <span class="key">→</span></span><span>move right</span></div>
               <div class="key-row"><span><span class="key">Space</span></span><span>shoot</span></div>
               <div class="key-row"><span><span class="key">E</span> / <span class="key">Enter</span></span><span>use item</span></div>
-            </div>
-            <div class="footer-note">
-              viewer は別タブではなくこのページ内に埋め込まれています。JOIN を押すと操作が有効になります。
             </div>
           </section>
         </aside>
