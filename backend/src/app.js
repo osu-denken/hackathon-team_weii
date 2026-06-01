@@ -8,14 +8,11 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // clientとviewerも同じサーバーでホストする
-app.use('/client', express.static('../smartphone'));
-app.use('/viewer', express.static('../frontend'));
-app.use('/asset', express.static('../asset'));
+app.use('/client', express.static('../smartphone')); // スマートフォン操作用
+app.use('/viewer', express.static('../frontend')); // モニター表示用
 
-app.get('/play', (req, res) => {
-  res.sendFile(__dirname + '/frontend/play.html');
-});
-
+app.use('/play', express.static('../frontend/play')); // キーボード操作ができる
+app.use('/asset', express.static('../asset')); // アイテムの画像などの静的ファイル
 
 const stage = new Stage();
 const socketToPlayerId = new Map();
