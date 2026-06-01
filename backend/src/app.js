@@ -51,6 +51,9 @@ const PREFERRED_INTERFACE_PATTERNS = [
   /local area connection/i,
 ];
 
+const FRONTEND_URL = null; // nullの場合は自動に
+// const FRONTEND_URL = 'https://hackathon-team-weii.fly.dev/client/';
+
 const getLanIPv4 = () => {
   const interfaces = os.networkInterfaces();
   let fallbackPrivateIp = null;
@@ -91,6 +94,8 @@ const getLanIPv4 = () => {
 };
 
 const buildClientUrl = (req) => {
+  if (FRONTEND_URL) return FRONTEND_URL;
+
   const hostHeader = req.headers.host || `localhost:${PORT}`;
   const hostName = req.hostname || hostHeader.split(':')[0];
   const portMatch = hostHeader.match(/:(\d+)$/);
@@ -99,9 +104,7 @@ const buildClientUrl = (req) => {
 
   if (LOCALHOST_HOSTNAMES.has(hostName)) {
     const lanIp = getLanIPv4();
-    if (lanIp) {
-      return `${protocol}://${lanIp}${port}/client/`;
-    }
+    if (lanIp) return `${protocol}://${lanIp}${port}/client/`;
   }
 
   return `${protocol}://${hostHeader}/client/`;
