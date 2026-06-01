@@ -26,12 +26,14 @@ let connected = false;
 let currentHeldItem = null;
 let moveTimer = null;
 let lastMoveSendAt = 0;
+let shootTimer = null;
 const activeKeys = new Set();
 
 // Movement tuning: smaller step, higher frequency for smoother long-press movement
 const MOVE_INTERVAL_MS = 30; // tick every 30ms (~33fps)
 const MOVE_STEP = 0.06; // smaller per-tick delta for smooth motion
 const THROTTLE_MS = 20; // allow more frequent sends
+const SHOOT_INTERVAL_MS = 120; // auto-fire interval when holding Space (ms)
 
 const setConnectionState = (value) => {
   connected = value;
@@ -239,6 +241,19 @@ btnShoot.addEventListener('touchstart', (event) => {
 
 btnUseItem.addEventListener('click', sendUseItem);
 
+const startShootingLoop = () => {
+  if (shootTimer) return;
+  // send immediately and then repeat
+  sendShoot();
+  shootTimer = window.setInterval(() => sendShoot(), SHOOT_INTERVAL_MS);
+};
+
+const stopShootingLoop = () => {
+  if (!shootTimer) return;
+  window.clearInterval(shootTimer);
+  shootTimer = null;
+};
+
 const isTypingTarget = (element) => {
   if (!element) {
     return false;
@@ -268,7 +283,8 @@ window.addEventListener('keydown', (event) => {
   }
 
   if (event.code === 'Space') {
-    sendShoot();
+    // start auto-fire while Space is held so holding Space + movement works reliably
+    startShootingLoop();
     return;
   }
 
@@ -283,6 +299,9 @@ window.addEventListener('keyup', (event) => {
     if (currentMoveDelta() === 0) {
       stopMovementLoop();
     }
+  }
+  if (event.code === 'Space') {
+    stopShootingLoop();
   }
 });
 

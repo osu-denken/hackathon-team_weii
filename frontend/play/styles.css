@@ -17,6 +17,7 @@ body {
 
 body {
   min-height: 100vh;
+  padding: 16px;
   overflow: hidden;
   background-color: #151515; /* smartphone background */
   color: #ffffff;
@@ -132,8 +133,6 @@ body {
   display: grid;
   place-items: center;
   min-height: 118px;
-  background-color: #1a1a1a;
-  border: 1px solid #333333;
 }
 
 .item-box img {
