@@ -4,7 +4,6 @@ const clientId = createId();
 const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 const wsUrl = `${wsProtocol}://${window.location.hostname}:3001`;
 
-const connectionState = document.getElementById('connection-state');
 const playerState = document.getElementById('player-state');
 const playerBadge = document.getElementById('player-badge');
 const itemState = document.getElementById('item-state');
@@ -29,15 +28,13 @@ let moveTimer = null;
 let lastMoveSendAt = 0;
 const activeKeys = new Set();
 
-const MOVE_INTERVAL_MS = 80;
-const MOVE_STEP = 0.85;
-const THROTTLE_MS = 100;
+// Movement tuning: smaller step, higher frequency for smoother long-press movement
+const MOVE_INTERVAL_MS = 30; // tick every 30ms (~33fps)
+const MOVE_STEP = 0.06; // smaller per-tick delta for smooth motion
+const THROTTLE_MS = 20; // allow more frequent sends
 
 const setConnectionState = (value) => {
   connected = value;
-  if (connectionState) {
-    connectionState.textContent = value ? 'connected' : 'disconnected';
-  }
   if (btnJoin) {
     btnJoin.textContent = value ? 'LEAVE' : 'JOIN';
     btnJoin.classList.toggle('danger', value);
@@ -146,6 +143,8 @@ const startMovementLoop = () => {
     return;
   }
 
+  // send initial movement immediately, then schedule repeated updates
+  updateMovement();
   moveTimer = window.setInterval(updateMovement, MOVE_INTERVAL_MS);
 };
 
