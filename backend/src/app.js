@@ -4,10 +4,10 @@ import https from 'https';
 import WebSocket, { WebSocketServer } from 'ws';
 import { Stage } from './Stage.js';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
 const app = express();
-
 const opt = {
   key: fs.readFileSync('../shared/server-key.pem'),
   cert: fs.readFileSync('../shared/server.pem')
@@ -23,6 +23,93 @@ app.use('/viewer', express.static('../frontend')); // モニター表示用
 
 app.use('/play', express.static('../frontend/play')); // キーボード操作ができる
 app.use('/asset', express.static('../asset')); // アイテムの画像などの静的ファイル
+
+const LOCALHOST_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
+const VIRTUAL_INTERFACE_PATTERNS = [
+  /virtual/i,
+  /vmware/i,
+  /vbox/i,
+  /virtualbox/i,
+  /hyper-?v/i,
+  /vethernet/i,
+  /docker/i,
+  /wsl/i,
+  /loopback/i,
+  /hamachi/i,
+  /tunnel/i,
+  /tap/i,
+  /tailscale/i,
+  /wireguard/i,
+  /vpn/i,
+];
+const PREFERRED_INTERFACE_PATTERNS = [
+  /wi-?fi/i,
+  /wlan/i,
+  /ethernet/i,
+  /^en/i,
+  /^eth/i,
+  /local area connection/i,
+];
+
+const getLanIPv4 = () => {
+  const interfaces = os.networkInterfaces();
+  let fallbackPrivateIp = null;
+
+  const isVirtualInterface = (name) => VIRTUAL_INTERFACE_PATTERNS.some((pattern) => pattern.test(name));
+  const isPreferredInterface = (name) => PREFERRED_INTERFACE_PATTERNS.some((pattern) => pattern.test(name));
+
+  for (const [name, entries] of Object.entries(interfaces)) {
+    if (!entries) continue;
+
+    for (const address of entries) {
+      if (address.family !== 'IPv4' || address.internal) {
+        continue;
+      }
+
+      const [first, second] = address.address.split('.').map(Number);
+      const isPrivateIPv4 =
+        first === 10 ||
+        (first === 172 && second >= 16 && second <= 31) ||
+        (first === 192 && second === 168);
+      const isLinkLocalIPv4 = first === 169 && second === 254;
+
+      if (isLinkLocalIPv4 || isVirtualInterface(name)) {
+        continue;
+      }
+
+      if (isPrivateIPv4 && isPreferredInterface(name)) {
+        return address.address;
+      }
+
+      if (isPrivateIPv4 && !fallbackPrivateIp) {
+        fallbackPrivateIp = address.address;
+      }
+    }
+  }
+
+  return fallbackPrivateIp;
+};
+
+const buildClientUrl = (req) => {
+  const hostHeader = req.headers.host || `localhost:${PORT}`;
+  const hostName = req.hostname || hostHeader.split(':')[0];
+  const portMatch = hostHeader.match(/:(\d+)$/);
+  const port = portMatch ? `:${portMatch[1]}` : '';
+  const protocol = req.protocol || 'https';
+
+  if (LOCALHOST_HOSTNAMES.has(hostName)) {
+    const lanIp = getLanIPv4();
+    if (lanIp) {
+      return `${protocol}://${lanIp}${port}/client/`;
+    }
+  }
+
+  return `${protocol}://${hostHeader}/client/`;
+};
+
+app.get('/api/client-url', (req, res) => {
+  res.json({ clientUrl: buildClientUrl(req) });
+});
 
 const stage = new Stage();
 const socketToPlayerId = new Map();

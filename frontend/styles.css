@@ -140,8 +140,8 @@ canvas { z-index: 0; }
   position: absolute;
   left: 12px;
   top: 12px;
-  width: 80px;
-  height: 80px;
+  width: 160px;
+  height: 160px;
   opacity: 0.72;
   border-radius: 8px;
   overflow: hidden;
