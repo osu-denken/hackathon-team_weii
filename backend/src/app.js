@@ -1,10 +1,20 @@
 import express from 'express';
 import http from 'http';
+import https from 'https';
 import WebSocket, { WebSocketServer } from 'ws';
 import { Stage } from './Stage.js';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
-const server = http.createServer(app);
+
+const opt = {
+  key: fs.readFileSync('../shared/server-key.pem'),
+  cert: fs.readFileSync('../shared/server.pem')
+};
+
+// const server = http.createServer(app);
+const server = https.createServer(opt, app);
 const wss = new WebSocketServer({ server });
 
 // clientとviewerも同じサーバーでホストする
