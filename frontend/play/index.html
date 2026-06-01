@@ -1,53 +1,53 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Desktop Play of "phone ∧ shoot"</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div class="play-shell">
-      <main class="play-main">
-        <section class="viewer-panel" aria-label="viewer">
-          <iframe src="/viewer/" title="viewer" tabindex="-1"></iframe>
-          <div class="iframe-block" aria-hidden="true"></div>
-        </section>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Desktop Play of "phone ∧ shoot"</title>
+		<link rel="stylesheet" href="./styles.css" />
+	</head>
+	<body>
+		<div class="play-shell">
+			<main class="play-main">
+				<section class="viewer-panel" aria-label="viewer">
+					<iframe src="/viewer/" title="viewer" tabindex="-1"></iframe>
+					<div class="iframe-block" aria-hidden="true"></div>
+				</section>
 
-        <aside class="control-panel" aria-label="controls">
-          <section class="control-card">
-            <div class="status-list">
-              <div class="status-row"><span>Player</span><strong id="player-state">-</strong></div>
-              <div class="status-row"><span>Badge</span><strong id="player-badge">-</strong></div>
-              <div class="status-row"><span>Held Item</span><strong id="item-state">none</strong></div>
-              <div class="status-row"><span>Detail</span><strong id="player-detail">waiting...</strong></div>
-            </div>
-          </section>
+				<aside class="control-panel" aria-label="controls">
+					<section class="control-card">
+						<div class="status-list">
+							<div class="status-row"><span>Player</span><strong id="player-state">-</strong></div>
+							<div class="status-row"><span>Badge</span><strong id="player-badge">-</strong></div>
+							<div class="status-row"><span>Held Item</span><strong id="item-state">none</strong></div>
+							<div class="status-row"><span>Detail</span><strong id="player-detail">waiting...</strong></div>
+						</div>
+					</section>
 
-          <section class="control-card">
-            <div class="item-box">
-              <img id="item-icon" src="/asset/images/empty.png" alt="item" />
-            </div>
-          </section>
+					<section class="control-card">
+						<div class="item-box">
+							<img id="item-icon" src="/asset/images/empty.png" alt="item" />
+						</div>
+					</section>
 
-          <section class="button-row">
-            <button id="btn-join" class="action-button primary" type="button">JOIN</button>
-            <button id="btn-shoot" class="action-button" type="button" disabled>SHOOT</button>
-            <button id="btn-use-item" class="action-button" type="button" disabled>USE ITEM</button>
-          </section>
+					<section class="button-row">
+						<button id="btn-join" class="action-button primary" type="button">JOIN</button>
+						<button id="btn-shoot" class="action-button" type="button" disabled>SHOOT</button>
+						<button id="btn-use-item" class="action-button" type="button" disabled>USE ITEM</button>
+					</section>
 
-          <section class="controls-help">
-            <h2>Key Bindings</h2>
-            <div class="key-grid">
-              <div class="key-row"><span><span class="key">A</span> / <span class="key">←</span></span><span>move left</span></div>
-              <div class="key-row"><span><span class="key">D</span> / <span class="key">→</span></span><span>move right</span></div>
-              <div class="key-row"><span><span class="key">Space</span></span><span>shoot</span></div>
-              <div class="key-row"><span><span class="key">E</span> / <span class="key">Enter</span></span><span>use item</span></div>
-            </div>
-          </section>
-        </aside>
-      </main>
-    </div>
-    <script src="./main.js"></script>
-  </body>
+					<section class="controls-help">
+						<h2>Key Bindings</h2>
+						<div class="key-grid">
+							<div class="key-row"><span><span class="key">A</span> / <span class="key">←</span></span><span>move left</span></div>
+							<div class="key-row"><span><span class="key">D</span> / <span class="key">→</span></span><span>move right</span></div>
+							<div class="key-row"><span><span class="key">Space</span></span><span>shoot</span></div>
+							<div class="key-row"><span><span class="key">E</span> / <span class="key">Enter</span></span><span>use item</span></div>
+						</div>
+					</section>
+				</aside>
+			</main>
+		</div>
+		<script src="./main.js"></script>
+	</body>
 </html>
