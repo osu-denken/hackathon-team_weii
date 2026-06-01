@@ -16,15 +16,16 @@ app.use('/asset', express.static('../asset')); // アイテムの画像などの
 
 const stage = new Stage();
 const socketToPlayerId = new Map();
-let viewer = null; // モニター用のWebSocket接続
+const viewers = new Set(); // モニター用のWebSocket接続
 
 const TICK_MS = 40; // ゲームの状態を更新してViewer(フロントエンド)に送る間隔 (40ms = 25fps)
 
 const sendToViewer = (data) => {
   const payload = JSON.stringify(data);
-  if (viewer && viewer.readyState === WebSocket.OPEN) {
-    viewer.send(payload);
-  }
+  viewers.forEach((ws) => {
+    if (ws.readyState === WebSocket.OPEN)
+      ws.send(payload);
+  });
 };
 
 // ゲームの状態を更新してViewer(フロントエンド)に送る
@@ -38,14 +39,12 @@ const sendStateToPlayers = () => {
   const now = Date.now();
   socketToPlayerId.forEach((id, ws) => {
     const player = stage.getPlayer(id);
-    if (!player) {
-      return;
-    }
+    if (!player) return;
 
     const payload = stage.buildPlayerState(player, now);
-    if (ws.readyState === WebSocket.OPEN) {
+    if (ws.readyState === WebSocket.OPEN)
       ws.send(JSON.stringify(payload));
-    }
+
   });
 };
 
@@ -119,7 +118,9 @@ const parseMsg = (ws, raw) => {
       handleJoin(ws, msg);
       break;
     case 'viewer':
-      viewer = ws;
+      viewers.add(ws);
+      if (ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify(stage.buildViewerPayload(Date.now())));
       break;
     case 'leave':
       handleLeave(ws);
@@ -148,9 +149,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    if (viewer === ws) {
-      viewer = null;
-    }
+    viewers.delete(ws);
     handleLeave(ws);
   });
 });
