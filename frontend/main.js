@@ -40,9 +40,18 @@ const itemSpritePaths = {
   triple_shot: '/asset/images/triple_shot.png',
 };
 
+const guideSpritePaths = {
+  phone: '/asset/images/phone.png',
+  arrow: '/asset/images/arrow.png',
+};
+
 const spriteCache = new Map();
 const spriteColors = new Map();
 const itemSpriteCache = new Map();
+const guideSpriteCache = new Map();
+
+const IDLE_GUIDE_DELAY_MS = 3500;
+const IDLE_GUIDE_FADE_MS = 700;
 
 const sampleSpriteColor = (img) => {
   if (!img.naturalWidth || !img.naturalHeight) {
@@ -78,6 +87,12 @@ const loadSprites = () => {
     const img = new Image();
     img.src = src;
     itemSpriteCache.set(key, img);
+  });
+
+  Object.entries(guideSpritePaths).forEach(([key, src]) => {
+    const img = new Image();
+    img.src = src;
+    guideSpriteCache.set(key, img);
   });
 };
 
@@ -353,6 +368,9 @@ const drawPlayer = (player, index, width, height) => {
   const sampledColor = spriteColors.get(number);
   const color = sampledColor || fallbackColor; // キャラクターごとの色をスプライトからサンプリングして使用。失敗した場合はフォールバックカラーを使用
   const spriteSize = 70;
+  const lastControlAt = player.lastControlAt ?? 0;
+  const idleMs = Date.now() - lastControlAt;
+  const guideVisible = idleMs >= IDLE_GUIDE_DELAY_MS;
 
   if (sprite && sprite.complete) {
     ctx.save();
@@ -392,6 +410,53 @@ const drawPlayer = (player, index, width, height) => {
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 1;
   ctx.strokeRect(x - barWidth / 2, barY, barWidth, barHeight);
+
+  if (guideVisible) {
+    const guideFade = Math.min(1, (idleMs - IDLE_GUIDE_DELAY_MS) / IDLE_GUIDE_FADE_MS);
+    const guideAlpha = Math.max(0, Math.min(1, guideFade));
+    const bob = Math.sin(Date.now() / 240 + index) * 5;
+    const guideBaseY = barY - 34 + bob;
+    const phone = guideSpriteCache.get('phone');
+    const arrow = guideSpriteCache.get('arrow');
+    const phoneWidth = 48;
+    const phoneHeight = 48;
+    const arrowWidth = 18;
+    const arrowHeight = 18;
+
+    ctx.save();
+    ctx.globalAlpha = guideAlpha;
+
+    let rotate = Math.sin(Date.now() / 260 + index) * 0.12;
+
+    if (arrow && arrow.complete) {
+      ctx.save();
+      ctx.translate(x - 38, guideBaseY);
+      ctx.scale(-1, 1);
+      ctx.rotate(rotate);
+      ctx.drawImage(arrow, -arrowWidth / 2, -arrowHeight / 2, arrowWidth, arrowHeight);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(x + 38, guideBaseY);
+      ctx.scale(1, -1);
+      ctx.rotate(rotate);
+      ctx.drawImage(arrow, -arrowWidth / 2, -arrowHeight / 2, arrowWidth, arrowHeight);
+      ctx.restore();
+    }
+
+    if (phone && phone.complete) {
+      ctx.save();
+      ctx.translate(x, guideBaseY + 2);
+      ctx.rotate(rotate);
+      ctx.drawImage(phone, -phoneWidth / 2, -phoneHeight / 2, phoneWidth, phoneHeight);
+      ctx.restore();
+    }
+
+    ctx.fillStyle = '#d9f4ff';
+    ctx.font = '700 11px sans-serif';
+    ctx.fillText('スマホを傾けて移動', x, guideBaseY - 28);
+    ctx.restore();
+  }
 };
 
 const draw = () => {

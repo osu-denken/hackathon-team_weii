@@ -69,7 +69,7 @@ class Stage {
     return this.players.get(id) || null;
   }
 
-  movePlayer(id, delta) {
+  movePlayer(id, delta, now = Date.now()) {
     const player = this.getPlayer(id);
     if (!player) {
       return;
@@ -77,6 +77,9 @@ class Stage {
 
     const moveDelta = clamp(Number(delta) || 0, -1, 1);
     player.move(moveDelta, X_MIN, X_MAX);
+    if (moveDelta !== 0) {
+      player.lastControlAt = now;
+    }
   }
 
   shootPlayer(id, now) {
@@ -116,16 +119,19 @@ class Stage {
 
     if (item.type === 'score_up') {
       player.score += SCORE_UP_AMOUNT;
+      player.lastControlAt = now;
       return;
     }
 
     if (item.type === 'shield') {
       player.applyShield(now, SHIELD_DURATION_MS);
+      player.lastControlAt = now;
       return;
     }
 
     if (item.type === 'triple_shot') {
       player.applyTripleShot(now, TRIPLE_SHOT_DURATION_MS);
+      player.lastControlAt = now;
       return;
     }
   }
@@ -176,6 +182,7 @@ class Stage {
         maxHp: player.maxHp,
         score: player.score,
         attackPower: player.attackPower,
+        lastControlAt: player.lastControlAt,
         powerRemainingMs: Math.max(0, player.powerUntil - now),
         shieldRemainingMs: Math.max(0, player.shieldUntil - now),
         tripleShotRemainingMs: Math.max(0, player.tripleShotUntil - now),

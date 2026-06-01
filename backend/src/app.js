@@ -80,7 +80,7 @@ const handleMove = (ws, msg) => {
   const id = socketToPlayerId.get(ws);
   if (!id) return;
 
-  stage.movePlayer(id, msg.delta);
+  stage.movePlayer(id, msg.delta, Date.now());
 };
 
 const handleShoot = (ws) => {

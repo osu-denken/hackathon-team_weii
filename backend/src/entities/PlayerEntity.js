@@ -13,6 +13,7 @@ class PlayerEntity extends LivingEntity {
     this.shieldUntil = 0;
     this.tripleShotUntil = 0;
     this.lastShotAt = 0;
+    this.lastControlAt = Date.now();
     this.number = number;
     this.color = color;
     this.heldItem = null;
@@ -69,6 +70,7 @@ class PlayerEntity extends LivingEntity {
 
   markShot(now) {
     this.lastShotAt = now;
+    this.lastControlAt = now;
   }
 
   setHeldItem(item) {
@@ -99,6 +101,7 @@ class PlayerEntity extends LivingEntity {
       score: this.score,
       number: this.number,
       color: this.color,
+      lastControlAt: this.lastControlAt,
     };
   }
 }
