@@ -78,10 +78,10 @@ function connectWebSocket() {
         ws.send(JSON.stringify(joinData));
     };
 
-    ws.onmessage = (ev) => {
+    ws.onmessage = (e) => {
         try {
-            const data = JSON.parse(ev.data);
-            if (data && data.player) {
+            const data = JSON.parse(e.data);
+            if (data && data.type === 'joinAck' && data.player) { // joinAck
                 updatePlayerInfo(data.player);
             }
         } catch (err) {
@@ -94,8 +94,8 @@ function connectWebSocket() {
         updatePlayerInfo(null);
     };
 
-    ws.onerror = (error) => {
-        console.error("WebSocket Error:", error);
+    ws.onerror = (err) => {
+        console.error("WebSocket Error:", err);
         alert("WebSocket接続エラー。サーバーが起動しているか確認してください。");
         updateUI(false);
     };
@@ -113,6 +113,7 @@ function updatePlayerInfo(player) {
         }
         return;
     }
+
     playerInfoContainer.style.visibility = 'visible';
     const num = player.number || player.id || '';
     const color = player.color || '#888';
@@ -143,17 +144,17 @@ if (btnUseItem) {
 }
 
 // --- 4. 移動量検知と送信 (move) ---
-function handleOrientation(event) {
+function handleOrientation(e) {
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
-    if (event.beta == null) return;
+    if (e.beta == null) return;
 
     if (neutralBeta === null) {
-        neutralBeta = event.beta;
+        neutralBeta = e.beta;
         return;
     }
 
-    let steer = event.beta - neutralBeta;
+    let steer = e.beta - neutralBeta;
 
     const DEAD_ZONE = 5;
 
@@ -167,7 +168,7 @@ function handleOrientation(event) {
 
     const delta = Math.round((steer / MAX_TILT) * 1000) / 1000;
 
-    sendMove(delta, 0, event.beta, event.gamma);
+    sendMove(delta, 0, e.beta, e.gamma);
 }
 
 function sendMove(delta, angle, beta, gamma) {

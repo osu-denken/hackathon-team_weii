@@ -183,10 +183,10 @@ socket.addEventListener('error', () => {
   setConnected(false);
 });
 
-socket.addEventListener('message', (event) => {
+socket.addEventListener('message', (e) => {
   let payload;
   try {
-    payload = JSON.parse(event.data);
+    payload = JSON.parse(e.data);
   } catch (error) {
     return;
   }
