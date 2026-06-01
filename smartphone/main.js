@@ -83,6 +83,8 @@ function connectWebSocket() {
             const data = JSON.parse(e.data);
             if (data && data.type === 'joinAck' && data.player) { // joinAck
                 updatePlayerInfo(data.player);
+            } else if (data && data.type === 'playerState' && data.player) {
+                updatePlayerInfo(data.player);
             }
         } catch (err) {
             console.error('ws.onmessage parse error', err);
