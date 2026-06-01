@@ -81,9 +81,7 @@ function connectWebSocket() {
     ws.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
-            if (data && data.type === 'joinAck' && data.player) { // joinAck
-                updatePlayerInfo(data.player);
-            } else if (data && data.type === 'playerState' && data.player) {
+            if (data && (data.type === 'joinAck' || data.type === 'playerState') && data.player) { // joinAck or playerState
                 updatePlayerInfo(data.player);
             }
         } catch (err) {
