@@ -288,6 +288,7 @@ class Stage {
     this.updateBullets();
     this.updateItem();
     this.handleBulletCollisions();
+    this.handleEnemyBulletCollisions(now);
     this.handleEnemyTouches(now);
     this.handleItemPickup();
 
@@ -526,6 +527,7 @@ class Stage {
           vx,
           vy: -BulletEntity.SPEED,
           ownerId: null,
+          ownerType: 'enemy',
           damage: enemy.attack,
         });
         this.bullets.set(bullet.id, bullet);
@@ -561,6 +563,10 @@ class Stage {
     const kills = [];
 
     this.bullets.forEach((bullet) => {
+      if (bullet.ownerType !== 'player') {
+        return;
+      }
+
       this.enemies.forEach((enemy) => {
         const dx = Math.abs(bullet.x - enemy.x);
         const dy = Math.abs(bullet.y - enemy.y);
@@ -590,6 +596,35 @@ class Stage {
         this.spawnItem(kill.enemy.x, kill.enemy.y);
       }
     });
+  }
+
+  handleEnemyBulletCollisions(now) {
+    const bulletsToRemove = new Set();
+
+    this.bullets.forEach((bullet) => {
+      if (bullet.ownerType !== 'enemy') {
+        return;
+      }
+
+      this.players.forEach((player) => {
+        if (player.isDead()) {
+          return;
+        }
+
+        const dx = Math.abs(bullet.x - player.x);
+        const dy = Math.abs(bullet.y - player.y);
+        if (dx <= BULLET_HIT_RANGE && dy <= BULLET_HIT_RANGE) {
+          bulletsToRemove.add(bullet.id);
+          if (player.hasShield(now)) {
+            player.consumeShield();
+          } else {
+            player.damage(bullet.damage);
+          }
+        }
+      });
+    });
+
+    bulletsToRemove.forEach((id) => this.bullets.delete(id));
   }
 
   handleEnemyTouches(now) {
@@ -675,6 +710,7 @@ class Stage {
       vx: 0,
       vy: BulletEntity.SPEED,
       ownerId: player.id,
+      ownerType: 'player',
       damage,
     });
     this.bullets.set(bullet.id, bullet);
@@ -689,6 +725,7 @@ class Stage {
         vx,
         vy: BulletEntity.SPEED,
         ownerId: player.id,
+        ownerType: 'player',
         damage,
       });
       this.bullets.set(bullet.id, bullet);
