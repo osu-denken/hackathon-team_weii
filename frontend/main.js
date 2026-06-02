@@ -719,8 +719,6 @@ const draw = () => {
     const y = toCanvasY(bullet.y, height);
     ctx.save();
     const isEnemyBullet = bullet.ownerType === 'enemy';
-    ctx.shadowColor = isEnemyBullet ? 'rgba(248, 113, 113, 0.75)' : '#22d3ee';
-    ctx.shadowBlur = 16;
     if (isEnemyBullet && enemyBulletSprite.complete && enemyBulletSprite.naturalWidth > 0) {
       const drawWidth = 16;
       const drawHeight = 24;
