@@ -495,8 +495,6 @@ const drawEnemy = (enemy, width, height) => {
   const border = isBig ? '#fbbf24' : '#ffffff';
 
   ctx.save();
-  ctx.shadowColor = color;
-  ctx.shadowBlur = isBig ? 26 : 16;
   ctx.fillStyle = color;
   ctx.beginPath();
   const points = isBig ? 6 : 4;
