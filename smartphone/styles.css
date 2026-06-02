@@ -111,6 +111,27 @@ body {
     transition: opacity 0.2s ease;
 }
 
+/* Difficulty buttons shown on smartphone controller while waiting to start */
+.difficulty-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.difficulty-btn {
+    flex: 1;
+    padding: 10px 8px;
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    color: #e6e6e6;
+    font-weight: 700;
+    cursor: pointer;
+}
+.difficulty-btn.active {
+    background-color: #ffd166;
+    color: #071013;
+    border-color: #f4c542;
+}
+
 /* 右側: 射撃ボタンのエリア */
 .controller-area {
     flex: 1;

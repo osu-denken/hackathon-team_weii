@@ -17,6 +17,10 @@ const playerBadge = document.getElementById('player-badge');
 const playerNumberSpan = document.getElementById('player-number');
 const playerNumberText = document.getElementById('player-number-text');
 let _currentHeldItem = null;
+const difficultyControls = document.getElementById('difficulty-controls');
+const difficultyNormalBtn = document.getElementById('difficulty-normal');
+const difficultyHardBtn = document.getElementById('difficulty-hard');
+let _localPlayerNumber = null;
 
 let neutralBeta = null; // 傾きのニュートラル位置（初期値はnullで、最初のセンサーイベントで設定）
 
@@ -81,8 +85,9 @@ function connectWebSocket() {
     ws.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
-            if (data && (data.type === 'joinAck' || data.type === 'playerState') && data.player) { // joinAck or playerState
-                updatePlayerInfo(data.player);
+            if (data && (data.type === 'joinAck' || data.type === 'playerState')) { // joinAck or playerState
+                if (data.player) updatePlayerInfo(data.player);
+                if (data.game) updateGameInfo(data.game);
             }
         } catch (err) {
             console.error('ws.onmessage parse error', err);
@@ -111,6 +116,8 @@ function updatePlayerInfo(player) {
             itemIcon.src = itemIconMap.empty;
             itemIcon.style.opacity = 0.3;
         }
+        _localPlayerNumber = null;
+        if (difficultyControls) difficultyControls.style.display = 'none';
         return;
     }
 
@@ -122,6 +129,7 @@ function updatePlayerInfo(player) {
     if (playerNumberSpan) playerNumberSpan.textContent = num;
     if (playerNumberText) playerNumberText.textContent = num;
     if (playerBadge) playerBadge.style.backgroundColor = color;
+    _localPlayerNumber = player.number || null;
     
     if (btnUseItem) btnUseItem.disabled = !_currentHeldItem;
     if (itemIcon) {
@@ -240,3 +248,41 @@ window.addEventListener('beforeunload', () => {
         ws.close();
     }
 });
+
+// --- Difficulty UI helpers ---
+function showDifficultyControls(visible) {
+    if (!difficultyControls) return;
+    difficultyControls.style.display = visible ? 'flex' : 'none';
+}
+
+function setDifficultyUI(difficulty) {
+    if (difficultyNormalBtn) difficultyNormalBtn.classList.toggle('active', difficulty === 'normal');
+    if (difficultyHardBtn) difficultyHardBtn.classList.toggle('active', difficulty === 'hard');
+}
+
+function updateGameInfo(game) {
+    const waiting = game && game.waitingForStart;
+    const is1p = _localPlayerNumber === 1;
+    showDifficultyControls(Boolean(waiting && is1p));
+    if (game && typeof game.difficulty === 'string') {
+        setDifficultyUI(game.difficulty);
+    }
+}
+
+if (difficultyNormalBtn) {
+    difficultyNormalBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({ type: 'setDifficulty', difficulty: 'normal' }));
+        setDifficultyUI('normal');
+    });
+}
+
+if (difficultyHardBtn) {
+    difficultyHardBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({ type: 'setDifficulty', difficulty: 'hard' }));
+        setDifficultyUI('hard');
+    });
+}
