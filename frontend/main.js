@@ -210,7 +210,7 @@ const renderPlayerSummary = () => {
 
     bottom.innerHTML = `
       <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
-        <div class="pcb-icon" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:160%;background-position:center 10%;background-repeat:no-repeat;border:2px solid rgba(255,255,255,0.2);"></div>
+        <div class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:175%;background-position:center 15%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid rgba(255,255,255,0.2);"></div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
           <div class="pcb-name" style="font-weight:700;transition:color 0.2s;"></div>
           <div class="pcb-status" style="font-size:12px;color:#cfeffd"></div>
