@@ -83,9 +83,8 @@ const setPlayerInfo = (player) => {
 };
 
 const send = (payload) => {
-  if (!socket || socket.readyState !== WebSocket.OPEN) {
+  if (!socket || socket.readyState !== WebSocket.OPEN) 
     return;
-  }
 
   socket.send(JSON.stringify(payload));
 };
@@ -103,18 +102,14 @@ const sendShoot = () => {
 };
 
 const sendUseItem = () => {
-  if (!currentHeldItem) {
-    return;
-  }
+  if (!currentHeldItem) return;
 
   send({ type: 'useItem' });
 };
 
 const sendMove = (delta) => {
   const now = Date.now();
-  if (now - lastMoveSendAt < THROTTLE_MS) {
-    return;
-  }
+  if (now - lastMoveSendAt < THROTTLE_MS) return;
 
   send({ type: 'move', delta });
   lastMoveSendAt = now;

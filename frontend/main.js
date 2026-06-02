@@ -276,7 +276,7 @@ const updateGameUI = () => {
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
-  if (overlayStage) overlayStage.textContent = stageLabel || `Stage ${stage || 1}/3`;
+  if (overlayStage) overlayStage.textContent = stageLabel + '/3' || `Stage ${stage || 1}/3`;
   if (overlayPlayerCount) overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
   if (returnNoticeOverlay) {
     returnNoticeOverlay.classList.toggle('show', showReturnNotice);
@@ -451,6 +451,7 @@ const showStageTransition = (stage, stageLabel) => {
   if (stageTransitionTimeout) {
     clearTimeout(stageTransitionTimeout);
   }
+
   stageTransitionTimeout = setTimeout(() => {
     overlayStageTransition.classList.remove('show');
     stageTransitionTimeout = null;
