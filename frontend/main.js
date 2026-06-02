@@ -88,6 +88,7 @@ const guideSpritePaths = {
   arrow: '/asset/images/arrow.png',
 };
 const bulletSpritePath = '/asset/images/bullet.png';
+const enemyBulletSpritePath = '/asset/images/enemy_bullet.png';
 const stageBackgroundPaths = {
   2: '/asset/images/stage-second.png',
   3: '/asset/images/stage-final.png',
@@ -99,6 +100,7 @@ const itemSpriteCache = new Map();
 const guideSpriteCache = new Map();
 const stageBackgroundCache = new Map();
 const bulletSprite = new Image();
+const enemyBulletSprite = new Image();
 
 const IDLE_GUIDE_DELAY_MS = 3500;
 const IDLE_GUIDE_FADE_MS = 700;
@@ -152,6 +154,7 @@ const loadSprites = () => {
   });
 
   bulletSprite.src = bulletSpritePath;
+  enemyBulletSprite.src = enemyBulletSpritePath;
 };
 
 const formatTime = (ms) => {
@@ -165,7 +168,7 @@ const renderPlayerSummary = () => {
   overlayBottom.innerHTML = '';
 
   state.characters.forEach((player, index) => {
-    const color = player.color || ['#22d3ee', '#fbbf24', '#a78bfa', '#f472b6'][index] || '#38bdf8';
+    const color = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6'][index] || '#38bdf8';
     const hp = player.hp ?? 0;
     const maxHp = player.maxHp ?? 1;
     const score = player.score ?? 0;
@@ -215,7 +218,8 @@ const renderPlayerSummary = () => {
 
 const updateGameUI = () => {
   const {
-    totalScore,
+    stageScore,
+    totalPlayerScore,
     targetScore,
     timeRemainingMs,
     cleared,
@@ -230,7 +234,7 @@ const updateGameUI = () => {
     stage,
     stageLabel,
   } = state.game;
-  const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
+  const percent = targetScore > 0 ? Math.min(100, Math.round((stageScore / targetScore) * 100)) : 0;
   // overlay updates (no side panel elements)
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
@@ -246,7 +250,7 @@ const updateGameUI = () => {
   if (overlayClear) {
     if (cleared && !showTitle && !showReturnNotice && !waitingForStart) {
       overlayClear.classList.add('show');
-      if (overlayClearScore) overlayClearScore.textContent = `${totalScore} / ${targetScore}`;
+      if (overlayClearScore) overlayClearScore.textContent = `${stageScore} / ${targetScore}`;
       if (overlayClearTime) overlayClearTime.textContent = formatTime(timeRemainingMs);
     } else {
       overlayClear.classList.remove('show');
@@ -361,7 +365,8 @@ socket.addEventListener('message', (e) => {
     state.items = Array.isArray(payload.items) ? payload.items : [];
     state.game = payload.game
       ? {
-          totalScore: payload.game.totalScore ?? 0,
+          stageScore: payload.game.stageScore ?? 0,
+          totalPlayerScore: payload.game.totalPlayerScore ?? 0,
           targetScore: payload.game.targetScore ?? 100,
           timeLimitMs: payload.game.timeLimitMs ?? 0,
           timeRemainingMs: payload.game.timeRemainingMs ?? 0,
@@ -718,7 +723,15 @@ const draw = () => {
     const isEnemyBullet = bullet.ownerType === 'enemy';
     ctx.shadowColor = isEnemyBullet ? 'rgba(248, 113, 113, 0.75)' : '#22d3ee';
     ctx.shadowBlur = 16;
-    if (!isEnemyBullet && bulletSprite.complete && bulletSprite.naturalWidth > 0) {
+    if (isEnemyBullet && enemyBulletSprite.complete && enemyBulletSprite.naturalWidth > 0) {
+      const drawWidth = 16;
+      const drawHeight = 24;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(1, -1);
+      ctx.drawImage(enemyBulletSprite, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      ctx.restore();
+    } else if (!isEnemyBullet && bulletSprite.complete && bulletSprite.naturalWidth > 0) {
       const drawWidth = 16;
       const drawHeight = 24;
       ctx.drawImage(bulletSprite, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);

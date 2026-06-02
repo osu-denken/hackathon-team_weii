@@ -611,7 +611,7 @@ class Stage {
   updateBullets() {
     this.bullets.forEach((bullet, id) => {
       bullet.update();
-      if (bullet.y > BulletEntity.MAX_Y || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
+      if (bullet.y > BulletEntity.MAX_Y || bullet.y < -5 || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
         this.bullets.delete(id);
       }
     });
