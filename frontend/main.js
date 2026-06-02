@@ -698,8 +698,8 @@ const draw = () => {
   const width = rect.width;
   const height = rect.height;
 
-  const stageNumber = state.game.stageNumber || 1;
-  const stageBackground = stageBackgroundCache.get(stageNumber);
+  const currentStage = state.game.stage || 1;
+  const stageBackground = stageBackgroundCache.get(currentStage);
   if (stageBackground && stageBackground.complete && stageBackground.naturalWidth > 0) {
     ctx.drawImage(stageBackground, 0, 0, width, height);
   } else {
