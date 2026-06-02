@@ -7,6 +7,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as config from './constants/systemConfig.js';
+import { send, sendError } from './utilites/NetworkUtil.js';
 
 const app = express();
 
@@ -35,8 +36,7 @@ const viewers = new Set(); // モニター用のWebSocket接続
 const sendToViewer = (data) => {
   const payload = JSON.stringify(data);
   viewers.forEach((ws) => {
-    if (ws.readyState === WebSocket.OPEN)
-      ws.send(payload);
+    send(ws, payload);
   });
 };
 
@@ -49,9 +49,7 @@ const sendState = () => {
 // タイトルリセット時に全プレイヤーのスマホに通知しsocketToPlayerIdをクリアする
 const handleGameReset = () => {
   socketToPlayerId.forEach((id, ws) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'gameReset' }));
-    }
+    send(ws, { type: 'gameReset' });
   });
   socketToPlayerId.clear();
 };
@@ -64,15 +62,13 @@ const sendStateToPlayers = () => {
     if (!player) return;
 
     const payload = stage.buildPlayerState(player, now);
-    if (ws.readyState === WebSocket.OPEN)
-      ws.send(JSON.stringify(payload));
-
+    send(ws, payload);
   });
 };
 
 const handleJoin = (ws, msg) => {
   if (!msg.id) {
-    ws.send(JSON.stringify({ type: 'error', reason: 'missing id' }));
+    sendError(ws, 'missing id');
     return;
   }
 
@@ -80,14 +76,14 @@ const handleJoin = (ws, msg) => {
   socketToPlayerId.set(ws, player.id);
 
   if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({
+    send(ws, {
       type: 'joinAck',
       player: {
         id: player.id,
         number: player.number,
         color: player.color,
       },
-    }));
+    });
   }
 };
 
@@ -131,12 +127,12 @@ const parseMsg = (ws, raw) => {
   try {
     msg = JSON.parse(raw);
   } catch (error) {
-    ws.send(JSON.stringify({ type: 'error', reason: 'invalid json' }));
+    sendError(ws, 'invalid json');
     return;
   }
 
   if (!msg || typeof msg.type !== 'string') {
-    ws.send(JSON.stringify({ type: 'error', reason: 'missing type' }));
+    sendError(ws, 'missing type');
     return;
   }
 
@@ -148,8 +144,7 @@ const parseMsg = (ws, raw) => {
       break;
     case 'viewer':
       viewers.add(ws);
-      if (ws.readyState === WebSocket.OPEN)
-        ws.send(JSON.stringify(stage.buildViewerPayload(Date.now())));
+      send(ws, stage.buildViewerPayload(Date.now()));
       break;
     case 'setDifficulty':
       if (typeof msg.difficulty === 'string') {
@@ -173,7 +168,7 @@ const parseMsg = (ws, raw) => {
       handleResetPosition(ws);
       break;
     default:
-      ws.send(JSON.stringify({ type: 'error', reason: 'unknown type' }));
+      sendError(ws, 'unknown type');
   }
 };
 
@@ -191,8 +186,6 @@ wss.on('connection', (ws) => {
     handleLeave(ws);
   });
 });
-
-let prevGameStarted = false;
 
 setInterval(() => {
   const wasStarted = stage.gameStarted;
