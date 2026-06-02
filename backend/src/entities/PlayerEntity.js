@@ -17,7 +17,6 @@ class PlayerEntity extends LivingEntity {
     this.number = number;
     this.color = color;
     this.heldItem = null;
-    this.respawnAt = null;
   }
 
   move(delta, minX, maxX) {
