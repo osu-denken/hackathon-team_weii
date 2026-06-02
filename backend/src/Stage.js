@@ -19,43 +19,28 @@ const HEAL_AMOUNT = 2;
 const SCORE_DOUBLE_DURATION_MS = 8000;
 const ENEMY_BULLET_SPEED = 0.12;
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
 const RETURN_TO_TITLE_DELAY_MS = 5000;
 
-const STAGE_CONFIG = {
-  1: {
-    label: 'Stage 1',
-    targetScore: 100,
-    timeLimitMs: 120000,
-    enemySpawnLimit: 5,
-    enemySpawnIntervalMs: EnemyEntity.SPAWN_INTERVAL_MS,
-    enemyBigEvery: EnemyEntity.BIG_EVERY,
-    canEnemiesShoot: false,
-  },
-  2: {
-    label: 'Stage 2',
-    targetScore: 150,
-    timeLimitMs: 120000,
-    enemySpawnLimit: 8,
-    enemySpawnIntervalMs: Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.8),
-    enemyBigEvery: EnemyEntity.BIG_EVERY,
-    canEnemiesShoot: false,
-  },
-  3: {
-    label: 'Stage 3',
-    targetScore: 200,
-    timeLimitMs: 150000,
-    enemySpawnLimit: 7,
-    enemySpawnIntervalMs: 1200,
-    enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.7)),
-    canEnemiesShoot: true,
-    enemyShootCooldownMs: 3000,
-    enemyBulletSpeed: ENEMY_BULLET_SPEED,
-    enemyBottomRowShootDisabled: true,
-    enemyBarrage: false,
-  },
-};
+const STAGE_CONFIG = {};
+try {
+  for (let i = 1; i <= 3; i++) {
+    const configPath = path.join(__dirname, `stages/stage${i}.json`);
+    const data = fs.readFileSync(configPath, 'utf-8');
+    STAGE_CONFIG[i] = JSON.parse(data);
+  }
+} catch (e) {
+  console.error('Failed to load stage configs:', e);
+}
+
 const RESPAWN_MS = 10000;
 
 const DIFFICULTY_SETTINGS = {
@@ -109,8 +94,9 @@ class Stage {
     this.mode = 'title';
     this.currentStage = 1;
     this.stageCleared = false;
-    // ステージスコア（ステージ開始時にリセット）
     this.stageScore = 0;
+    this.gameOver = false;
+    this.gameOverAt = null;
   }
 
   resetToTitle(now = Date.now()) {
@@ -132,6 +118,8 @@ class Stage {
     this.currentStage = 1;
     this.stageCleared = false;
     this.stageScore = 0;
+    this.gameOver = false;
+    this.gameOverAt = null;
   }
 
   addPlayer(id, now = Date.now()) {
@@ -300,7 +288,13 @@ class Stage {
       if (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
         this.resetToTitle(now);
       }
+      return;
+    }
 
+    if (this.gameOver) {
+      if (now - this.gameOverAt >= 5000) {
+        this.resetToTitle(now);
+      }
       return;
     }
 
@@ -322,6 +316,15 @@ class Stage {
 
     // Check if stage is cleared and advance to next stage
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    
+    // Check game over by time limit
+    const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - this.gameStartAt));
+    if (timeRemainingMs <= 0 && !this.stageCleared) {
+      this.gameOver = true;
+      this.gameOverAt = now;
+      return;
+    }
+
     if (this.stageScore >= stageConfig.targetScore && !this.stageCleared) {
       this.stageCleared = true;
       this.nextStage(now);
@@ -398,6 +401,7 @@ class Stage {
 
     const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - this.gameStartAt));
     const cleared = stageScore >= stageConfig.targetScore;
+    const gameOver = this.gameOver;
     const returnToTitleRemainingMs = this.emptySince === null
       ? 0
       : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
@@ -413,6 +417,7 @@ class Stage {
       timeLimitMs: stageConfig.timeLimitMs,
       timeRemainingMs,
       cleared,
+      gameOver,
       difficulty: this.difficulty,
       stageNumber: this.getStageNumber(stageScore, stageConfig.targetScore),
       showReturnNotice,
@@ -555,7 +560,7 @@ class Stage {
     const shootCooldown = stageConfig.enemyShootCooldownMs || EnemyEntity.SHOOT_COOLDOWN_MS;
     const enemyBulletSpeed = stageConfig.enemyBulletSpeed || BulletEntity.SPEED;
     const disableBottomRow = stageConfig.enemyBottomRowShootDisabled;
-    const bottomRowThreshold = 0;
+    const bottomRowThreshold = 2.0;
 
     this.enemies.forEach((enemy) => {
       if (!enemy.canShoot(now, shootCooldown)) {

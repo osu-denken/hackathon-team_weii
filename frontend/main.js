@@ -11,7 +11,8 @@ const overlayStage = document.getElementById('overlay-stage');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
-const overlayStageTransition = document.getElementById('overlay-stage-transition');
+const overlayClearTime = document.getElementById('overlay-clear-time');
+const overlayGameOver = document.getElementById('overlay-gameover');
 const stageTransitionText = document.getElementById('stage-transition-text');
 const returnNoticeOverlay = document.getElementById('return-notice');
 const returnNoticeSeconds = document.getElementById('return-notice-seconds');
@@ -54,7 +55,9 @@ const state = {
     targetScore: 100,
     timeLimitMs: 0,
     timeRemainingMs: 0,
+    timeRemainingMs: 0,
     cleared: false,
+    gameOver: false,
     showReturnNotice: false,
     returnToTitleRemainingMs: 0,
     showTitle: true,
@@ -222,7 +225,10 @@ const updateGameUI = () => {
     totalPlayerScore,
     targetScore,
     timeRemainingMs,
+    targetScore,
+    timeRemainingMs,
     cleared,
+    gameOver,
     showTitle,
     showReturnNotice,
     returnToTitleRemainingMs,
@@ -254,6 +260,15 @@ const updateGameUI = () => {
       if (overlayClearTime) overlayClearTime.textContent = formatTime(timeRemainingMs);
     } else {
       overlayClear.classList.remove('show');
+    }
+  }
+  if (overlayGameOver) {
+    if (gameOver && !showTitle && !showReturnNotice && !waitingForStart) {
+      overlayGameOver.style.display = 'flex';
+      overlayGameOver.classList.add('show');
+    } else {
+      overlayGameOver.style.display = 'none';
+      overlayGameOver.classList.remove('show');
     }
   }
   const shouldShowTitle = showTitle || waitingForStart;
@@ -371,6 +386,7 @@ socket.addEventListener('message', (e) => {
           timeLimitMs: payload.game.timeLimitMs ?? 0,
           timeRemainingMs: payload.game.timeRemainingMs ?? 0,
           cleared: payload.game.cleared ?? false,
+          gameOver: payload.game.gameOver ?? false,
           showReturnNotice: payload.game.showReturnNotice ?? false,
           returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
           showTitle: payload.game.showTitle ?? false,
