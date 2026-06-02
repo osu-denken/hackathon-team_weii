@@ -152,6 +152,29 @@ const formatTime = (ms) => {
 const renderPlayerSummary = () => {
   overlayBottom.innerHTML = '';
 
+  const waiting = state.game.waitingForStart;
+
+  if (waiting) {
+    // 待機中はカウントダウンカードを表示
+    const countdownMs = state.game.countdownRemainingMs ?? 0;
+    const countdownStarted = state.game.countdownStarted ?? false;
+    const playerCount = state.game.playerCount ?? 0;
+
+    if (playerCount > 0 && countdownStarted) {
+      const bottom = document.createElement('div');
+      bottom.className = 'player-card-bottom';
+      bottom.style.cssText = 'justify-content:center;gap:10px;padding:10px 20px;';
+      bottom.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:13px;color:#cfeffd;">ゲーム開始まで</div>
+          <div style="font-size:22px;font-weight:700;color:#38bdf8;min-width:48px;text-align:center;">${Math.ceil(countdownMs / 1000)}<span style="font-size:14px;margin-left:2px;">秒</span></div>
+        </div>
+      `;
+      overlayBottom.appendChild(bottom);
+    }
+    return;
+  }
+
   state.characters.forEach((player, index) => {
     const color = player.color || ['#22d3ee', '#fbbf24', '#a78bfa', '#f472b6'][index] || '#38bdf8';
     const hp = player.hp ?? 0;
@@ -650,7 +673,9 @@ const draw = () => {
     ctx.restore();
   });
 
-  state.characters.forEach((player, index) => drawPlayer(player, index, width, height));
+  if (!state.game.waitingForStart) {
+    state.characters.forEach((player, index) => drawPlayer(player, index, width, height));
+  }
 
   requestAnimationFrame(draw);
 };
