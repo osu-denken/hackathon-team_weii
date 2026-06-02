@@ -9,10 +9,18 @@ const overlayScoreText = document.getElementById('overlay-score-text');
 const overlayTime = document.getElementById('overlay-time');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
+const titleOverlay = document.getElementById('title-overlay');
 const overlayClear = document.getElementById('overlay-clear');
 const overlayClearScore = document.getElementById('overlay-clear-score');
 const overlayClearTime = document.getElementById('overlay-clear-time');
 const qrOverlay = document.getElementById('qr-overlay');
+
+let hasReceivedUpdate = false;
+
+const setTitleVisible = (visible) => {
+  if (!titleOverlay) return;
+  titleOverlay.classList.toggle('show', visible);
+};
 
 const state = {
   characters: [],
@@ -170,6 +178,9 @@ const updateGameUI = () => {
       overlayClear.classList.remove('show');
     }
   }
+  if (hasReceivedUpdate) {
+    setTitleVisible(false);
+  }
   renderPlayerSummary();
 };
 
@@ -256,6 +267,9 @@ socket.addEventListener('message', (e) => {
         }
       : state.game;
 
+    if (!hasReceivedUpdate) {
+      hasReceivedUpdate = true;
+    }
     updateGameUI();
   }
 });
