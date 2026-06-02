@@ -6,7 +6,7 @@ import { Stage } from './Stage.js';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import * as config from './config.js';
+import * as config from './constants/systemConfig.js';
 
 const app = express();
 
