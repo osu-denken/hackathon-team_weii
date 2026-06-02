@@ -150,7 +150,7 @@ class Stage {
   buildGameState(now) {
     const totalScore = this.getTotalScore();
     const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - this.gameStartAt));
-    const cleared = totalScore >= TARGET_SCORE && timeRemainingMs > 0;
+    const cleared = totalScore >= TARGET_SCORE;
 
     return {
       totalScore,
