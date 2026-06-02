@@ -7,7 +7,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as config from './constants/systemConfig.js';
-import { send, sendError } from './utilites/NetworkUtil.js';
+import { sendRaw, send, sendError } from './utilites/NetworkUtil.js';
 
 const app = express();
 
