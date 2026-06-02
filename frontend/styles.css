@@ -279,10 +279,10 @@ canvas { z-index: 0; }
 
 .overlay-bottom {
   position: absolute;
-  bottom: 10px;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 40;
+  z-index: 60;
   display: flex;
   gap: 10px;
   align-items: flex-end;
