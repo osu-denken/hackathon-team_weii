@@ -1,4 +1,8 @@
 class AbstractItem {
+  /**
+   * アイテムの抽象クラス
+   * @param {string} type - アイテムの種類 (例: 'health_potion', 'shield', 'triple_shot')
+   */
   constructor(type) {
     this.type = type;
   }
