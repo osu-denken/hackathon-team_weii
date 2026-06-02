@@ -52,6 +52,8 @@ const STAGE_CONFIG = {
     canEnemiesShoot: true,
     enemyShootCooldownMs: 3000,
     enemyBulletSpeed: ENEMY_BULLET_SPEED,
+    enemyShootForbiddenZoneMinX: X_MIN / 3,
+    enemyShootForbiddenZoneMaxX: X_MAX / 3,
     enemyBarrage: false,
   },
 };
@@ -512,10 +514,18 @@ class Stage {
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
     const shootCooldown = stageConfig.enemyShootCooldownMs || EnemyEntity.SHOOT_COOLDOWN_MS;
     const enemyBulletSpeed = stageConfig.enemyBulletSpeed || BulletEntity.SPEED;
+    const forbiddenMinX = stageConfig.enemyShootForbiddenZoneMinX;
+    const forbiddenMaxX = stageConfig.enemyShootForbiddenZoneMaxX;
 
     this.enemies.forEach((enemy) => {
       if (!enemy.canShoot(now, shootCooldown)) {
         return;
+      }
+
+      if (typeof forbiddenMinX === 'number' && typeof forbiddenMaxX === 'number') {
+        if (enemy.x >= forbiddenMinX && enemy.x <= forbiddenMaxX) {
+          return;
+        }
       }
 
       let targetPlayer = null;
