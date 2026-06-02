@@ -114,6 +114,7 @@ const spritePaths = {
 
 const itemSpritePaths = {
   health_potion: '/asset/images/health_potion.png',
+  health_increase: '/asset/images/heart_increase.png',
   score_up: '/asset/images/score_up.png',
   shield: '/asset/images/shield.png',
   triple_shot: '/asset/images/triple_shot.png',
@@ -574,6 +575,15 @@ const drawItem = (item, width, height) => {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(x - 3, y - 8, 6, 16);
     ctx.fillRect(x - 8, y - 3, 16, 6);
+  } else if (item.type === 'health_increase') {
+    ctx.shadowColor = '#f43f5e';
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = '#e11d48';
+    ctx.beginPath();
+    ctx.arc(x - 4, y - 2, 6, Math.PI, 0);
+    ctx.arc(x + 4, y - 2, 6, Math.PI, 0);
+    ctx.lineTo(x, y + 10);
+    ctx.fill();
   } else if (item.type === 'score_up') {
     ctx.shadowColor = '#fbbf24';
     ctx.shadowBlur = 18;

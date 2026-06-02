@@ -114,6 +114,13 @@ export class CollisionSystem {
           break;
         }
 
+        if (payload.type === 'health_increase') {
+          player.maxHp += 1;
+          player.heal(1);
+          stage.itemEntity = null;
+          break;
+        }
+
         if (player.heldItem) {
           continue;
         }

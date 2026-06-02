@@ -15,6 +15,7 @@ const itemIcon = document.getElementById('item-icon');
 
 const itemIconMap = {
   health_potion: '/asset/images/health_potion.png',
+  health_increase: '/asset/images/heart_increase.png',
   score_up: '/asset/images/score_up.png',
   shield: '/asset/images/shield.png',
   triple_shot: '/asset/images/triple_shot.png',
