@@ -9,6 +9,9 @@ const overlayScoreText = document.getElementById('overlay-score-text');
 const overlayTime = document.getElementById('overlay-time');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
+const overlayClear = document.getElementById('overlay-clear');
+const overlayClearScore = document.getElementById('overlay-clear-score');
+const overlayClearTime = document.getElementById('overlay-clear-time');
 const qrOverlay = document.getElementById('qr-overlay');
 
 const state = {
@@ -157,8 +160,16 @@ const updateGameUI = () => {
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
-  // overlay updates
   if (overlayPlayerCount) overlayPlayerCount.textContent = `${state.characters.length} / ${MAX_PLAYERS}`;
+  if (overlayClear) {
+    if (cleared) {
+      overlayClear.classList.add('show');
+      if (overlayClearScore) overlayClearScore.textContent = `${totalScore} / ${targetScore}`;
+      if (overlayClearTime) overlayClearTime.textContent = formatTime(timeRemainingMs);
+    } else {
+      overlayClear.classList.remove('show');
+    }
+  }
   renderPlayerSummary();
 };
 
