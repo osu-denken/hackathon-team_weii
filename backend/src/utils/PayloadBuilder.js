@@ -100,7 +100,7 @@ export class PayloadBuilder {
         dead: player.isDead(),
         respawnRemainingMs: player.deadUntil && player.deadUntil > now ? player.deadUntil - now : 0,
       },
-      item: stage.itemEntity ? stage.itemEntity.toPayload() : null,
+      items: PayloadBuilder.listItems(stage),
       game: PayloadBuilder.buildGameState(stage, now),
     };
   }
@@ -118,6 +118,6 @@ export class PayloadBuilder {
   }
 
   static listItems(stage) {
-    return stage.itemEntity ? [stage.itemEntity.toPayload()] : [];
+    return Array.from(stage.itemEntities.values()).map((itemEntity) => itemEntity.toPayload());
   }
 }

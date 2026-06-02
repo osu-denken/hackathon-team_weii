@@ -24,6 +24,7 @@ export const TARGET_SCORE = 100;
 export const TIME_LIMIT_MS = 120000;
 export const RETURN_TO_TITLE_DELAY_MS = 5000;
 export const RESPAWN_MS = 10000;
+export const ITEM_SPAWN_LIMIT = 5;
 
 export const BULLET_HIT_RANGE = 0.5;
 export const PLAYER_HIT_RANGE = 0.7;

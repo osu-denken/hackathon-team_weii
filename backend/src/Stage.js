@@ -19,6 +19,7 @@ import {
   SCORE_DOUBLE_DURATION_MS,
   RETURN_TO_TITLE_DELAY_MS,
   RESPAWN_MS,
+  ITEM_SPAWN_LIMIT,
   STAGE_CONFIG,
   DIFFICULTY_SETTINGS
 } from './constants/gameConfig.js';
@@ -32,7 +33,7 @@ class Stage {
     this.players = new Map();
     this.enemies = new Map();
     this.bullets = new Map();
-    this.itemEntity = null;
+    this.itemEntities = new Map();
 
     this.enemyCounter = 0;
     this.bulletCounter = 0;
@@ -58,7 +59,7 @@ class Stage {
     this.players.clear();
     this.enemies.clear();
     this.bullets.clear();
-    this.itemEntity = null;
+    this.itemEntities.clear();
     this.enemyCounter = 0;
     this.bulletCounter = 0;
     this.itemCounter = 0;
@@ -106,20 +107,15 @@ class Stage {
 
     this.players.set(id, player);
 
-    if (!this.gameStarted) {
-      this.startCountdownAt = now;
-    }
+    if (!this.gameStarted) this.startCountdownAt = now;
 
     return player;
   }
 
   setDifficulty(difficulty) {
-    if (this.gameStarted) {
-      return;
-    }
-    if (!Object.prototype.hasOwnProperty.call(DIFFICULTY_SETTINGS, difficulty)) {
-      return;
-    }
+    // if (this.gameStarted) return;
+    if (!Object.prototype.hasOwnProperty.call(DIFFICULTY_SETTINGS, difficulty)) return;
+    
     this.difficulty = difficulty;
   }
 
@@ -250,7 +246,7 @@ class Stage {
     this.maybeSpawnEnemyBullets(now);
     this.updateBullets(dtFactor);
 
-    this.updateItem(dtFactor);
+    this.updateItems(dtFactor);
     this.handleBulletCollisions();
     this.handleEnemyBulletCollisions(now);
     this.handleEnemyTouches(now);
@@ -284,7 +280,7 @@ class Stage {
       this.gameStartAt = now;
       this.enemies.clear();
       this.bullets.clear();
-      this.itemEntity = null;
+      this.itemEntities.clear();
       this.enemyCounter = 0;
       this.bulletCounter = 0;
       this.itemCounter = 0;
@@ -301,7 +297,7 @@ class Stage {
     this.stageCleared = false;
     this.enemies.clear();
     this.bullets.clear();
-    this.itemEntity = null;
+    this.itemEntities.clear();
     this.bulletCounter = 0;
     this.itemCounter = 0;
     this.gameStartAt = now;
@@ -360,15 +356,13 @@ class Stage {
     });
   }
 
-  updateItem(dt) {
-    if (!this.itemEntity) {
-      return;
-    }
-
-    this.itemEntity.update(ItemEntity.SPEED * dt);
-    if (this.itemEntity.y < -5) {
-      this.itemEntity = null;
-    }
+  updateItems(dt) {
+    this.itemEntities.forEach((itemEntity, id) => {
+      itemEntity.update(ItemEntity.SPEED * dt);
+      if (itemEntity.y < -5) {
+        this.itemEntities.delete(id);
+      }
+    });
   }
 
   handlePlayerDeaths(now) {
@@ -427,13 +421,17 @@ class Stage {
   }
 
   spawnItem(x, y) {
+    if (this.itemEntities.size >= ITEM_SPAWN_LIMIT)
+      return;
+
     const item = ItemFactory.random();
-    this.itemEntity = new ItemEntity({
+    const itemEntity = new ItemEntity({
       id: `item-${this.itemCounter++}`,
       item,
       x,
       y,
     });
+    this.itemEntities.set(itemEntity.id, itemEntity);
   }
 
   countBulletsByOwner(ownerId) {

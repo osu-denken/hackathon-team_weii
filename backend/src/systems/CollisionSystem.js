@@ -40,7 +40,7 @@ export class CollisionSystem {
         }
       }
 
-      if (kill.enemy.type === 'big' && !stage.itemEntity) {
+      if (kill.enemy.type === 'big') {
         stage.spawnItem(kill.enemy.x, kill.enemy.y);
       }
     });
@@ -94,32 +94,25 @@ export class CollisionSystem {
   }
 
   static handleItemPickup(stage) {
-    if (!stage.itemEntity) {
-      return;
-    }
+    for (const [itemId, itemEntity] of stage.itemEntities.entries()) {
+      for (const player of stage.players.values()) {
+        const dx = Math.abs(itemEntity.x - player.x);
+        const dy = Math.abs(itemEntity.y - player.y);
+        if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE) {
+          if (itemEntity.item.isInstant()) {
+            itemEntity.item.applyInstant(player, stage, Date.now());
+            stage.itemEntities.delete(itemId);
+            break;
+          }
 
-    const itemEntity = stage.itemEntity;
-    if (!itemEntity) {
-      return;
-    }
+          if (player.heldItem) {
+            continue;
+          }
 
-    for (const player of stage.players.values()) {
-      const dx = Math.abs(itemEntity.x - player.x);
-      const dy = Math.abs(itemEntity.y - player.y);
-      if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE) {
-        if (itemEntity.item.isInstant()) {
-          itemEntity.item.applyInstant(player, stage, Date.now());
-          stage.itemEntity = null;
+          player.setHeldItem(itemEntity.item);
+          stage.itemEntities.delete(itemId);
           break;
         }
-
-        if (player.heldItem) {
-          continue;
-        }
-
-        player.setHeldItem(itemEntity.item);
-        stage.itemEntity = null;
-        break;
       }
     }
   }
