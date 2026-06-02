@@ -37,12 +37,16 @@ class Stage {
     this.itemCounter = 0;
     this.nextPlayerNumber = 1;
     this.lastEnemySpawnAt = Date.now();
-    this.gameStartAt = Date.now();
+    this.gameStartAt = null;
+    this.gameStarted = false;
+    this.startCountdownAt = null;
+    this.startCountdownMs = 10000;
   }
 
-  addPlayer(id) {
-    if (this.players.has(id)) {
-      return this.players.get(id);
+  addPlayer(id, now = Date.now()) {
+    const existing = this.players.get(id);
+    if (existing) {
+      return existing;
     }
 
     const number = this.nextPlayerNumber++;
@@ -55,6 +59,11 @@ class Stage {
     });
 
     this.players.set(id, player);
+
+    if (!this.gameStarted) {
+      this.startCountdownAt = now;
+    }
+
     return player;
   }
 
@@ -62,6 +71,9 @@ class Stage {
     this.players.delete(id);
     if (this.players.size === 0) {
       this.nextPlayerNumber = 1;
+      if (!this.gameStarted) {
+        this.startCountdownAt = null;
+      }
     }
   }
 
@@ -137,6 +149,11 @@ class Stage {
   }
 
   update(now) {
+    this.maybeStartGame(now);
+    if (!this.gameStarted) {
+      return;
+    }
+
     this.updatePlayerPowers(now);
     this.maybeSpawnEnemy(now);
     this.updateEnemies();
@@ -147,8 +164,44 @@ class Stage {
     this.handleItemPickup();
   }
 
+  maybeStartGame(now) {
+    if (this.gameStarted || this.players.size === 0 || this.startCountdownAt === null) {
+      return;
+    }
+
+    if (now - this.startCountdownAt >= this.startCountdownMs) {
+      this.gameStarted = true;
+      this.gameStartAt = now;
+      this.enemies.clear();
+      this.bullets.clear();
+      this.itemEntity = null;
+      this.enemyCounter = 0;
+      this.bulletCounter = 0;
+      this.itemCounter = 0;
+    }
+  }
+
   buildGameState(now) {
     const totalScore = this.getTotalScore();
+
+    if (!this.gameStarted) {
+      const countdownRemainingMs = this.startCountdownAt
+        ? Math.max(0, this.startCountdownMs - (now - this.startCountdownAt))
+        : this.startCountdownMs;
+
+      return {
+        totalScore,
+        targetScore: TARGET_SCORE,
+        timeLimitMs: this.startCountdownMs,
+        timeRemainingMs: countdownRemainingMs,
+        cleared: false,
+        waitingForStart: true,
+        countdownRemainingMs,
+        countdownStarted: this.startCountdownAt !== null,
+        playerCount: this.players.size,
+      };
+    }
+
     const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - this.gameStartAt));
     const cleared = totalScore >= TARGET_SCORE;
 
@@ -158,6 +211,10 @@ class Stage {
       timeLimitMs: TIME_LIMIT_MS,
       timeRemainingMs,
       cleared,
+      waitingForStart: false,
+      countdownRemainingMs: 0,
+      countdownStarted: false,
+      playerCount: this.players.size,
     };
   }
 
