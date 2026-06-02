@@ -493,15 +493,14 @@ class Stage {
     return Array.from(this.players.values()).reduce((sum, player) => sum + player.score, 0);
   }
 
-<<<<<<< HEAD
   // 現在のステージスコア（ステージ開始時にリセットされる）
   getStageScore() {
     return this.stageScore;
-=======
+  }
+
   getStageNumber(totalScore, targetScore) {
     const stageTwoThreshold = Math.round(targetScore * 0.5);
     return totalScore >= stageTwoThreshold ? 2 : 1;
->>>>>>> 2f8fefeb227e955918a33d7489b77adaf043bae7
   }
 
   updatePlayerPowers(now) {
