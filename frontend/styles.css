@@ -282,7 +282,7 @@ canvas { z-index: 0; }
   bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 60;
+  z-index: 42;
   display: flex;
   gap: 10px;
   align-items: flex-end;
