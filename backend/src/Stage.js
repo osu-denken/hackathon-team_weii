@@ -415,7 +415,7 @@ class Stage {
       timeRemainingMs,
       cleared,
       difficulty: this.difficulty,
-      stageNumber: this.getStageNumber(totalScore, settings.targetScore),
+      stageNumber: this.getStageNumber(stageScore, stageConfig.targetScore),
       showReturnNotice,
       returnToTitleRemainingMs,
       showTitle,
