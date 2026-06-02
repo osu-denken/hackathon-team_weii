@@ -7,8 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 // __dirname will be `backend/src/constants`, so to get to `stages` we go `../stages`
 const __dirname = path.dirname(__filename);
 
-export const X_MIN = -5;
-export const X_MAX = 5;
+export const X_MIN = -6;
+export const X_MAX = 6;
 
 export const PLAYER_COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6'];
 

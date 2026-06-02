@@ -4,7 +4,7 @@ class BulletEntity extends Entity {
   static SPEED = 0.2;
   static SPREAD = 0.05;
   static MAX_Y = 12;
-  static MAX_X = 6;
+  static MAX_X = 7;
 
   constructor({ id, x, y, vx, vy, ownerId, ownerType = 'player', damage }) {
     super({ id, x, y });
