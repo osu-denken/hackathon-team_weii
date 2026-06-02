@@ -49,7 +49,8 @@ const STAGE_CONFIG = {
     enemySpawnIntervalMs: Math.max(400, Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.5)),
     enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.7)),
     canEnemiesShoot: true,
-    enemyBarrage: true,
+    enemyShootCooldownMs: 3000,
+    enemyBarrage: false,
   },
 };
 const RESPAWN_MS = 10000;
@@ -507,32 +508,24 @@ class Stage {
 
   maybeSpawnEnemyBullets(now) {
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    const shootCooldown = stageConfig.enemyShootCooldownMs || EnemyEntity.SHOOT_COOLDOWN_MS;
 
     this.enemies.forEach((enemy) => {
-      if (!enemy.canShoot(now, EnemyEntity.SHOOT_COOLDOWN_MS)) {
+      if (!enemy.canShoot(now, shootCooldown)) {
         return;
       }
 
-      const pattern = stageConfig.enemyBarrage
-        ? enemy.type === 'big'
-          ? [-0.18, -0.09, 0, 0.09, 0.18]
-          : [-0.14, -0.06, 0, 0.06, 0.14]
-        : [0];
-
-      pattern.forEach((vx) => {
-        const bullet = new BulletEntity({
-          id: `enemy-bullet-${this.bulletCounter++}`,
-          x: enemy.x,
-          y: enemy.y,
-          vx,
-          vy: -BulletEntity.SPEED,
-          ownerId: null,
-          ownerType: 'enemy',
-          damage: enemy.attack,
-        });
-        this.bullets.set(bullet.id, bullet);
+      const bullet = new BulletEntity({
+        id: `enemy-bullet-${this.bulletCounter++}`,
+        x: enemy.x,
+        y: enemy.y,
+        vx: 0,
+        vy: -BulletEntity.SPEED,
+        ownerId: null,
+        ownerType: 'enemy',
+        damage: enemy.attack,
       });
-
+      this.bullets.set(bullet.id, bullet);
       enemy.markShot(now);
     });
   }

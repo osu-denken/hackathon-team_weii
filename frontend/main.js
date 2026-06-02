@@ -660,14 +660,23 @@ const draw = () => {
     const x = toCanvasX(bullet.x, width);
     const y = toCanvasY(bullet.y, height);
     ctx.save();
-    ctx.shadowColor = '#22d3ee';
+    const isEnemyBullet = bullet.ownerType === 'enemy';
+    ctx.shadowColor = isEnemyBullet ? 'rgba(248, 113, 113, 0.75)' : '#22d3ee';
     ctx.shadowBlur = 16;
     if (bulletSprite.complete && bulletSprite.naturalWidth > 0) {
       const drawWidth = 16;
       const drawHeight = 24;
+      ctx.globalCompositeOperation = 'source-over';
+      if (isEnemyBullet) {
+        ctx.fillStyle = '#f87171';
+        ctx.filter = 'brightness(1.2)';
+        ctx.beginPath();
+        ctx.ellipse(x, y, 7, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.drawImage(bulletSprite, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
     } else {
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = isEnemyBullet ? '#f87171' : '#38bdf8';
       ctx.fillRect(x - 5, y - 8, 10, 16);
     }
     ctx.restore();
