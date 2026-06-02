@@ -186,7 +186,7 @@ const renderPlayerSummary = () => {
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="width:28px;height:28px;border-radius:50%;background:${isDead ? 'rgba(239,68,68,0.5)' : color};display:grid;place-items:center;font-weight:700;color:#fff;${isDead ? 'filter:grayscale(1);' : ''}">${player.number ?? index + 1}</div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
-          <div style="font-weight:700;${isDead ? 'color:#fca5a5;' : ''}">P${player.number ?? index + 1}${isDead ? ' 💀' : ''}</div>
+          <div style="font-weight:700;${isDead ? 'color:#fca5a5;' : ''}">P${player.number ?? index + 1}</div>
           <div style="font-size:12px;color:#cfeffd">${isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`}</div>
         </div>
       </div>
