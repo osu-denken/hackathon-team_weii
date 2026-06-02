@@ -110,6 +110,7 @@ const spritePaths = {
   3: '/asset/images/character-3.png',
   4: '/asset/images/character-4.png',
   5: '/asset/images/character-5.png',
+  6: '/asset/images/character-6.png',
 };
 
 const itemSpritePaths = {
@@ -229,7 +230,7 @@ const renderPlayerSummary = () => {
 
   state.characters.forEach((player, index) => {
     const pNum = player.number ?? index + 1;
-    const fallbackColor = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6'][index] || '#38bdf8';
+    const fallbackColor = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6', '#47D8B2'][index] || '#38bdf8';
     const sampledColor = spriteColors.get(pNum);
     const color = sampledColor || fallbackColor;
 
