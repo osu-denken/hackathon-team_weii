@@ -107,16 +107,8 @@ export class CollisionSystem {
       const dx = Math.abs(itemEntity.x - player.x);
       const dy = Math.abs(itemEntity.y - player.y);
       if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE) {
-        const payload = itemEntity.toPayload();
-        if (payload.type === 'health_potion') {
-          player.heal(HEAL_AMOUNT);
-          stage.itemEntity = null;
-          break;
-        }
-
-        if (payload.type === 'health_increase') {
-          player.maxHp += 1;
-          player.heal(1);
+        if (itemEntity.item.isInstant()) {
+          itemEntity.item.applyInstant(player, stage, Date.now());
           stage.itemEntity = null;
           break;
         }
@@ -125,7 +117,7 @@ export class CollisionSystem {
           continue;
         }
 
-        player.setHeldItem(payload);
+        player.setHeldItem(itemEntity.item);
         stage.itemEntity = null;
         break;
       }

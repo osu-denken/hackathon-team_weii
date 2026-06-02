@@ -1,6 +1,6 @@
 import { PlayerEntity, DEFAULT_HP, BASE_ATTACK } from './entities/PlayerEntity.js';
 import { BulletEntity } from './entities/BulletEntity.js';
-import { Item } from './Item.js';
+import { ItemFactory } from './items/ItemFactory.js';
 import { ItemEntity } from './entities/ItemEntity.js';
 import { TICK_MS } from './constants/systemConfig.js';
 
@@ -211,23 +211,7 @@ class Stage {
       return;
     }
 
-    if (item.type === 'score_up') {
-      player.applyScoreDouble(now, SCORE_DOUBLE_DURATION_MS);
-      player.lastControlAt = now;
-      return;
-    }
-
-    if (item.type === 'shield') {
-      player.applyShield(now, SHIELD_DURATION_MS);
-      player.lastControlAt = now;
-      return;
-    }
-
-    if (item.type === 'triple_shot') {
-      player.applyTripleShot(now, TRIPLE_SHOT_DURATION_MS);
-      player.lastControlAt = now;
-      return;
-    }
+    item.applyUse(player, this, now);
   }
 
   update(now) {
@@ -443,7 +427,7 @@ class Stage {
   }
 
   spawnItem(x, y) {
-    const item = Item.random();
+    const item = ItemFactory.random();
     this.itemEntity = new ItemEntity({
       id: `item-${this.itemCounter++}`,
       item,
