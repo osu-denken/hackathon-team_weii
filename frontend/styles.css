@@ -429,7 +429,7 @@ canvas { z-index: 0; }
 
 .difficulty-button.active {
   /* background: linear-gradient(135deg, #38bdf8, #818cf8); */
-  background: #38bdf8;
+  background: #818cf8;
   border-color: rgba(255, 255, 255, 0.32);
   color: #ffffff;
 }

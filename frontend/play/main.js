@@ -123,27 +123,24 @@ const sendMove = (delta) => {
 const currentMoveDelta = () => {
   const left = activeKeys.has('ArrowLeft') || activeKeys.has('KeyA');
   const right = activeKeys.has('ArrowRight') || activeKeys.has('KeyD');
+  const shift = activeKeys.has('ShiftLeft') || activeKeys.has('ShiftRight');
 
-  if (left && !right) return -MOVE_STEP;
-  if (right && !left) return MOVE_STEP;
+  const step = shift ? MOVE_STEP * 1.5 : MOVE_STEP;
+
+  if (left && !right) return -step;
+  if (right && !left) return step;
   return 0;
 };
 
 const updateMovement = () => {
-  if (!connected) {
-    return;
-  }
+  if (!connected) return;
 
   const delta = currentMoveDelta();
-  if (delta !== 0) {
-    sendMove(delta);
-  }
+  if (delta !== 0) sendMove(delta);
 };
 
 const startMovementLoop = () => {
-  if (moveTimer) {
-    return;
-  }
+  if (moveTimer) return;
 
   // send initial movement immediately, then schedule repeated updates
   updateMovement();
@@ -151,10 +148,7 @@ const startMovementLoop = () => {
 };
 
 const stopMovementLoop = () => {
-  if (!moveTimer) {
-    return;
-  }
-
+  if (!moveTimer) return;
   window.clearInterval(moveTimer);
   moveTimer = null;
 };
@@ -197,9 +191,7 @@ const connect = () => {
 };
 
 const disconnect = () => {
-  if (!socket) {
-    return;
-  }
+  if (!socket) return;
 
   try {
     sendLeave();
@@ -255,25 +247,19 @@ const stopShootingLoop = () => {
 };
 
 const isTypingTarget = (element) => {
-  if (!element) {
-    return false;
-  }
+  if (!element) return false;
 
   return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable;
 };
 
 window.addEventListener('keydown', (event) => {
-  if (isTypingTarget(event.target)) {
-    return;
-  }
+  if (isTypingTarget(event.target)) return;
 
   if (event.code === 'ArrowLeft' || event.code === 'KeyA' || event.code === 'ArrowRight' || event.code === 'KeyD' || event.code === 'Space') {
     event.preventDefault();
   }
 
-  if (!connected) {
-    return;
-  }
+  if (!connected) return;
 
   if (event.code === 'ArrowLeft' || event.code === 'KeyA' || event.code === 'ArrowRight' || event.code === 'KeyD') {
     activeKeys.add(event.code);

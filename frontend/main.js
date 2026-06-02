@@ -276,7 +276,7 @@ const updateGameUI = () => {
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
-  if (overlayStage) overlayStage.textContent = stageLabel || `Stage ${stage || 1}`;
+  if (overlayStage) overlayStage.textContent = stageLabel || `Stage ${stage || 1}/3`;
   if (overlayPlayerCount) overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
   if (returnNoticeOverlay) {
     returnNoticeOverlay.classList.toggle('show', showReturnNotice);
