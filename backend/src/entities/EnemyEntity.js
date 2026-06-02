@@ -8,9 +8,10 @@ class EnemyEntity extends LivingEntity {
   static SPAWN_LIMIT = 5;
   static SPAWN_INTERVAL_MS = 1000;
 
-  constructor({ id, x, y, type, hp, maxHp }) {
+  constructor({ id, x, y, type, hp, maxHp, attack = 1 }) {
     super({ id, x, y, hp, maxHp });
     this.type = type;
+    this.attack = attack;
   }
 
   update(speed) {
@@ -25,6 +26,7 @@ class EnemyEntity extends LivingEntity {
       hp: this.hp,
       maxHp: this.maxHp,
       type: this.type,
+      attack: this.attack,
     };
   }
 }

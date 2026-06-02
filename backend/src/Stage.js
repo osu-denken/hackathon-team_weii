@@ -31,6 +31,8 @@ const DIFFICULTY_SETTINGS = {
     enemySpawnIntervalMs: EnemyEntity.SPAWN_INTERVAL_MS,
     enemyBigEvery: EnemyEntity.BIG_EVERY,
     enemySpawnLimit: EnemyEntity.SPAWN_LIMIT,
+    enemyHpMultiplier: 1,
+    enemyAttack: 1,
   },
   hard: {
     label: 'Hard',
@@ -40,6 +42,8 @@ const DIFFICULTY_SETTINGS = {
     enemySpawnIntervalMs: Math.max(300, Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.75)),
     enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.75)),
     enemySpawnLimit: Math.max(6, EnemyEntity.SPAWN_LIMIT + 1),
+    enemyHpMultiplier: 1.75,
+    enemyAttack: 2,
   },
 };
 
@@ -392,7 +396,9 @@ class Stage {
     }
 
     const type = this.enemyCounter % settings.enemyBigEvery === 0 ? 'big' : 'normal';
-    const hp = type === 'big' ? EnemyEntity.BIG_HP : EnemyEntity.NORMAL_HP;
+    const baseHp = type === 'big' ? EnemyEntity.BIG_HP : EnemyEntity.NORMAL_HP;
+    const hp = Math.max(1, Math.round(baseHp * (settings.enemyHpMultiplier || 1)));
+    const attack = settings.enemyAttack || 1;
     const enemy = new EnemyEntity({
       id: `enemy-${this.enemyCounter++}`,
       x: (Math.random() * 6) - 3,
@@ -400,6 +406,7 @@ class Stage {
       type,
       hp,
       maxHp: hp,
+      attack,
     });
     this.enemies.set(enemy.id, enemy);
     this.lastEnemySpawnAt = now;
@@ -478,10 +485,11 @@ class Stage {
         const dx = Math.abs(enemy.x - player.x);
         const dy = Math.abs(enemy.y - player.y);
         if (dx <= PLAYER_HIT_RANGE && dy <= PLAYER_HIT_RANGE) {
+          const attack = typeof enemy.attack === 'number' ? enemy.attack : 1;
           if (player.hasShield(now)) {
             player.consumeShield();
           } else {
-            player.damage(1);
+            player.damage(attack);
           }
           this.enemies.delete(enemyId);
         }
