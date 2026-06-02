@@ -178,7 +178,7 @@ canvas { z-index: 0; }
 .overlay-time { font-size: 13px; color: #cfeffd; }
 
 .overlay-status { font-size: 13px; padding: 6px 8px; border-radius: 8px; }
-..overlay-status.connected { background: rgba(34,197,94,0.12); color: #86efac; }
+.overlay-status.connected { background: rgba(34,197,94,0.12); color: #86efac; }
 .overlay-status.disconnected { background: rgba(244,63,94,0.08); color: #ffd6de; }
 
 .overlay-stage {
