@@ -49,7 +49,8 @@ const state = {
   bullets: [],
   items: [],
   game: {
-    totalScore: 0,
+    stageScore: 0,
+    totalPlayerScore: 0,
     targetScore: 100,
     timeLimitMs: 0,
     timeRemainingMs: 0,
@@ -562,18 +563,30 @@ const drawPlayer = (player, index, width, height) => {
   const spriteSize = 70;
   const lastControlAt = player.lastControlAt ?? 0;
   const idleMs = Date.now() - lastControlAt;
-  const guideVisible = idleMs >= IDLE_GUIDE_DELAY_MS;
+  // 死亡中はガイドを表示しない
+  const guideVisible = !isDead && idleMs >= IDLE_GUIDE_DELAY_MS;
+
+  // シールド（無敵）中かどうか
+  const shieldUntil = player.shieldUntil ?? 0;
+  const hasShield = shieldUntil > Date.now();
+  const shieldPulse = hasShield ? (Math.sin(Date.now() / 150) * 0.5 + 0.5) : 0; // 0.0〜1.0で点滅
 
   if (sprite && sprite.complete) {
     ctx.save();
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 18;
+    if (hasShield) {
+      // シールド中は青白いグローを強く
+      ctx.shadowColor = `rgba(56, 189, 248, ${0.6 + shieldPulse * 0.4})`;
+      ctx.shadowBlur = 28 + shieldPulse * 14;
+    } else {
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 18;
+    }
     ctx.drawImage(sprite, x - spriteSize / 2, y - spriteSize / 2, spriteSize, spriteSize);
     ctx.restore();
   } else {
     ctx.save();
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = hasShield ? '#38bdf8' : color;
+    ctx.shadowBlur = hasShield ? 28 + shieldPulse * 14 : 20;
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, 22, 0, Math.PI * 2);
@@ -585,6 +598,31 @@ const drawPlayer = (player, index, width, height) => {
     ctx.beginPath();
     ctx.arc(x, y, 22, 0, Math.PI * 2);
     ctx.stroke();
+  }
+
+  // シールド中のオーバーレイ（六角形のバリア風エフェクト）
+  if (hasShield) {
+    ctx.save();
+    const shieldRadius = spriteSize / 2 + 10 + shieldPulse * 4;
+    const shieldAlpha = 0.25 + shieldPulse * 0.2;
+    ctx.strokeStyle = `rgba(56, 189, 248, ${0.7 + shieldPulse * 0.3})`;
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI * 2 * i) / 6 - Math.PI / 6;
+      const px = x + Math.cos(angle) * shieldRadius;
+      const py = y + Math.sin(angle) * shieldRadius;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    // 内側の薄い塗り
+    ctx.fillStyle = `rgba(56, 189, 248, ${shieldAlpha * 0.3})`;
+    ctx.fill();
+    ctx.restore();
   }
 
   ctx.fillStyle = '#ffffff';
