@@ -45,10 +45,11 @@ const STAGE_CONFIG = {
     label: 'Stage 3',
     targetScore: 200,
     timeLimitMs: 150000,
-    enemySpawnLimit: 10,
-    enemySpawnIntervalMs: Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.6),
-    enemyBigEvery: Math.max(5, Math.floor(EnemyEntity.BIG_EVERY * 0.8)),
+    enemySpawnLimit: 12,
+    enemySpawnIntervalMs: Math.max(400, Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.5)),
+    enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.7)),
     canEnemiesShoot: true,
+    enemyBarrage: true,
   },
 };
 const RESPAWN_MS = 10000;
@@ -504,21 +505,32 @@ class Stage {
   }
 
   maybeSpawnEnemyBullets(now) {
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+
     this.enemies.forEach((enemy) => {
       if (!enemy.canShoot(now, EnemyEntity.SHOOT_COOLDOWN_MS)) {
         return;
       }
 
-      const bullet = new BulletEntity({
-        id: `enemy-bullet-${this.bulletCounter++}`,
-        x: enemy.x,
-        y: enemy.y,
-        vx: 0,
-        vy: -BulletEntity.SPEED,
-        ownerId: null,
-        damage: enemy.attack,
+      const pattern = stageConfig.enemyBarrage
+        ? enemy.type === 'big'
+          ? [-0.18, -0.09, 0, 0.09, 0.18]
+          : [-0.14, -0.06, 0, 0.06, 0.14]
+        : [0];
+
+      pattern.forEach((vx) => {
+        const bullet = new BulletEntity({
+          id: `enemy-bullet-${this.bulletCounter++}`,
+          x: enemy.x,
+          y: enemy.y,
+          vx,
+          vy: -BulletEntity.SPEED,
+          ownerId: null,
+          damage: enemy.attack,
+        });
+        this.bullets.set(bullet.id, bullet);
       });
-      this.bullets.set(bullet.id, bullet);
+
       enemy.markShot(now);
     });
   }
