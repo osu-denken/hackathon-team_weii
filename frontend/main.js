@@ -266,7 +266,7 @@ const renderPlayerSummary = () => {
       let hpBlocks = `<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">`;
       for (let i = 0; i < maxHp; i++) {
         const isFilled = i < hp;
-        hpBlocks += `<div style="width:12px;height:12px;border-radius:2px;background:${isFilled ? color : 'rgba(255,255,255,0.15)'};box-shadow:${isFilled ? `0 0 6px ${color}` : 'none'};transition:all 0.2s;"></div>`;
+        hpBlocks += `<div style="width:8px;height:12px;background:${isFilled ? color : 'rgba(255, 255, 255, 0.15)'};transition:all 0.2s;"></div>`;
       }
       hpBlocks += `</div>`;
       right.innerHTML = hpBlocks;
