@@ -21,7 +21,7 @@ const ENEMY_BULLET_SPEED = 0.12;
 
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
-const RETURN_TO_TITLE_DELAY_MS = 10000;
+const RETURN_TO_TITLE_DELAY_MS = 5000;
 
 const STAGE_CONFIG = {
   1: {
@@ -109,6 +109,8 @@ class Stage {
     this.mode = 'title';
     this.currentStage = 1;
     this.stageCleared = false;
+    // ステージスコア（ステージ開始時にリセット）
+    this.stageScore = 0;
   }
 
   resetToTitle(now = Date.now()) {
@@ -128,6 +130,9 @@ class Stage {
     this.mode = 'title';
     this.currentStage = 1;
     this.stageCleared = false;
+    this.stageScore = 0;
+    // プレイヤーのスコアもリセット
+    this.players.forEach((player) => { player.score = 0; });
   }
 
   addPlayer(id, now = Date.now()) {
@@ -318,8 +323,7 @@ class Stage {
 
     // Check if stage is cleared and advance to next stage
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
-    const totalScore = this.getTotalScore();
-    if (totalScore >= stageConfig.targetScore && !this.stageCleared) {
+    if (this.stageScore >= stageConfig.targetScore && !this.stageCleared) {
       this.stageCleared = true;
       this.nextStage(now);
     }
@@ -358,10 +362,13 @@ class Stage {
     this.itemCounter = 0;
     this.gameStartAt = now;
     this.lastEnemySpawnAt = now;
+    // ステージスコアをリセット（プレイヤーの累積スコアは保持）
+    this.stageScore = 0;
   }
 
   buildGameState(now) {
-    const totalScore = this.getTotalScore();
+    const stageScore = this.getStageScore();
+    const totalPlayerScore = this.getTotalPlayerScore();
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
 
     if (!this.gameStarted) {
@@ -369,9 +376,9 @@ class Stage {
         ? Math.max(0, this.startCountdownMs - (now - this.startCountdownAt))
         : this.startCountdownMs;
 
-      const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
       return {
-        totalScore,
+        stageScore,
+        totalPlayerScore,
         targetScore: stageConfig.targetScore,
         timeLimitMs: this.startCountdownMs,
         timeRemainingMs: countdownRemainingMs,
@@ -381,6 +388,7 @@ class Stage {
         countdownStarted: this.startCountdownAt !== null,
         playerCount: this.players.size,
         difficulty: this.difficulty,
+        stageNumber: 1,
         showReturnNotice: false,
         returnToTitleRemainingMs: 0,
         showTitle: true,
@@ -389,9 +397,8 @@ class Stage {
       };
     }
 
-    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
     const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - this.gameStartAt));
-    const cleared = totalScore >= stageConfig.targetScore;
+    const cleared = stageScore >= stageConfig.targetScore;
     const returnToTitleRemainingMs = this.emptySince === null
       ? 0
       : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
@@ -401,12 +408,14 @@ class Stage {
     );
 
     return {
-      totalScore,
+      stageScore,
+      totalPlayerScore,
       targetScore: stageConfig.targetScore,
       timeLimitMs: stageConfig.timeLimitMs,
       timeRemainingMs,
       cleared,
       difficulty: this.difficulty,
+      stageNumber: this.getStageNumber(totalScore, settings.targetScore),
       showReturnNotice,
       returnToTitleRemainingMs,
       showTitle,
@@ -479,8 +488,20 @@ class Stage {
     return this.itemEntity ? [this.itemEntity.toPayload()] : [];
   }
 
-  getTotalScore() {
+  // プレイヤーの累積合計スコア（ステージをまたいで保持）
+  getTotalPlayerScore() {
     return Array.from(this.players.values()).reduce((sum, player) => sum + player.score, 0);
+  }
+
+<<<<<<< HEAD
+  // 現在のステージスコア（ステージ開始時にリセットされる）
+  getStageScore() {
+    return this.stageScore;
+=======
+  getStageNumber(totalScore, targetScore) {
+    const stageTwoThreshold = Math.round(targetScore * 0.5);
+    return totalScore >= stageTwoThreshold ? 2 : 1;
+>>>>>>> 2f8fefeb227e955918a33d7489b77adaf043bae7
   }
 
   updatePlayerPowers(now) {
@@ -642,7 +663,9 @@ class Stage {
         if (player) {
           const baseScore = kill.enemy.type === 'big' ? 2 : 1;
           const multiplier = player.hasScoreDouble(Date.now()) ? 2 : 1;
-          player.score += baseScore * multiplier;
+          const earned = baseScore * multiplier;
+          player.score += earned;       // プレイヤー累積スコア
+          this.stageScore += earned;    // ステージスコア
         }
       }
 
