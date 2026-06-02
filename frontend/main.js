@@ -82,8 +82,16 @@ const guideSpritePaths = {
   arrow: '/asset/images/arrow.png',
 };
 const bulletSpritePath = '/asset/images/bullet.png';
+const stageBackgroundPaths = {
+  2: '/asset/images/background-stage-2.svg',
+};
 
 const spriteCache = new Map();
+const spriteColors = new Map();
+const itemSpriteCache = new Map();
+const guideSpriteCache = new Map();
+const stageBackgroundCache = new Map();
+const bulletSprite = new Image();
 const spriteColors = new Map();
 const itemSpriteCache = new Map();
 const guideSpriteCache = new Map();
@@ -132,6 +140,12 @@ const loadSprites = () => {
     const img = new Image();
     img.src = src;
     guideSpriteCache.set(key, img);
+  });
+
+  Object.entries(stageBackgroundPaths).forEach(([key, src]) => {
+    const img = new Image();
+    img.src = src;
+    stageBackgroundCache.set(Number(key), img);
   });
 
   bulletSprite.src = bulletSpritePath;
@@ -340,6 +354,7 @@ socket.addEventListener('message', (e) => {
           countdownStarted: payload.game.countdownStarted ?? false,
           playerCount: payload.game.playerCount ?? 0,
           difficulty: payload.game.difficulty ?? 'normal',
+          stageNumber: payload.game.stageNumber ?? 1,
         }
       : state.game;
 
@@ -584,9 +599,15 @@ const draw = () => {
   const width = rect.width;
   const height = rect.height;
 
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = '#040916';
-  ctx.fillRect(0, 0, width, height);
+  const stageNumber = state.game.stageNumber || 1;
+  const stageBackground = stageBackgroundCache.get(stageNumber);
+  if (stageBackground && stageBackground.complete && stageBackground.naturalWidth > 0) {
+    ctx.drawImage(stageBackground, 0, 0, width, height);
+  } else {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#040916';
+    ctx.fillRect(0, 0, width, height);
+  }
 
   drawGrid(width, height);
   ctx.fillStyle = '#0f172a';

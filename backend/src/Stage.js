@@ -294,6 +294,7 @@ class Stage {
         countdownStarted: this.startCountdownAt !== null,
         playerCount: this.players.size,
         difficulty: this.difficulty,
+        stageNumber: 1,
         showReturnNotice: false,
         returnToTitleRemainingMs: 0,
         showTitle: true,
@@ -318,6 +319,7 @@ class Stage {
       timeRemainingMs,
       cleared,
       difficulty: this.difficulty,
+      stageNumber: this.getStageNumber(totalScore, settings.targetScore),
       showReturnNotice,
       returnToTitleRemainingMs,
       showTitle,
@@ -390,6 +392,11 @@ class Stage {
 
   getTotalScore() {
     return Array.from(this.players.values()).reduce((sum, player) => sum + player.score, 0);
+  }
+
+  getStageNumber(totalScore, targetScore) {
+    const stageTwoThreshold = Math.round(targetScore * 0.5);
+    return totalScore >= stageTwoThreshold ? 2 : 1;
   }
 
   updatePlayerPowers(now) {
