@@ -22,6 +22,36 @@ const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
 const RETURN_TO_TITLE_DELAY_MS = 10000;
 
+const STAGE_CONFIG = {
+  1: {
+    label: 'Stage 1',
+    targetScore: 100,
+    timeLimitMs: 120000,
+    enemySpawnLimit: 5,
+    enemySpawnIntervalMs: EnemyEntity.SPAWN_INTERVAL_MS,
+    enemyBigEvery: EnemyEntity.BIG_EVERY,
+    canEnemiesShoot: false,
+  },
+  2: {
+    label: 'Stage 2',
+    targetScore: 150,
+    timeLimitMs: 120000,
+    enemySpawnLimit: 8,
+    enemySpawnIntervalMs: Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.8),
+    enemyBigEvery: EnemyEntity.BIG_EVERY,
+    canEnemiesShoot: false,
+  },
+  3: {
+    label: 'Stage 3',
+    targetScore: 200,
+    timeLimitMs: 150000,
+    enemySpawnLimit: 10,
+    enemySpawnIntervalMs: Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.6),
+    enemyBigEvery: Math.max(5, Math.floor(EnemyEntity.BIG_EVERY * 0.8)),
+    canEnemiesShoot: true,
+  },
+};
+
 const DIFFICULTY_SETTINGS = {
   normal: {
     label: 'Normal',
@@ -71,6 +101,8 @@ class Stage {
     this.emptySince = null;
     this.pausedAt = null;
     this.mode = 'title';
+    this.currentStage = 1;
+    this.stageCleared = false;
   }
 
   resetToTitle(now = Date.now()) {
@@ -88,6 +120,8 @@ class Stage {
     this.emptySince = null;
     this.pausedAt = null;
     this.mode = 'title';
+    this.currentStage = 1;
+    this.stageCleared = false;
   }
 
   addPlayer(id, now = Date.now()) {
@@ -237,12 +271,21 @@ class Stage {
 
     this.updatePlayerPowers(now);
     this.maybeSpawnEnemy(now);
+    this.maybeSpawnEnemyBullets(now);
     this.updateEnemies();
     this.updateBullets();
     this.updateItem();
     this.handleBulletCollisions();
     this.handleEnemyTouches(now);
     this.handleItemPickup();
+
+    // Check if stage is cleared and advance to next stage
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    const totalScore = this.getTotalScore();
+    if (totalScore >= stageConfig.targetScore && !this.stageCleared) {
+      this.stageCleared = true;
+      this.nextStage(now);
+    }
   }
 
   maybeStartGame(now) {
@@ -262,8 +305,24 @@ class Stage {
     }
   }
 
+  nextStage(now) {
+    if (this.currentStage >= 3) {
+      return;
+    }
+    this.currentStage += 1;
+    this.stageCleared = false;
+    this.enemies.clear();
+    this.bullets.clear();
+    this.itemEntity = null;
+    this.bulletCounter = 0;
+    this.itemCounter = 0;
+    this.gameStartAt = now;
+    this.lastEnemySpawnAt = now;
+  }
+
   buildGameState(now) {
     const totalScore = this.getTotalScore();
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
 
     if (!this.gameStarted) {
       const countdownRemainingMs = this.startCountdownAt
@@ -273,7 +332,7 @@ class Stage {
       const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
       return {
         totalScore,
-        targetScore: settings.targetScore,
+        targetScore: stageConfig.targetScore,
         timeLimitMs: this.startCountdownMs,
         timeRemainingMs: countdownRemainingMs,
         cleared: false,
@@ -285,12 +344,14 @@ class Stage {
         showReturnNotice: false,
         returnToTitleRemainingMs: 0,
         showTitle: true,
+        stage: this.currentStage,
+        stageLabel: stageConfig.label,
       };
     }
 
     const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
-    const timeRemainingMs = Math.max(0, settings.timeLimitMs - (now - this.gameStartAt));
-    const cleared = totalScore >= settings.targetScore;
+    const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - this.gameStartAt));
+    const cleared = totalScore >= stageConfig.targetScore;
     const returnToTitleRemainingMs = this.emptySince === null
       ? 0
       : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
@@ -301,8 +362,8 @@ class Stage {
 
     return {
       totalScore,
-      targetScore: settings.targetScore,
-      timeLimitMs: settings.timeLimitMs,
+      targetScore: stageConfig.targetScore,
+      timeLimitMs: stageConfig.timeLimitMs,
       timeRemainingMs,
       cleared,
       difficulty: this.difficulty,
@@ -313,6 +374,8 @@ class Stage {
       countdownRemainingMs: 0,
       countdownStarted: false,
       playerCount: this.players.size,
+      stage: this.currentStage,
+      stageLabel: stageConfig.label,
     };
   }
 
@@ -386,19 +449,22 @@ class Stage {
   }
 
   maybeSpawnEnemy(now) {
-    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
-    if (this.enemies.size >= settings.enemySpawnLimit) {
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    const difficultySettings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
+    
+    if (this.enemies.size >= stageConfig.enemySpawnLimit) {
       return;
     }
 
-    if (now - this.lastEnemySpawnAt < settings.enemySpawnIntervalMs) {
+    if (now - this.lastEnemySpawnAt < stageConfig.enemySpawnIntervalMs) {
       return;
     }
 
-    const type = this.enemyCounter % settings.enemyBigEvery === 0 ? 'big' : 'normal';
+    const type = this.enemyCounter % stageConfig.enemyBigEvery === 0 ? 'big' : 'normal';
     const baseHp = type === 'big' ? EnemyEntity.BIG_HP : EnemyEntity.NORMAL_HP;
-    const hp = Math.max(1, Math.round(baseHp * (settings.enemyHpMultiplier || 1)));
-    const attack = settings.enemyAttack || 1;
+    const hp = Math.max(1, Math.round(baseHp * (difficultySettings.enemyHpMultiplier || 1)));
+    const attack = difficultySettings.enemyAttack || 1;
+    const canShootBullets = stageConfig.canEnemiesShoot;
     const enemy = new EnemyEntity({
       id: `enemy-${this.enemyCounter++}`,
       x: (Math.random() * 6) - 3,
@@ -407,6 +473,7 @@ class Stage {
       hp,
       maxHp: hp,
       attack,
+      canShootBullets,
     });
     this.enemies.set(enemy.id, enemy);
     this.lastEnemySpawnAt = now;
@@ -419,6 +486,26 @@ class Stage {
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }
+    });
+  }
+
+  maybeSpawnEnemyBullets(now) {
+    this.enemies.forEach((enemy) => {
+      if (!enemy.canShoot(now, EnemyEntity.SHOOT_COOLDOWN_MS)) {
+        return;
+      }
+
+      const bullet = new BulletEntity({
+        id: `enemy-bullet-${this.bulletCounter++}`,
+        x: enemy.x,
+        y: enemy.y,
+        vx: 0,
+        vy: -BulletEntity.SPEED,
+        ownerId: null,
+        damage: enemy.attack,
+      });
+      this.bullets.set(bullet.id, bullet);
+      enemy.markShot(now);
     });
   }
 

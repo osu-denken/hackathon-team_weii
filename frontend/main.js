@@ -59,6 +59,8 @@ const state = {
     countdownStarted: false,
     playerCount: 0,
     difficulty: 'normal',
+    stage: 1,
+    stageLabel: 'Stage 1',
   },
 };
 
@@ -201,6 +203,8 @@ const updateGameUI = () => {
     countdownStarted,
     playerCount,
     difficulty,
+    stage,
+    stageLabel,
   } = state.game;
   const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
   // overlay updates (no side panel elements)
@@ -240,6 +244,10 @@ const updateGameUI = () => {
     if (titleDifficultyNormal && titleDifficultyHard) {
       titleDifficultyNormal.classList.toggle('active', difficulty === 'normal');
       titleDifficultyHard.classList.toggle('active', difficulty === 'hard');
+    }
+    const titleStage = document.getElementById('title-stage');
+    if (titleStage) {
+      titleStage.textContent = stageLabel || `Stage ${stage || 1}`;
     }
   }
   renderPlayerSummary();
@@ -340,6 +348,8 @@ socket.addEventListener('message', (e) => {
           countdownStarted: payload.game.countdownStarted ?? false,
           playerCount: payload.game.playerCount ?? 0,
           difficulty: payload.game.difficulty ?? 'normal',
+          stage: payload.game.stage ?? 1,
+          stageLabel: payload.game.stageLabel ?? 'Stage 1',
         }
       : state.game;
 
