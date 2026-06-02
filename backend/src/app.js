@@ -134,6 +134,12 @@ const parseMsg = (ws, raw) => {
       if (ws.readyState === WebSocket.OPEN)
         ws.send(JSON.stringify(stage.buildViewerPayload(Date.now())));
       break;
+    case 'setDifficulty':
+      if (typeof msg.difficulty === 'string') {
+        stage.setDifficulty(msg.difficulty);
+        sendState();
+      }
+      break;
     case 'leave':
       handleLeave(ws);
       break;

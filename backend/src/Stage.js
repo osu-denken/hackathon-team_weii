@@ -22,6 +22,27 @@ const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
 const RETURN_TO_TITLE_DELAY_MS = 10000;
 
+const DIFFICULTY_SETTINGS = {
+  normal: {
+    label: 'Normal',
+    targetScore: 100,
+    timeLimitMs: 120000,
+    enemySpeed: EnemyEntity.SPEED,
+    enemySpawnIntervalMs: EnemyEntity.SPAWN_INTERVAL_MS,
+    enemyBigEvery: EnemyEntity.BIG_EVERY,
+    enemySpawnLimit: EnemyEntity.SPAWN_LIMIT,
+  },
+  hard: {
+    label: 'Hard',
+    targetScore: 120,
+    timeLimitMs: 90000,
+    enemySpeed: EnemyEntity.SPEED * 1.25,
+    enemySpawnIntervalMs: Math.max(300, Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.75)),
+    enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.75)),
+    enemySpawnLimit: Math.max(6, EnemyEntity.SPAWN_LIMIT + 1),
+  },
+};
+
 const BULLET_HIT_RANGE = 0.5;
 const PLAYER_HIT_RANGE = 0.7;
 const ITEM_HIT_RANGE = 0.6;
@@ -42,6 +63,7 @@ class Stage {
     this.gameStarted = false;
     this.startCountdownAt = null;
     this.startCountdownMs = 10000;
+    this.difficulty = 'normal';
     this.emptySince = null;
     this.pausedAt = null;
     this.mode = 'title';
@@ -98,6 +120,16 @@ class Stage {
     }
 
     return player;
+  }
+
+  setDifficulty(difficulty) {
+    if (this.gameStarted) {
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(DIFFICULTY_SETTINGS, difficulty)) {
+      return;
+    }
+    this.difficulty = difficulty;
   }
 
   removePlayer(id, now = Date.now()) {
@@ -234,9 +266,10 @@ class Stage {
         ? Math.max(0, this.startCountdownMs - (now - this.startCountdownAt))
         : this.startCountdownMs;
 
+      const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
       return {
         totalScore,
-        targetScore: TARGET_SCORE,
+        targetScore: settings.targetScore,
         timeLimitMs: this.startCountdownMs,
         timeRemainingMs: countdownRemainingMs,
         cleared: false,
@@ -244,14 +277,16 @@ class Stage {
         countdownRemainingMs,
         countdownStarted: this.startCountdownAt !== null,
         playerCount: this.players.size,
+        difficulty: this.difficulty,
         showReturnNotice: false,
         returnToTitleRemainingMs: 0,
         showTitle: true,
       };
     }
 
-    const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - this.gameStartAt));
-    const cleared = totalScore >= TARGET_SCORE;
+    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
+    const timeRemainingMs = Math.max(0, settings.timeLimitMs - (now - this.gameStartAt));
+    const cleared = totalScore >= settings.targetScore;
     const returnToTitleRemainingMs = this.emptySince === null
       ? 0
       : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
@@ -262,10 +297,11 @@ class Stage {
 
     return {
       totalScore,
-      targetScore: TARGET_SCORE,
-      timeLimitMs: TIME_LIMIT_MS,
+      targetScore: settings.targetScore,
+      timeLimitMs: settings.timeLimitMs,
       timeRemainingMs,
       cleared,
+      difficulty: this.difficulty,
       showReturnNotice,
       returnToTitleRemainingMs,
       showTitle,
@@ -346,15 +382,16 @@ class Stage {
   }
 
   maybeSpawnEnemy(now) {
-    if (this.enemies.size >= EnemyEntity.SPAWN_LIMIT) {
+    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
+    if (this.enemies.size >= settings.enemySpawnLimit) {
       return;
     }
 
-    if (now - this.lastEnemySpawnAt < EnemyEntity.SPAWN_INTERVAL_MS) {
+    if (now - this.lastEnemySpawnAt < settings.enemySpawnIntervalMs) {
       return;
     }
 
-    const type = this.enemyCounter % EnemyEntity.BIG_EVERY === 0 ? 'big' : 'normal';
+    const type = this.enemyCounter % settings.enemyBigEvery === 0 ? 'big' : 'normal';
     const hp = type === 'big' ? EnemyEntity.BIG_HP : EnemyEntity.NORMAL_HP;
     const enemy = new EnemyEntity({
       id: `enemy-${this.enemyCounter++}`,
@@ -369,8 +406,9 @@ class Stage {
   }
 
   updateEnemies() {
+    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
     this.enemies.forEach((enemy, id) => {
-      enemy.update(EnemyEntity.SPEED);
+      enemy.update(settings.enemySpeed);
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }

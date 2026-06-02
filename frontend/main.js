@@ -14,6 +14,8 @@ const returnNoticeOverlay = document.getElementById('return-notice');
 const returnNoticeSeconds = document.getElementById('return-notice-seconds');
 const titleCountdown = document.getElementById('title-countdown');
 const titlePlayers = document.getElementById('title-players');
+const titleDifficultyNormal = document.getElementById('title-difficulty-normal');
+const titleDifficultyHard = document.getElementById('title-difficulty-hard');
 const overlayClear = document.getElementById('overlay-clear');
 const overlayClearScore = document.getElementById('overlay-clear-score');
 const overlayClearTime = document.getElementById('overlay-clear-time');
@@ -22,6 +24,20 @@ const qrOverlay = document.getElementById('qr-overlay');
 const setTitleVisible = (visible) => {
   if (!titleOverlay) return;
   titleOverlay.classList.toggle('show', visible);
+};
+
+const setDifficultyUI = (difficulty) => {
+  if (titleDifficultyNormal) titleDifficultyNormal.classList.toggle('active', difficulty === 'normal');
+  if (titleDifficultyHard) titleDifficultyHard.classList.toggle('active', difficulty === 'hard');
+};
+
+const selectDifficulty = (difficulty) => {
+  if (state.game.difficulty === difficulty) return;
+  state.game.difficulty = difficulty;
+  setDifficultyUI(difficulty);
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: 'setDifficulty', difficulty }));
+  }
 };
 
 const state = {
@@ -42,6 +58,7 @@ const state = {
     countdownRemainingMs: 10000,
     countdownStarted: false,
     playerCount: 0,
+    difficulty: 'normal',
   },
 };
 
@@ -183,6 +200,7 @@ const updateGameUI = () => {
     countdownRemainingMs,
     countdownStarted,
     playerCount,
+    difficulty,
   } = state.game;
   const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
   // overlay updates (no side panel elements)
@@ -218,6 +236,10 @@ const updateGameUI = () => {
     }
     if (titlePlayers) {
       titlePlayers.textContent = `参加プレイヤー: ${playerCount}人`;
+    }
+    if (titleDifficultyNormal && titleDifficultyHard) {
+      titleDifficultyNormal.classList.toggle('active', difficulty === 'normal');
+      titleDifficultyHard.classList.toggle('active', difficulty === 'hard');
     }
   }
   renderPlayerSummary();
@@ -260,6 +282,13 @@ loadClientUrl().then(setQrOverlay);
 const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 const wsUrl = `${wsProtocol}://${window.location.host}`;
 const socket = new WebSocket(wsUrl);
+
+if (titleDifficultyNormal) {
+  titleDifficultyNormal.addEventListener('click', () => selectDifficulty('normal'));
+}
+if (titleDifficultyHard) {
+  titleDifficultyHard.addEventListener('click', () => selectDifficulty('hard'));
+}
 
 const setConnected = (connected) => {
   if (overlayStatus) {
@@ -310,6 +339,7 @@ socket.addEventListener('message', (e) => {
           countdownRemainingMs: payload.game.countdownRemainingMs ?? 0,
           countdownStarted: payload.game.countdownStarted ?? false,
           playerCount: payload.game.playerCount ?? 0,
+          difficulty: payload.game.difficulty ?? 'normal',
         }
       : state.game;
 
