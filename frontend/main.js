@@ -12,6 +12,8 @@ const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
 const returnNoticeOverlay = document.getElementById('return-notice');
 const returnNoticeSeconds = document.getElementById('return-notice-seconds');
+const titleCountdown = document.getElementById('title-countdown');
+const titlePlayers = document.getElementById('title-players');
 const overlayClear = document.getElementById('overlay-clear');
 const overlayClearScore = document.getElementById('overlay-clear-score');
 const overlayClearTime = document.getElementById('overlay-clear-time');
@@ -36,6 +38,10 @@ const state = {
     showReturnNotice: false,
     returnToTitleRemainingMs: 0,
     showTitle: true,
+    waitingForStart: true,
+    countdownRemainingMs: 10000,
+    countdownStarted: false,
+    playerCount: 0,
   },
 };
 
@@ -165,14 +171,25 @@ const renderPlayerSummary = () => {
 };
 
 const updateGameUI = () => {
-  const { totalScore, targetScore, timeRemainingMs, cleared, showTitle, showReturnNotice, returnToTitleRemainingMs } = state.game;
+  const {
+    totalScore,
+    targetScore,
+    timeRemainingMs,
+    cleared,
+    showTitle,
+    showReturnNotice,
+    returnToTitleRemainingMs,
+    waitingForStart,
+    countdownRemainingMs,
+    countdownStarted,
+    playerCount,
+  } = state.game;
   const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
   // overlay updates (no side panel elements)
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
-  if (overlayPlayerCount) overlayPlayerCount.textContent = `${state.characters.length} / ${MAX_PLAYERS}`;
-  setTitleVisible(showTitle && !showReturnNotice);
+  if (overlayPlayerCount) overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
   if (returnNoticeOverlay) {
     returnNoticeOverlay.classList.toggle('show', showReturnNotice);
   }
@@ -180,12 +197,27 @@ const updateGameUI = () => {
     returnNoticeSeconds.textContent = String(Math.max(1, Math.ceil(returnToTitleRemainingMs / 1000)));
   }
   if (overlayClear) {
-    if (cleared && !showTitle && !showReturnNotice) {
+    if (cleared && !showTitle && !showReturnNotice && !waitingForStart) {
       overlayClear.classList.add('show');
       if (overlayClearScore) overlayClearScore.textContent = `${totalScore} / ${targetScore}`;
       if (overlayClearTime) overlayClearTime.textContent = formatTime(timeRemainingMs);
     } else {
       overlayClear.classList.remove('show');
+    }
+  }
+  const shouldShowTitle = showTitle || waitingForStart;
+  setTitleVisible(shouldShowTitle && !showReturnNotice);
+
+  if (waitingForStart) {
+    if (titleCountdown) {
+      if (countdownStarted && playerCount > 0) {
+        titleCountdown.textContent = `ゲーム開始まで ${Math.ceil(countdownRemainingMs / 1000)} 秒`;
+      } else {
+        titleCountdown.textContent = '参加プレイヤーを待っています';
+      }
+    }
+    if (titlePlayers) {
+      titlePlayers.textContent = `参加プレイヤー: ${playerCount}人`;
     }
   }
   renderPlayerSummary();
@@ -274,8 +306,13 @@ socket.addEventListener('message', (e) => {
           showReturnNotice: payload.game.showReturnNotice ?? false,
           returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
           showTitle: payload.game.showTitle ?? false,
+          waitingForStart: payload.game.waitingForStart ?? false,
+          countdownRemainingMs: payload.game.countdownRemainingMs ?? 0,
+          countdownStarted: payload.game.countdownStarted ?? false,
+          playerCount: payload.game.playerCount ?? 0,
         }
       : state.game;
+
     updateGameUI();
   }
 });

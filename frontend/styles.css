@@ -300,6 +300,20 @@ canvas { z-index: 0; }
   line-height: 1.6;
 }
 
+.title-countdown {
+  margin-top: 24px;
+  color: #ffffff;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.title-players {
+  margin-top: 10px;
+  color: #a5b4fc;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
 .overlay-clear {
   position: absolute;
   inset: 0;

@@ -66,7 +66,7 @@ const handleJoin = (ws, msg) => {
     return;
   }
 
-  const player = stage.addPlayer(msg.id);
+  const player = stage.addPlayer(msg.id, Date.now());
   socketToPlayerId.set(ws, player.id);
 
   if (ws.readyState === WebSocket.OPEN) {

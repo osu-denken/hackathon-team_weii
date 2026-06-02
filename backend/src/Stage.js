@@ -38,7 +38,10 @@ class Stage {
     this.itemCounter = 0;
     this.nextPlayerNumber = 1;
     this.lastEnemySpawnAt = Date.now();
-    this.gameStartAt = Date.now();
+    this.gameStartAt = null;
+    this.gameStarted = false;
+    this.startCountdownAt = null;
+    this.startCountdownMs = 10000;
     this.emptySince = null;
     this.pausedAt = null;
     this.mode = 'title';
@@ -52,7 +55,9 @@ class Stage {
     this.bulletCounter = 0;
     this.itemCounter = 0;
     this.nextPlayerNumber = 1;
-    this.gameStartAt = now;
+    this.gameStartAt = null;
+    this.gameStarted = false;
+    this.startCountdownAt = null;
     this.lastEnemySpawnAt = now;
     this.emptySince = null;
     this.pausedAt = null;
@@ -60,15 +65,15 @@ class Stage {
   }
 
   addPlayer(id, now = Date.now()) {
-    if (this.players.has(id)) {
-      return this.players.get(id);
+    const existing = this.players.get(id);
+    if (existing) {
+      return existing;
     }
 
     if (this.players.size === 0) {
-      if (this.mode === 'playing' && this.pausedAt !== null) {
+      if (this.mode === 'playing' && this.pausedAt !== null && this.gameStarted && this.gameStartAt !== null) {
         this.gameStartAt += now - this.pausedAt;
       } else if (this.mode === 'title') {
-        this.gameStartAt = now;
         this.lastEnemySpawnAt = now;
       }
 
@@ -87,6 +92,11 @@ class Stage {
     });
 
     this.players.set(id, player);
+
+    if (!this.gameStarted) {
+      this.startCountdownAt = now;
+    }
+
     return player;
   }
 
@@ -94,8 +104,13 @@ class Stage {
     this.players.delete(id);
     if (this.players.size === 0) {
       this.nextPlayerNumber = 1;
+      if (!this.gameStarted) {
+        this.startCountdownAt = null;
+      }
       this.emptySince = now;
-      this.pausedAt = now;
+      if (this.gameStarted) {
+        this.pausedAt = now;
+      }
     }
   }
 
@@ -179,6 +194,11 @@ class Stage {
       return;
     }
 
+    this.maybeStartGame(now);
+    if (!this.gameStarted) {
+      return;
+    }
+
     this.updatePlayerPowers(now);
     this.maybeSpawnEnemy(now);
     this.updateEnemies();
@@ -189,8 +209,47 @@ class Stage {
     this.handleItemPickup();
   }
 
+  maybeStartGame(now) {
+    if (this.gameStarted || this.players.size === 0 || this.startCountdownAt === null) {
+      return;
+    }
+
+    if (now - this.startCountdownAt >= this.startCountdownMs) {
+      this.gameStarted = true;
+      this.gameStartAt = now;
+      this.enemies.clear();
+      this.bullets.clear();
+      this.itemEntity = null;
+      this.enemyCounter = 0;
+      this.bulletCounter = 0;
+      this.itemCounter = 0;
+    }
+  }
+
   buildGameState(now) {
     const totalScore = this.getTotalScore();
+
+    if (!this.gameStarted) {
+      const countdownRemainingMs = this.startCountdownAt
+        ? Math.max(0, this.startCountdownMs - (now - this.startCountdownAt))
+        : this.startCountdownMs;
+
+      return {
+        totalScore,
+        targetScore: TARGET_SCORE,
+        timeLimitMs: this.startCountdownMs,
+        timeRemainingMs: countdownRemainingMs,
+        cleared: false,
+        waitingForStart: true,
+        countdownRemainingMs,
+        countdownStarted: this.startCountdownAt !== null,
+        playerCount: this.players.size,
+        showReturnNotice: false,
+        returnToTitleRemainingMs: 0,
+        showTitle: true,
+      };
+    }
+
     const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - this.gameStartAt));
     const cleared = totalScore >= TARGET_SCORE;
     const returnToTitleRemainingMs = this.emptySince === null
@@ -210,6 +269,10 @@ class Stage {
       showReturnNotice,
       returnToTitleRemainingMs,
       showTitle,
+      waitingForStart: false,
+      countdownRemainingMs: 0,
+      countdownStarted: false,
+      playerCount: this.players.size,
     };
   }
 
