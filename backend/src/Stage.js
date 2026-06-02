@@ -17,6 +17,7 @@ const TRIPLE_SHOT_DURATION_MS = 5000;
 const SHIELD_DURATION_MS = 5000;
 const HEAL_AMOUNT = 2;
 const SCORE_UP_AMOUNT = 10;
+const ENEMY_BULLET_SPEED = 0.12;
 
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
@@ -45,11 +46,12 @@ const STAGE_CONFIG = {
     label: 'Stage 3',
     targetScore: 200,
     timeLimitMs: 150000,
-    enemySpawnLimit: 12,
-    enemySpawnIntervalMs: Math.max(400, Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.5)),
+    enemySpawnLimit: 7,
+    enemySpawnIntervalMs: 1200,
     enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.7)),
     canEnemiesShoot: true,
     enemyShootCooldownMs: 3000,
+    enemyBulletSpeed: ENEMY_BULLET_SPEED,
     enemyBarrage: false,
   },
 };
@@ -509,18 +511,46 @@ class Stage {
   maybeSpawnEnemyBullets(now) {
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
     const shootCooldown = stageConfig.enemyShootCooldownMs || EnemyEntity.SHOOT_COOLDOWN_MS;
+    const enemyBulletSpeed = stageConfig.enemyBulletSpeed || BulletEntity.SPEED;
 
     this.enemies.forEach((enemy) => {
       if (!enemy.canShoot(now, shootCooldown)) {
         return;
       }
 
+      let targetPlayer = null;
+      let closestDistance = Infinity;
+      this.players.forEach((player) => {
+        if (player.isDead()) {
+          return;
+        }
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const distanceSq = dx * dx + dy * dy;
+        if (distanceSq < closestDistance) {
+          closestDistance = distanceSq;
+          targetPlayer = player;
+        }
+      });
+
+      let vx = 0;
+      let vy = -enemyBulletSpeed;
+      if (targetPlayer) {
+        const dx = targetPlayer.x - enemy.x;
+        const dy = targetPlayer.y - enemy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 0.001) {
+          vx = (dx / distance) * enemyBulletSpeed;
+          vy = (dy / distance) * enemyBulletSpeed;
+        }
+      }
+
       const bullet = new BulletEntity({
         id: `enemy-bullet-${this.bulletCounter++}`,
         x: enemy.x,
         y: enemy.y,
-        vx: 0,
-        vy: -BulletEntity.SPEED,
+        vx,
+        vy,
         ownerId: null,
         ownerType: 'enemy',
         damage: enemy.attack,
