@@ -10,12 +10,12 @@ const overlayTime = document.getElementById('overlay-time');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
+const returnNoticeOverlay = document.getElementById('return-notice');
+const returnNoticeSeconds = document.getElementById('return-notice-seconds');
 const overlayClear = document.getElementById('overlay-clear');
 const overlayClearScore = document.getElementById('overlay-clear-score');
 const overlayClearTime = document.getElementById('overlay-clear-time');
 const qrOverlay = document.getElementById('qr-overlay');
-
-let hasReceivedUpdate = false;
 
 const setTitleVisible = (visible) => {
   if (!titleOverlay) return;
@@ -33,6 +33,9 @@ const state = {
     timeLimitMs: 0,
     timeRemainingMs: 0,
     cleared: false,
+    showReturnNotice: false,
+    returnToTitleRemainingMs: 0,
+    showTitle: true,
   },
 };
 
@@ -162,24 +165,28 @@ const renderPlayerSummary = () => {
 };
 
 const updateGameUI = () => {
-  const { totalScore, targetScore, timeRemainingMs, cleared } = state.game;
+  const { totalScore, targetScore, timeRemainingMs, cleared, showTitle, showReturnNotice, returnToTitleRemainingMs } = state.game;
   const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
   // overlay updates (no side panel elements)
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
   if (overlayPlayerCount) overlayPlayerCount.textContent = `${state.characters.length} / ${MAX_PLAYERS}`;
+  setTitleVisible(showTitle && !showReturnNotice);
+  if (returnNoticeOverlay) {
+    returnNoticeOverlay.classList.toggle('show', showReturnNotice);
+  }
+  if (returnNoticeSeconds) {
+    returnNoticeSeconds.textContent = String(Math.max(1, Math.ceil(returnToTitleRemainingMs / 1000)));
+  }
   if (overlayClear) {
-    if (cleared) {
+    if (cleared && !showTitle && !showReturnNotice) {
       overlayClear.classList.add('show');
       if (overlayClearScore) overlayClearScore.textContent = `${totalScore} / ${targetScore}`;
       if (overlayClearTime) overlayClearTime.textContent = formatTime(timeRemainingMs);
     } else {
       overlayClear.classList.remove('show');
     }
-  }
-  if (hasReceivedUpdate) {
-    setTitleVisible(false);
   }
   renderPlayerSummary();
 };
@@ -264,12 +271,11 @@ socket.addEventListener('message', (e) => {
           timeLimitMs: payload.game.timeLimitMs ?? 0,
           timeRemainingMs: payload.game.timeRemainingMs ?? 0,
           cleared: payload.game.cleared ?? false,
+          showReturnNotice: payload.game.showReturnNotice ?? false,
+          returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
+          showTitle: payload.game.showTitle ?? false,
         }
       : state.game;
-
-    if (!hasReceivedUpdate) {
-      hasReceivedUpdate = true;
-    }
     updateGameUI();
   }
 });

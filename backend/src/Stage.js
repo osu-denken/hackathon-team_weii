@@ -20,6 +20,7 @@ const SCORE_UP_AMOUNT = 10;
 
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
+const RETURN_TO_TITLE_DELAY_MS = 10000;
 
 const BULLET_HIT_RANGE = 0.5;
 const PLAYER_HIT_RANGE = 0.7;
@@ -38,11 +39,42 @@ class Stage {
     this.nextPlayerNumber = 1;
     this.lastEnemySpawnAt = Date.now();
     this.gameStartAt = Date.now();
+    this.emptySince = null;
+    this.pausedAt = null;
+    this.mode = 'title';
   }
 
-  addPlayer(id) {
+  resetToTitle(now = Date.now()) {
+    this.enemies.clear();
+    this.bullets.clear();
+    this.itemEntity = null;
+    this.enemyCounter = 0;
+    this.bulletCounter = 0;
+    this.itemCounter = 0;
+    this.nextPlayerNumber = 1;
+    this.gameStartAt = now;
+    this.lastEnemySpawnAt = now;
+    this.emptySince = null;
+    this.pausedAt = null;
+    this.mode = 'title';
+  }
+
+  addPlayer(id, now = Date.now()) {
     if (this.players.has(id)) {
       return this.players.get(id);
+    }
+
+    if (this.players.size === 0) {
+      if (this.mode === 'playing' && this.pausedAt !== null) {
+        this.gameStartAt += now - this.pausedAt;
+      } else if (this.mode === 'title') {
+        this.gameStartAt = now;
+        this.lastEnemySpawnAt = now;
+      }
+
+      this.emptySince = null;
+      this.pausedAt = null;
+      this.mode = 'playing';
     }
 
     const number = this.nextPlayerNumber++;
@@ -58,10 +90,12 @@ class Stage {
     return player;
   }
 
-  removePlayer(id) {
+  removePlayer(id, now = Date.now()) {
     this.players.delete(id);
     if (this.players.size === 0) {
       this.nextPlayerNumber = 1;
+      this.emptySince = now;
+      this.pausedAt = now;
     }
   }
 
@@ -137,6 +171,14 @@ class Stage {
   }
 
   update(now) {
+    if (this.players.size === 0) {
+      if (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
+        this.resetToTitle(now);
+      }
+
+      return;
+    }
+
     this.updatePlayerPowers(now);
     this.maybeSpawnEnemy(now);
     this.updateEnemies();
@@ -151,6 +193,13 @@ class Stage {
     const totalScore = this.getTotalScore();
     const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - this.gameStartAt));
     const cleared = totalScore >= TARGET_SCORE;
+    const returnToTitleRemainingMs = this.emptySince === null
+      ? 0
+      : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
+    const showReturnNotice = this.players.size === 0 && returnToTitleRemainingMs > 0;
+    const showTitle = this.players.size === 0 && (
+      this.mode === 'title' || (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS)
+    );
 
     return {
       totalScore,
@@ -158,6 +207,9 @@ class Stage {
       timeLimitMs: TIME_LIMIT_MS,
       timeRemainingMs,
       cleared,
+      showReturnNotice,
+      returnToTitleRemainingMs,
+      showTitle,
     };
   }
 
