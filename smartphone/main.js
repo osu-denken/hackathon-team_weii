@@ -90,6 +90,10 @@ function connectWebSocket() {
             if (data && (data.type === 'joinAck' || data.type === 'playerState')) { // joinAck or playerState
                 if (data.player) updatePlayerInfo(data.player);
                 if (data.game) updateGameInfo(data.game);
+            } else if (data && data.type === 'gameReset') {
+                // タイトルに戻ったのでjoinを再送してプレイヤー登録し直す
+                const joinData = { type: 'join', id: myUUID };
+                ws.send(JSON.stringify(joinData));
             }
         } catch (err) {
             console.error('ws.onmessage parse error', err);
