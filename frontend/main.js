@@ -207,10 +207,10 @@ const renderPlayerSummary = () => {
   while (overlayBottom.children.length < state.characters.length) {
     const bottom = document.createElement('div');
     bottom.className = 'player-card-bottom';
-    
+
     bottom.innerHTML = `
       <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
-        <div class="pcb-icon" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:150%;background-position:center 10%;background-repeat:no-repeat;border:2px solid rgba(255,255,255,0.2);"></div>
+        <div class="pcb-icon" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:160%;background-position:center 10%;background-repeat:no-repeat;border:2px solid rgba(255,255,255,0.2);"></div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
           <div class="pcb-name" style="font-weight:700;transition:color 0.2s;"></div>
           <div class="pcb-status" style="font-size:12px;color:#cfeffd"></div>
@@ -231,7 +231,7 @@ const renderPlayerSummary = () => {
     const fallbackColor = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6'][index] || '#38bdf8';
     const sampledColor = spriteColors.get(pNum);
     const color = sampledColor || fallbackColor;
-    
+
     const hp = Math.floor(player.hp ?? 0);
     const maxHp = Math.floor(player.maxHp ?? 1);
     const score = Math.floor(player.score ?? 0);
@@ -261,7 +261,7 @@ const renderPlayerSummary = () => {
       icon.style.backgroundImage = `url('${spriteUrl}')`;
       icon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
       icon.style.filter = isDead ? 'grayscale(1)' : '';
-      icon.textContent = ''; 
+      icon.textContent = '';
     }
 
     const name = bottom.querySelector('.pcb-name');
@@ -276,7 +276,7 @@ const renderPlayerSummary = () => {
     const statusHash = `${isDead}:${respawnSec}:${hp}:${maxHp}:${score}`;
     if (status.dataset.hash !== statusHash) {
       status.dataset.hash = statusHash;
-      status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`;
+      status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `${score}pt`;
     }
 
     const respawnDiv = bottom.querySelector('.pcb-respawn');
@@ -477,25 +477,25 @@ socket.addEventListener('message', (e) => {
     state.items = Array.isArray(payload.items) ? payload.items : [];
     state.game = payload.game
       ? {
-          stageScore: payload.game.stageScore ?? 0,
-          totalPlayerScore: payload.game.totalPlayerScore ?? 0,
-          targetScore: payload.game.targetScore ?? 100,
-          timeLimitMs: payload.game.timeLimitMs ?? 0,
-          timeRemainingMs: payload.game.timeRemainingMs ?? 0,
-          cleared: payload.game.cleared ?? false,
-          gameOver: payload.game.gameOver ?? false,
-          showReturnNotice: payload.game.showReturnNotice ?? false,
-          returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
-          showTitle: payload.game.showTitle ?? false,
-          waitingForStart: payload.game.waitingForStart ?? false,
-          countdownRemainingMs: payload.game.countdownRemainingMs ?? 0,
-          countdownStarted: payload.game.countdownStarted ?? false,
-          playerCount: payload.game.playerCount ?? 0,
-          difficulty: payload.game.difficulty ?? 'normal',
-          stageNumber: payload.game.stageNumber ?? 1,
-          stage: payload.game.stage ?? 1,
-          stageLabel: payload.game.stageLabel ?? 'Stage 1',
-        }
+        stageScore: payload.game.stageScore ?? 0,
+        totalPlayerScore: payload.game.totalPlayerScore ?? 0,
+        targetScore: payload.game.targetScore ?? 100,
+        timeLimitMs: payload.game.timeLimitMs ?? 0,
+        timeRemainingMs: payload.game.timeRemainingMs ?? 0,
+        cleared: payload.game.cleared ?? false,
+        gameOver: payload.game.gameOver ?? false,
+        showReturnNotice: payload.game.showReturnNotice ?? false,
+        returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
+        showTitle: payload.game.showTitle ?? false,
+        waitingForStart: payload.game.waitingForStart ?? false,
+        countdownRemainingMs: payload.game.countdownRemainingMs ?? 0,
+        countdownStarted: payload.game.countdownStarted ?? false,
+        playerCount: payload.game.playerCount ?? 0,
+        difficulty: payload.game.difficulty ?? 'normal',
+        stageNumber: payload.game.stageNumber ?? 1,
+        stage: payload.game.stage ?? 1,
+        stageLabel: payload.game.stageLabel ?? 'Stage 1',
+      }
       : state.game;
 
     if (payload.game && typeof payload.game.stage === 'number' && payload.game.stage > prevStage) {
@@ -512,7 +512,7 @@ const showStageTransition = (stage, stageLabel) => {
   if (!overlayStageTransition || !stageTransitionText) return;
   const labelText = stageLabel || `Stage ${stage}`;
   stageTransitionText.textContent = `${labelText}`;
-  
+
   // アニメーションを再トリガーするために一度クラスを外してリフローを強制
   overlayStageTransition.classList.remove('show');
   void overlayStageTransition.offsetWidth;
@@ -827,7 +827,7 @@ const drawStars = (width, height) => {
       star.y = 0;
       star.x = Math.random();
     }
-    
+
     star.brightness += (Math.random() - 0.5) * 0.08;
     star.brightness = Math.max(0.2, Math.min(1.0, star.brightness));
 
@@ -839,7 +839,7 @@ const drawStars = (width, height) => {
       ctx.shadowBlur = 0;
       ctx.fillStyle = `rgba(186, 230, 253, ${star.brightness * 0.6})`;
     }
-    
+
     ctx.beginPath();
     ctx.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2);
     ctx.fill();
