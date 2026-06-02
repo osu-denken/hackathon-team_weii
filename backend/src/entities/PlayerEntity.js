@@ -12,6 +12,7 @@ class PlayerEntity extends LivingEntity {
     this.powerUntil = 0;
     this.shieldUntil = 0;
     this.tripleShotUntil = 0;
+    this.scoreDoubleUntil = 0;
     this.lastShotAt = 0;
     this.lastControlAt = Date.now();
     this.number = number;
@@ -43,12 +44,23 @@ class PlayerEntity extends LivingEntity {
     }
   }
 
+  applyScoreDouble(now, durationMs) {
+    this.scoreDoubleUntil = Math.max(this.scoreDoubleUntil, now + durationMs);
+  }
+
+  hasScoreDouble(now) {
+    return this.scoreDoubleUntil > now;
+  }
+
   updateTimers(now) {
     if (this.shieldUntil > 0 && this.shieldUntil <= now) {
       this.shieldUntil = 0;
     }
     if (this.tripleShotUntil > 0 && this.tripleShotUntil <= now) {
       this.tripleShotUntil = 0;
+    }
+    if (this.scoreDoubleUntil > 0 && this.scoreDoubleUntil <= now) {
+      this.scoreDoubleUntil = 0;
     }
   }
 
@@ -104,6 +116,7 @@ class PlayerEntity extends LivingEntity {
       lastControlAt: this.lastControlAt,
       dead: this.isDead(),
       deadUntil: this.deadUntil ?? 0,
+      scoreDouble: this.scoreDoubleUntil > Date.now(),
     };
   }
 }

@@ -16,7 +16,7 @@ const MAX_ACTIVE_BULLETS_PER_PLAYER = 12;
 const TRIPLE_SHOT_DURATION_MS = 5000;
 const SHIELD_DURATION_MS = 5000;
 const HEAL_AMOUNT = 2;
-const SCORE_UP_AMOUNT = 10;
+const SCORE_DOUBLE_DURATION_MS = 8000;
 const ENEMY_BULLET_SPEED = 0.12;
 
 const TARGET_SCORE = 100;
@@ -252,7 +252,7 @@ class Stage {
     }
 
     if (item.type === 'score_up') {
-      player.score += SCORE_UP_AMOUNT;
+      player.applyScoreDouble(now, SCORE_DOUBLE_DURATION_MS);
       player.lastControlAt = now;
       return;
     }
@@ -611,7 +611,9 @@ class Stage {
       if (kill.ownerId) {
         const player = this.players.get(kill.ownerId);
         if (player) {
-          player.score += 1;
+          const baseScore = kill.enemy.type === 'big' ? 2 : 1;
+          const multiplier = player.hasScoreDouble(Date.now()) ? 2 : 1;
+          player.score += baseScore * multiplier;
         }
       }
 
