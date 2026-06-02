@@ -21,6 +21,7 @@ const difficultyControls = document.getElementById('difficulty-controls');
 const difficultyNormalBtn = document.getElementById('difficulty-normal');
 const difficultyHardBtn = document.getElementById('difficulty-hard');
 let _localPlayerNumber = null;
+let _controlsEnabled = true;
 
 let neutralBeta = null; // 傾きのニュートラル位置（初期値はnullで、最初のセンサーイベントで設定）
 
@@ -86,7 +87,7 @@ function connectWebSocket() {
         try {
             const data = JSON.parse(e.data);
             if (data && (data.type === 'joinAck' || data.type === 'playerState')) { // joinAck or playerState
-                if (data.player) updatePlayerInfo(data.player);
+                if (Object.prototype.hasOwnProperty.call(data, 'player')) updatePlayerInfo(data.player);
                 if (data.game) updateGameInfo(data.game);
             }
         } catch (err) {
@@ -118,6 +119,7 @@ function updatePlayerInfo(player) {
         }
         _localPlayerNumber = null;
         if (difficultyControls) difficultyControls.style.display = 'none';
+        _controlsEnabled = false;
         return;
     }
 
@@ -131,7 +133,10 @@ function updatePlayerInfo(player) {
     if (playerBadge) playerBadge.style.backgroundColor = color;
     _localPlayerNumber = player.number || null;
     
-    if (btnUseItem) btnUseItem.disabled = !_currentHeldItem;
+    // disable controls if player is dead (hp <= 0)
+    _controlsEnabled = !(player.hp <= 0);
+
+    if (btnUseItem) btnUseItem.disabled = !_currentHeldItem || !_controlsEnabled;
     if (itemIcon) {
         const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : itemIconMap.empty;
         itemIcon.src = iconSrc || itemIconMap.empty;
@@ -154,6 +159,8 @@ if (btnUseItem) {
 // --- 4. 移動量検知と送信 (move) ---
 function handleOrientation(e) {
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+    if (!_controlsEnabled) return;
 
     if (e.beta == null) return;
 
@@ -195,6 +202,7 @@ let _isHolding = false;
 let _lastTouchTime = 0;
 
 function sendShoot() {
+    if (!_controlsEnabled) return;
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: "shoot" }));
     }
@@ -232,7 +240,7 @@ btnShoot.addEventListener('mouseleave', stopShooting);
 // --- UI更新ユーティリティ ---
 function updateUI(isConnected) {
     btnJoin.textContent = isConnected ? 'LEAVE' : 'JOIN';
-    btnShoot.disabled = !isConnected;
+    btnShoot.disabled = !isConnected || !_controlsEnabled;
     
     btnJoin.classList.toggle('leave-state', isConnected);
     btnJoin.classList.toggle('join-state', !isConnected);

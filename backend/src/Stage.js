@@ -159,7 +159,9 @@ class Stage {
     if (!player) {
       return;
     }
-
+    if (player.isDead && player.isDead()) {
+      return;
+    }
     const moveDelta = clamp(Number(delta) || 0, -1, 1);
     player.move(moveDelta, X_MIN, X_MAX);
     if (moveDelta !== 0) {
@@ -170,6 +172,10 @@ class Stage {
   shootPlayer(id, now) {
     const player = this.getPlayer(id);
     if (!player) {
+      return false;
+    }
+
+    if (player.isDead && player.isDead()) {
       return false;
     }
 
@@ -194,6 +200,10 @@ class Stage {
   useHeldItem(id, now) {
     const player = this.getPlayer(id);
     if (!player) {
+      return;
+    }
+
+    if (player.isDead && player.isDead()) {
       return;
     }
 
@@ -236,6 +246,15 @@ class Stage {
     }
 
     this.updatePlayerPowers(now);
+    // handle scheduled respawns
+    this.players.forEach((player) => {
+      if (player.respawnAt && now >= player.respawnAt) {
+        player.hp = player.maxHp;
+        player.respawnAt = null;
+        player.x = 0;
+        player.lastControlAt = now;
+      }
+    });
     this.maybeSpawnEnemy(now);
     this.updateEnemies();
     this.updateBullets();
@@ -492,6 +511,24 @@ class Stage {
             player.damage(attack);
           }
           this.enemies.delete(enemyId);
+          if (player.isDead && player.isDead()) {
+            // handle death according to difficulty
+            if (this.difficulty === 'normal') {
+              // schedule respawn after 10s
+              player.respawnAt = now + 10000;
+            } else if (this.difficulty === 'hard') {
+              // remove player (they disappear) and check for game over
+              this.players.delete(player.id);
+              if (this.players.size === 0) {
+                // end game
+                this.gameStarted = false;
+                this.mode = 'title';
+                this.emptySince = now;
+                this.pausedAt = null;
+                this.startCountdownAt = null;
+              }
+            }
+          }
         }
       });
     });

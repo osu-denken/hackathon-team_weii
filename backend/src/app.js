@@ -51,11 +51,20 @@ const sendStateToPlayers = () => {
   const now = Date.now();
   socketToPlayerId.forEach((id, ws) => {
     const player = stage.getPlayer(id);
-    if (!player) return;
+    let payload;
+    if (!player) {
+      payload = {
+        type: 'playerState',
+        player: null,
+        game: stage.buildGameState(now),
+      };
+    } else {
+      payload = stage.buildPlayerState(player, now);
+    }
 
-    const payload = stage.buildPlayerState(player, now);
-    if (ws.readyState === WebSocket.OPEN)
+    if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(payload));
+    }
 
   });
 };
