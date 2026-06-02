@@ -521,6 +521,19 @@ const drawEnemy = (enemy, width, height) => {
 };
 
 const drawPlayer = (player, index, width, height) => {
+  const isDead = player.dead ?? false;
+  // 死亡中（リスポーン待ち10秒）は非表示。リスポーン直前3秒は点滅させる
+  if (isDead) {
+    const respawnRemainingMs = player.deadUntil && player.deadUntil > Date.now() ? player.deadUntil - Date.now() : 0;
+    if (respawnRemainingMs > 3000) {
+      return; // リスポーンまで3秒以上あれば完全非表示
+    }
+    // 残り3秒以内なら点滅（100msごと）
+    if (Math.floor(Date.now() / 100) % 2 === 0) {
+      return;
+    }
+  }
+
   const x = toCanvasX(player.x, width);
   const y = height - 130;
   const fallbackColor = player.color || ['#22d3ee', '#fbbf24'][index] || '#38bdf8';
