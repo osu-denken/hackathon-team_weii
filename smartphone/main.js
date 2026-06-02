@@ -11,6 +11,7 @@ const wsUrlInput = document.getElementById('ws-url');
 const btnJoin = document.getElementById('btn-join');
 const btnShoot = document.getElementById('btn-shoot');
 const btnResetPosition = document.getElementById('btn-reset-position');
+const btnFullscreen = document.getElementById('btn-fullscreen');
 const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
 const playerInfoContainer = document.getElementById('player-info');
@@ -182,6 +183,25 @@ const tryResetPosition = (e) => {
 if (btnResetPosition) {
     btnResetPosition.addEventListener('click', tryResetPosition);
     btnResetPosition.addEventListener('touchstart', tryResetPosition, { passive: false });
+}
+
+// --- Fullscreen ---
+const toggleFullscreen = (e) => {
+    if (e) e.preventDefault();
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+};
+
+if (btnFullscreen) {
+    btnFullscreen.addEventListener('click', toggleFullscreen);
+    btnFullscreen.addEventListener('touchstart', toggleFullscreen, { passive: false });
 }
 
 // --- 4. 移動量検知と送信 (move) ---
