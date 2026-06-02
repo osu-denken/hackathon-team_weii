@@ -11,6 +11,7 @@ const overlayStage = document.getElementById('overlay-stage');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
+const overlayStageTransition = document.getElementById('overlay-stage-transition');
 const overlayClearTime = document.getElementById('overlay-clear-time');
 const overlayGameOver = document.getElementById('overlay-gameover');
 const stageTransitionText = document.getElementById('stage-transition-text');
@@ -54,7 +55,6 @@ const state = {
     totalPlayerScore: 0,
     targetScore: 100,
     timeLimitMs: 0,
-    timeRemainingMs: 0,
     timeRemainingMs: 0,
     cleared: false,
     gameOver: false,
@@ -223,8 +223,6 @@ const updateGameUI = () => {
   const {
     stageScore,
     totalPlayerScore,
-    targetScore,
-    timeRemainingMs,
     targetScore,
     timeRemainingMs,
     cleared,
