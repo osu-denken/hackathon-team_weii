@@ -454,7 +454,7 @@ const showStageTransition = (stage, stageLabel) => {
   stageTransitionTimeout = setTimeout(() => {
     overlayStageTransition.classList.remove('show');
     stageTransitionTimeout = null;
-  }, 3600);
+  }, 3000);
 };
 
 const toCanvasX = (x, width) => width / 2 + x * 70;
