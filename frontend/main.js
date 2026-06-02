@@ -7,9 +7,12 @@ const overlayPlayerCount = document.getElementById('overlay-player-count');
 const overlayScoreFill = document.getElementById('overlay-score-fill');
 const overlayScoreText = document.getElementById('overlay-score-text');
 const overlayTime = document.getElementById('overlay-time');
+const overlayStage = document.getElementById('overlay-stage');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
+const overlayStageTransition = document.getElementById('overlay-stage-transition');
+const stageTransitionText = document.getElementById('stage-transition-text');
 const returnNoticeOverlay = document.getElementById('return-notice');
 const returnNoticeSeconds = document.getElementById('return-notice-seconds');
 const titleCountdown = document.getElementById('title-countdown');
@@ -211,6 +214,7 @@ const updateGameUI = () => {
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
+  if (overlayStage) overlayStage.textContent = stageLabel || `Stage ${stage || 1}`;
   if (overlayPlayerCount) overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
   if (returnNoticeOverlay) {
     returnNoticeOverlay.classList.toggle('show', showReturnNotice);
@@ -327,6 +331,7 @@ socket.addEventListener('message', (e) => {
   }
 
   if (payload.type === 'update') {
+    const prevStage = state.game.stage;
     state.characters = Array.isArray(payload.characters)
       ? payload.characters.slice(0, MAX_PLAYERS)
       : [];
@@ -353,9 +358,29 @@ socket.addEventListener('message', (e) => {
         }
       : state.game;
 
+    if (payload.game && typeof payload.game.stage === 'number' && payload.game.stage > prevStage) {
+      showStageTransition(payload.game.stage, payload.game.stageLabel);
+    }
+
     updateGameUI();
   }
 });
+
+let stageTransitionTimeout = null;
+
+const showStageTransition = (stage, stageLabel) => {
+  if (!overlayStageTransition || !stageTransitionText) return;
+  const labelText = stageLabel || `Stage ${stage}`;
+  stageTransitionText.textContent = `${labelText} へ進みます`;
+  overlayStageTransition.classList.add('show');
+  if (stageTransitionTimeout) {
+    clearTimeout(stageTransitionTimeout);
+  }
+  stageTransitionTimeout = setTimeout(() => {
+    overlayStageTransition.classList.remove('show');
+    stageTransitionTimeout = null;
+  }, 3000);
+};
 
 const toCanvasX = (x, width) => width / 2 + x * 70;
 const toCanvasY = (y, height) => height - 120 - y * 42;
