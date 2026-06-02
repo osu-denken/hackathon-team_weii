@@ -51,6 +51,7 @@ const STAGE_CONFIG = {
     canEnemiesShoot: true,
   },
 };
+const RESPAWN_MS = 10000;
 
 const DIFFICULTY_SETTINGS = {
   normal: {
@@ -181,6 +182,10 @@ class Stage {
       if (this.gameStarted) {
         this.pausedAt = now;
       }
+      // ハードモードでは全員消滅で即ゲーム終了（タイトルへ戻す）
+      if (this.difficulty === 'hard' && this.gameStarted) {
+        this.resetToTitle(now);
+      }
     }
   }
 
@@ -193,7 +198,9 @@ class Stage {
     if (!player) {
       return;
     }
-
+    if (player.isDead()) {
+      return;
+    }
     const moveDelta = clamp(Number(delta) || 0, -1, 1);
     player.move(moveDelta, X_MIN, X_MAX);
     if (moveDelta !== 0) {
@@ -206,7 +213,9 @@ class Stage {
     if (!player) {
       return false;
     }
-
+    if (player.isDead()) {
+      return false;
+    }
     if (!player.canShoot(now, SHOOT_COOLDOWN_MS)) {
       return false;
     }
@@ -230,7 +239,9 @@ class Stage {
     if (!player) {
       return;
     }
-
+    if (player.isDead()) {
+      return;
+    }
     const item = player.consumeHeldItem();
     if (!item) {
       return;
@@ -286,6 +297,7 @@ class Stage {
       this.stageCleared = true;
       this.nextStage(now);
     }
+    this.handlePlayerDeaths(now);
   }
 
   maybeStartGame(now) {
@@ -411,6 +423,8 @@ class Stage {
         bulletsMax: MAX_ACTIVE_BULLETS_PER_PLAYER,
         canShoot: player.canShoot(now, SHOOT_COOLDOWN_MS),
         cooldownRemainingMs,
+        dead: player.isDead(),
+        respawnRemainingMs: player.deadUntil && player.deadUntil > now ? player.deadUntil - now : 0,
       },
       item: this.itemEntity ? this.itemEntity.toPayload() : null,
       game: this.buildGameState(now),
@@ -612,6 +626,31 @@ class Stage {
         player.setHeldItem(payload);
         this.itemEntity = null;
         break;
+      }
+    }
+  }
+
+  handlePlayerDeaths(now) {
+    for (const player of Array.from(this.players.values())) {
+      if (!player.isDead()) {
+        if (player.deadUntil) {
+          player.deadUntil = 0;
+        }
+        continue;
+      }
+
+      if (this.difficulty === 'hard') {
+        this.removePlayer(player.id, now);
+        continue;
+      }
+
+      if (!player.deadUntil || player.deadUntil <= 0) {
+        player.deadUntil = now + RESPAWN_MS;
+      } else if (now >= player.deadUntil) {
+        player.hp = player.maxHp;
+        player.x = 0;
+        player.lastControlAt = now;
+        player.deadUntil = 0;
       }
     }
   }

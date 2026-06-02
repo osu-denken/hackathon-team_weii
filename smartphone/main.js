@@ -16,6 +16,7 @@ const playerInfoContainer = document.getElementById('player-info');
 const playerBadge = document.getElementById('player-badge');
 const playerNumberSpan = document.getElementById('player-number');
 const playerNumberText = document.getElementById('player-number-text');
+const playerStatus = document.getElementById('player-status');
 let _currentHeldItem = null;
 const difficultyControls = document.getElementById('difficulty-controls');
 const difficultyNormalBtn = document.getElementById('difficulty-normal');
@@ -131,12 +132,27 @@ function updatePlayerInfo(player) {
     if (playerBadge) playerBadge.style.backgroundColor = color;
     _localPlayerNumber = player.number || null;
     
-    if (btnUseItem) btnUseItem.disabled = !_currentHeldItem;
+    // 死亡状態の処理
+    const isDead = Boolean(player.dead);
+    const respawnMs = player.respawnRemainingMs || 0;
+    if (playerStatus) {
+        if (isDead) {
+            playerStatus.style.display = 'block';
+            const sec = Math.ceil(respawnMs / 1000);
+            playerStatus.textContent = `死亡中…復活まで ${sec} 秒`;
+        } else {
+            playerStatus.style.display = 'none';
+            playerStatus.textContent = '';
+        }
+    }
+
+    if (btnUseItem) btnUseItem.disabled = !_currentHeldItem || isDead;
     if (itemIcon) {
         const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : itemIconMap.empty;
         itemIcon.src = iconSrc || itemIconMap.empty;
         itemIcon.style.opacity = _currentHeldItem ? 1 : 0.3;
     }
+    if (btnShoot) btnShoot.disabled = isDead || !ws || ws.readyState !== WebSocket.OPEN;
 }
 
 const tryUseItem = (e) => {
