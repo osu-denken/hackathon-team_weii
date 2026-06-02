@@ -320,10 +320,6 @@ const updateGameUI = () => {
       titleDifficultyNormal.classList.toggle('active', difficulty === 'normal');
       titleDifficultyHard.classList.toggle('active', difficulty === 'hard');
     }
-    const titleStage = document.getElementById('title-stage');
-    if (titleStage) {
-      titleStage.textContent = stageLabel || `Stage ${stage || 1}`;
-    }
   }
   renderPlayerSummary();
 };
