@@ -210,66 +210,114 @@ const renderPlayerSummary = () => {
     
     bottom.innerHTML = `
       <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
-        <div class="pcb-icon" style="width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;"></div>
+        <div class="pcb-icon" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:150%;background-position:center 10%;background-repeat:no-repeat;border:2px solid rgba(255,255,255,0.2);"></div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
           <div class="pcb-name" style="font-weight:700;transition:color 0.2s;"></div>
           <div class="pcb-status" style="font-size:12px;color:#cfeffd"></div>
         </div>
       </div>
       <div class="pcb-right" style="display:flex; align-items: center; justify-content: flex-end; min-width: 80px;">
+        <div class="pcb-respawn" style="display:none;font-size:18px;font-weight:700;color:#f87171;text-align:right;">
+          <span class="respawn-sec"></span><span style="font-size:11px;margin-left:2px;">秒</span>
+        </div>
+        <div class="pcb-hp-blocks" style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;"></div>
       </div>
     `;
     overlayBottom.appendChild(bottom);
   }
 
   state.characters.forEach((player, index) => {
-    const color = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6'][index] || '#38bdf8';
-    const hp = player.hp ?? 0;
-    const maxHp = player.maxHp ?? 1;
-    const score = player.score ?? 0;
+    const pNum = player.number ?? index + 1;
+    const fallbackColor = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6'][index] || '#38bdf8';
+    const sampledColor = spriteColors.get(pNum);
+    const color = sampledColor || fallbackColor;
+    
+    const hp = Math.floor(player.hp ?? 0);
+    const maxHp = Math.floor(player.maxHp ?? 1);
+    const score = Math.floor(player.score ?? 0);
     const isDead = player.dead ?? false;
     const deadUntil = player.deadUntil ?? 0;
     const respawnRemainingMs = isDead && deadUntil > Date.now() ? deadUntil - Date.now() : 0;
     const respawnSec = Math.ceil(respawnRemainingMs / 1000);
-    const pNum = player.number ?? index + 1;
 
     const bottom = overlayBottom.children[index];
-    
-    const stateHash = `${color}:${hp}:${maxHp}:${score}:${isDead}:${respawnSec}:${pNum}`;
-    if (bottom.dataset.hash === stateHash) return;
-    bottom.dataset.hash = stateHash;
 
-    if (isDead) {
-      bottom.style.background = 'rgba(239,68,68,0.15)';
-      bottom.style.borderColor = 'rgba(239,68,68,0.4)';
-    } else {
-      bottom.style.background = '';
-      bottom.style.borderColor = '';
+    if (bottom.dataset.isDead !== String(isDead)) {
+      bottom.dataset.isDead = String(isDead);
+      if (isDead) {
+        bottom.style.background = 'rgba(239,68,68,0.15)';
+        bottom.style.borderColor = 'rgba(239,68,68,0.4)';
+      } else {
+        bottom.style.background = '';
+        bottom.style.borderColor = '';
+      }
     }
 
     const icon = bottom.querySelector('.pcb-icon');
-    icon.style.background = isDead ? 'rgba(239,68,68,0.5)' : color;
-    icon.style.filter = isDead ? 'grayscale(1)' : '';
-    icon.textContent = pNum;
+    const iconHash = `${pNum}:${isDead}`;
+    if (icon.dataset.hash !== iconHash) {
+      icon.dataset.hash = iconHash;
+      const spriteUrl = spritePaths[pNum] || '/asset/images/character-1.png';
+      icon.style.backgroundImage = `url('${spriteUrl}')`;
+      icon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
+      icon.style.filter = isDead ? 'grayscale(1)' : '';
+      icon.textContent = ''; 
+    }
 
     const name = bottom.querySelector('.pcb-name');
-    name.style.color = isDead ? '#fca5a5' : '';
-    name.textContent = `P${pNum}`;
+    if (name.dataset.pNum !== String(pNum) || name.dataset.isDead !== String(isDead)) {
+      name.dataset.pNum = String(pNum);
+      name.dataset.isDead = String(isDead);
+      name.style.color = isDead ? '#fca5a5' : '';
+      name.textContent = `P${pNum}`;
+    }
 
     const status = bottom.querySelector('.pcb-status');
-    status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`;
+    const statusHash = `${isDead}:${respawnSec}:${hp}:${maxHp}:${score}`;
+    if (status.dataset.hash !== statusHash) {
+      status.dataset.hash = statusHash;
+      status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`;
+    }
 
-    const right = bottom.querySelector('.pcb-right');
+    const respawnDiv = bottom.querySelector('.pcb-respawn');
+    const hpBlocksDiv = bottom.querySelector('.pcb-hp-blocks');
+
     if (isDead) {
-      right.innerHTML = `<div style="font-size:18px;font-weight:700;color:#f87171;text-align:right;">${respawnSec}<span style="font-size:11px;margin-left:2px;">秒</span></div>`;
-    } else {
-      let hpBlocks = `<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">`;
-      for (let i = 0; i < maxHp; i++) {
-        const isFilled = i < hp;
-        hpBlocks += `<div style="width:8px;height:12px;background:${isFilled ? color : 'rgba(255, 255, 255, 0.15)'};transition:all 0.2s;"></div>`;
+      if (respawnDiv.style.display !== 'block') {
+        respawnDiv.style.display = 'block';
+        hpBlocksDiv.style.display = 'none';
       }
-      hpBlocks += `</div>`;
-      right.innerHTML = hpBlocks;
+      const respawnSecSpan = respawnDiv.querySelector('.respawn-sec');
+      if (respawnSecSpan.textContent !== String(respawnSec)) {
+        respawnSecSpan.textContent = String(respawnSec);
+      }
+    } else {
+      if (hpBlocksDiv.style.display !== 'flex') {
+        hpBlocksDiv.style.display = 'flex';
+        respawnDiv.style.display = 'none';
+      }
+
+      while (hpBlocksDiv.children.length > maxHp) {
+        hpBlocksDiv.removeChild(hpBlocksDiv.lastChild);
+      }
+      while (hpBlocksDiv.children.length < maxHp) {
+        const block = document.createElement('div');
+        block.style.width = '8px';
+        block.style.height = '12px';
+        block.style.transition = 'all 0.2s';
+        hpBlocksDiv.appendChild(block);
+      }
+
+      for (let i = 0; i < maxHp; i++) {
+        const block = hpBlocksDiv.children[i];
+        const isFilled = i < hp;
+        const blockHash = `${isFilled}:${color}`;
+        if (block.dataset.hash !== blockHash) {
+          block.dataset.hash = blockHash;
+          block.style.background = isFilled ? color : 'rgba(255, 255, 255, 0.15)';
+          block.style.boxShadow = isFilled ? `0 0 6px ${color}` : 'none';
+        }
+      }
     }
   });
 };
