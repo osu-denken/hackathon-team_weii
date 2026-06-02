@@ -89,7 +89,8 @@ const guideSpritePaths = {
 };
 const bulletSpritePath = '/asset/images/bullet.png';
 const stageBackgroundPaths = {
-  2: '/asset/images/background-stage-2.svg',
+  2: '/asset/images/stage-second.png',
+  3: '/asset/images/stage-final.png',
 };
 
 const spriteCache = new Map();
