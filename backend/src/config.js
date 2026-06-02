@@ -8,7 +8,8 @@ const SSL_CERT_PATH = process.env.SSL_CERT_PATH || path.resolve('../shared/serve
 
 // const FRONTEND_URL = null; // nullの場合は自動に
 // const FRONTEND_URL = 'https://hackathon-team-weii.fly.dev/client/';
-const FRONTEND_URL = "https://obtundent-britteny-handily.ngrok-free.dev/client/";
+// const FRONTEND_URL = "https://obtundent-britteny-handily.ngrok-free.dev/client/";
+const FRONTEND_URL = "https://phoneshoot.kmmz.jp/client/";
 
 const LOCALHOST_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 
