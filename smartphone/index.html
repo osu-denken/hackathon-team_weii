@@ -4,12 +4,19 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>Controller of "phone ∧ shoot"</title>
-        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="styles.css?v=2" />
     </head>
     <body>
+        <button id="btn-fullscreen" class="btn-floating top-right" title="全画面表示">
+            <svg id="icon-fullscreen-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <svg id="icon-fullscreen-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;display:none;">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+        </button>
+        <button id="btn-reset-position" class="btn-floating bottom-right" disabled>傾きリセット</button>
         <div class="main-layout">
-            <button id="btn-fullscreen" class="btn-floating top-right">全画面表示</button>
-            <button id="btn-reset-position" class="btn-floating bottom-right" disabled>傾き再調整</button>
             <div class="left-panel">
                 <input type="hidden" id="ws-url" value="">
                 <button id="btn-join" class="btn-flat join-state">JOIN</button>
@@ -32,13 +39,12 @@
                         <img id="item-icon" alt="" />
                     </button>
                 </div>
-                </div>
             </div>
 
             <div class="controller-area">
                 <button id="btn-shoot" disabled>SHOOT</button>
             </div>
         </div>
-        <script src="main.js"></script>
+        <script src="main.js?v=3"></script>
     </body>
 </html>

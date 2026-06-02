@@ -12,6 +12,8 @@ const btnJoin = document.getElementById('btn-join');
 const btnShoot = document.getElementById('btn-shoot');
 const btnResetPosition = document.getElementById('btn-reset-position');
 const btnFullscreen = document.getElementById('btn-fullscreen');
+const iconFullscreenEnter = document.getElementById('icon-fullscreen-enter');
+const iconFullscreenExit = document.getElementById('icon-fullscreen-exit');
 const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
 const playerInfoContainer = document.getElementById('player-info');
@@ -186,6 +188,19 @@ if (btnResetPosition) {
 }
 
 // --- Fullscreen ---
+const updateFullscreenIcons = () => {
+    if (!iconFullscreenEnter || !iconFullscreenExit) return;
+    if (document.fullscreenElement) {
+        iconFullscreenEnter.style.display = 'none';
+        iconFullscreenExit.style.display = 'block';
+    } else {
+        iconFullscreenEnter.style.display = 'block';
+        iconFullscreenExit.style.display = 'none';
+    }
+};
+
+document.addEventListener('fullscreenchange', updateFullscreenIcons);
+
 const toggleFullscreen = (e) => {
     if (e) e.preventDefault();
     if (!document.fullscreenElement) {

@@ -22,6 +22,7 @@ body {
     box-sizing: border-box;
     padding: 15px;
     gap: 15px;
+    position: relative;
 }
 
 /* 左側パネル: 丸みと影を排除したフラットデザイン */
