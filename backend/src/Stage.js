@@ -143,12 +143,9 @@ class Stage {
 
   movePlayer(id, delta, now = Date.now()) {
     const player = this.getPlayer(id);
-    if (!player) {
-      return;
-    }
-    if (player.isDead()) {
-      return;
-    }
+    if (!player) return;
+    if (player.isDead()) return;
+
     const moveDelta = clamp(Number(delta) || 0, -1, 1);
     player.move(moveDelta, X_MIN, X_MAX);
     if (moveDelta !== 0) {
@@ -158,31 +155,19 @@ class Stage {
 
   resetPlayerPosition(id, now = Date.now()) {
     const player = this.getPlayer(id);
-    if (!player) {
-      return;
-    }
-    if (player.isDead()) {
-      return;
-    }
+    if (!player) return;
+    if (player.isDead()) return;
+
     player.x = 0;
     player.lastControlAt = now;
   }
 
   shootPlayer(id, now) {
     const player = this.getPlayer(id);
-    if (!player) {
-      return false;
-    }
-    if (player.isDead()) {
-      return false;
-    }
-    if (!player.canShoot(now, SHOOT_COOLDOWN_MS)) {
-      return false;
-    }
-
-    if (this.countBulletsByOwner(player.id) >= MAX_ACTIVE_BULLETS_PER_PLAYER) {
-      return false;
-    }
+    if (!player) return false;
+    if (player.isDead()) return false;
+    if (!player.canShoot(now, SHOOT_COOLDOWN_MS)) return false;
+    if (this.countBulletsByOwner(player.id) >= MAX_ACTIVE_BULLETS_PER_PLAYER) return false;
 
     if (player.hasTripleShot(now)) {
       this.spawnTripleBullets(player, player.attackPower);
@@ -196,16 +181,11 @@ class Stage {
 
   useHeldItem(id, now) {
     const player = this.getPlayer(id);
-    if (!player) {
-      return;
-    }
-    if (player.isDead()) {
-      return;
-    }
+    if (!player) return;
+    if (player.isDead()) return;
+    
     const item = player.consumeHeldItem();
-    if (!item) {
-      return;
-    }
+    if (!item) return;
 
     item.applyUse(player, this, now);
   }
@@ -234,9 +214,7 @@ class Stage {
     }
 
     this.maybeStartGame(now);
-    if (!this.gameStarted) {
-      return;
-    }
+    if (!this.gameStarted) return;
 
     this.updatePlayerPowers(now);
 
@@ -271,9 +249,8 @@ class Stage {
   }
 
   maybeStartGame(now) {
-    if (this.gameStarted || this.players.size === 0 || this.startCountdownAt === null) {
-      return;
-    }
+    if (this.gameStarted || this.players.size === 0
+       || this.startCountdownAt === null) return;
 
     if (now - this.startCountdownAt >= this.startCountdownMs) {
       this.gameStarted = true;
@@ -350,7 +327,8 @@ class Stage {
   updateBullets(dt) {
     this.bullets.forEach((bullet, id) => {
       bullet.update(dt);
-      if (bullet.y > BulletEntity.MAX_Y || bullet.y < -5 || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
+      if (bullet.y > BulletEntity.MAX_Y || bullet.y < -5
+         || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
         this.bullets.delete(id);
       }
     });
