@@ -12,7 +12,6 @@ const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
 const overlayStageTransition = document.getElementById('overlay-stage-transition');
-const overlayClearTime = document.getElementById('overlay-clear-time');
 const overlayGameOver = document.getElementById('overlay-gameover');
 const stageTransitionText = document.getElementById('stage-transition-text');
 const returnNoticeOverlay = document.getElementById('return-notice');
