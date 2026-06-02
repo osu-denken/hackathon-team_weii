@@ -10,6 +10,7 @@ const THROTTLE_MS = 100;
 const wsUrlInput = document.getElementById('ws-url');
 const btnJoin = document.getElementById('btn-join');
 const btnShoot = document.getElementById('btn-shoot');
+const btnResetPosition = document.getElementById('btn-reset-position');
 const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
 const playerInfoContainer = document.getElementById('player-info');
@@ -147,6 +148,7 @@ function updatePlayerInfo(player) {
     }
 
     if (btnUseItem) btnUseItem.disabled = !_currentHeldItem || isDead;
+    if (btnResetPosition) btnResetPosition.disabled = isDead || !ws || ws.readyState !== WebSocket.OPEN;
     if (itemIcon) {
         const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : itemIconMap.empty;
         itemIcon.src = iconSrc || itemIconMap.empty;
@@ -165,6 +167,17 @@ const tryUseItem = (e) => {
 if (btnUseItem) {
     btnUseItem.addEventListener('click', tryUseItem);
     btnUseItem.addEventListener('touchstart', tryUseItem, { passive: false });
+}
+
+const tryResetPosition = (e) => {
+    if (e) e.preventDefault();
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: 'resetPosition' }));
+};
+
+if (btnResetPosition) {
+    btnResetPosition.addEventListener('click', tryResetPosition);
+    btnResetPosition.addEventListener('touchstart', tryResetPosition, { passive: false });
 }
 
 // --- 4. 移動量検知と送信 (move) ---

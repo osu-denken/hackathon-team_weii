@@ -213,6 +213,18 @@ class Stage {
     }
   }
 
+  resetPlayerPosition(id, now = Date.now()) {
+    const player = this.getPlayer(id);
+    if (!player) {
+      return;
+    }
+    if (player.isDead()) {
+      return;
+    }
+    player.x = 0;
+    player.lastControlAt = now;
+  }
+
   shootPlayer(id, now) {
     const player = this.getPlayer(id);
     if (!player) {

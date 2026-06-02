@@ -109,6 +109,13 @@ const handleUseItem = (ws) => {
   stage.useHeldItem(id, Date.now());
 };
 
+const handleResetPosition = (ws) => {
+  const id = socketToPlayerId.get(ws);
+  if (!id) return;
+
+  stage.resetPlayerPosition(id, Date.now());
+};
+
 const parseMsg = (ws, raw) => {
   let msg;
   try {
@@ -151,6 +158,9 @@ const parseMsg = (ws, raw) => {
       break;
     case 'useItem':
       handleUseItem(ws);
+      break;
+    case 'resetPosition':
+      handleResetPosition(ws);
       break;
     default:
       ws.send(JSON.stringify({ type: 'error', reason: 'unknown type' }));
