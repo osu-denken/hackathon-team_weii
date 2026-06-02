@@ -102,6 +102,8 @@ class PlayerEntity extends LivingEntity {
       number: this.number,
       color: this.color,
       lastControlAt: this.lastControlAt,
+      dead: this.isDead(),
+      deadUntil: this.deadUntil ?? 0,
     };
   }
 }
