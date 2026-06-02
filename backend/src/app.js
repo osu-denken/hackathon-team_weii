@@ -42,6 +42,23 @@ const sendToViewer = (data) => {
 
 // ゲームの状態を更新してViewer(フロントエンド)に送る
 const sendState = () => {
+  // resetToTitle後にplayers.clearされた場合、socketToPlayerId内の既存接続を再登録する
+  socketToPlayerId.forEach((id, ws) => {
+    if (!stage.getPlayer(id) && ws.readyState === WebSocket.OPEN) {
+      // プレイヤーが消えた（resetToTitleによる）→ 再参加させる
+      const player = stage.addPlayer(id, Date.now());
+      // スマホにリセット通知を送る
+      ws.send(JSON.stringify({
+        type: 'gameReset',
+        player: {
+          id: player.id,
+          number: player.number,
+          color: player.color,
+        },
+      }));
+    }
+  });
+
   const payload = stage.buildViewerPayload(Date.now());
   sendToViewer(payload);
 };

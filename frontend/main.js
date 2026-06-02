@@ -98,10 +98,6 @@ const itemSpriteCache = new Map();
 const guideSpriteCache = new Map();
 const stageBackgroundCache = new Map();
 const bulletSprite = new Image();
-const spriteColors = new Map();
-const itemSpriteCache = new Map();
-const guideSpriteCache = new Map();
-const bulletSprite = new Image();
 
 const IDLE_GUIDE_DELAY_MS = 3500;
 const IDLE_GUIDE_FADE_MS = 700;

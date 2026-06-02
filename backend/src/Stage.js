@@ -114,6 +114,7 @@ class Stage {
   }
 
   resetToTitle(now = Date.now()) {
+    this.players.clear();
     this.enemies.clear();
     this.bullets.clear();
     this.itemEntity = null;
@@ -131,8 +132,6 @@ class Stage {
     this.currentStage = 1;
     this.stageCleared = false;
     this.stageScore = 0;
-    // プレイヤーのスコアもリセット
-    this.players.forEach((player) => { player.score = 0; });
   }
 
   addPlayer(id, now = Date.now()) {
