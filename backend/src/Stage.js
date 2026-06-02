@@ -271,6 +271,14 @@ class Stage {
   }
 
   update(now) {
+    // 全ステージクリア後にタイトルへ戻るカウントダウン中
+    if (this.stageCleared && this.currentStage >= 3 && this.emptySince !== null) {
+      if (now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
+        this.resetToTitle(now);
+      }
+      return;
+    }
+
     if (this.players.size === 0) {
       if (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
         this.resetToTitle(now);
@@ -324,6 +332,8 @@ class Stage {
 
   nextStage(now) {
     if (this.currentStage >= 3) {
+      // 全ステージクリア: タイトルへ戻るまでのカウントダウンを開始
+      this.emptySince = now;
       return;
     }
     this.currentStage += 1;
