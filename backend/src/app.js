@@ -36,7 +36,7 @@ const viewers = new Set(); // モニター用のWebSocket接続
 const sendToViewer = (data) => {
   const payload = JSON.stringify(data);
   viewers.forEach((ws) => {
-    send(ws, payload);
+    sendRaw(ws, payload);
   });
 };
 

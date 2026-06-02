@@ -1,6 +1,10 @@
+const sendRaw = (ws, raw) => {
+    ws.send(raw);
+}
+
 const send = (ws, msg) => {
     if (ws.readyState !== WebSocket.OPEN) return;
-    ws.send(JSON.stringify(msg));
+    send(ws, JSON.stringify(msg));
 }
 
 const sendError = (ws, msg) => {
