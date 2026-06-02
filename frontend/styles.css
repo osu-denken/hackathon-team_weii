@@ -199,6 +199,56 @@ canvas { z-index: 0; }
   width: calc(100% - 48px);
 }
 
+.overlay-title {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(2, 6, 20, 0.84);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.overlay-title.show {
+  display: flex;
+}
+
+.title-card {
+  width: min(640px, 100%);
+  padding: 32px 30px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(8, 15, 32, 0.96), rgba(5, 10, 22, 0.96));
+  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.4);
+}
+
+.title-hero {
+  font-size: clamp(2.4rem, 5vw, 5.2rem);
+  line-height: 0.95;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+}
+
+.title-subtitle {
+  margin-top: 18px;
+  color: #dbeafe;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.title-instruction {
+  margin-top: 22px;
+  color: #b9c7f3;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
 .overlay-clear {
   position: absolute;
   inset: 0;
