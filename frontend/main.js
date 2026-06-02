@@ -152,35 +152,16 @@ const formatTime = (ms) => {
 const renderPlayerSummary = () => {
   overlayBottom.innerHTML = '';
 
-  const waiting = state.game.waitingForStart;
-
-  if (waiting) {
-    // 待機中はカウントダウンカードを表示
-    const countdownMs = state.game.countdownRemainingMs ?? 0;
-    const countdownStarted = state.game.countdownStarted ?? false;
-    const playerCount = state.game.playerCount ?? 0;
-
-    if (playerCount > 0 && countdownStarted) {
-      const bottom = document.createElement('div');
-      bottom.className = 'player-card-bottom';
-      bottom.style.cssText = 'justify-content:center;gap:10px;padding:10px 20px;';
-      bottom.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="font-size:13px;color:#cfeffd;">ゲーム開始まで</div>
-          <div style="font-size:22px;font-weight:700;color:#38bdf8;min-width:48px;text-align:center;">${Math.ceil(countdownMs / 1000)}<span style="font-size:14px;margin-left:2px;">秒</span></div>
-        </div>
-      `;
-      overlayBottom.appendChild(bottom);
-    }
-    return;
-  }
-
   state.characters.forEach((player, index) => {
     const color = player.color || ['#22d3ee', '#fbbf24', '#a78bfa', '#f472b6'][index] || '#38bdf8';
     const hp = player.hp ?? 0;
     const maxHp = player.maxHp ?? 1;
     const score = player.score ?? 0;
     const healthRatio = Math.max(0, Math.min(1, maxHp === 0 ? 0 : hp / maxHp));
+    const isDead = player.dead ?? false;
+    const deadUntil = player.deadUntil ?? 0;
+    const respawnRemainingMs = isDead && deadUntil > Date.now() ? deadUntil - Date.now() : 0;
+    const respawnSec = Math.ceil(respawnRemainingMs / 1000);
 
     // side panel card
     const card = document.createElement('div');
@@ -197,18 +178,23 @@ const renderPlayerSummary = () => {
     // bottom overlay (horizontal)
     const bottom = document.createElement('div');
     bottom.className = 'player-card-bottom';
+    if (isDead) {
+      bottom.style.background = 'rgba(239,68,68,0.15)';
+      bottom.style.borderColor = 'rgba(239,68,68,0.4)';
+    }
     bottom.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:${color};display:grid;place-items:center;font-weight:700;color:#031021;">${player.number ?? index + 1}</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:${isDead ? 'rgba(239,68,68,0.5)' : color};display:grid;place-items:center;font-weight:700;color:#fff;${isDead ? 'filter:grayscale(1);' : ''}">${player.number ?? index + 1}</div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
-          <div style="font-weight:700">P${player.number ?? index + 1}</div>
-          <div style="font-size:12px;color:#cfeffd">HP: ${hp}/${maxHp} ・ ${score}pt</div>
+          <div style="font-weight:700;${isDead ? 'color:#fca5a5;' : ''}">P${player.number ?? index + 1}${isDead ? ' 💀' : ''}</div>
+          <div style="font-size:12px;color:#cfeffd">${isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`}</div>
         </div>
       </div>
       <div style="width:80px;">
-        <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;">
-          <div style="height:100%;width:${Math.round(healthRatio*100)}%;background:${color};"></div>
-        </div>
+        ${isDead
+          ? `<div style="font-size:18px;font-weight:700;color:#f87171;text-align:right;">${respawnSec}<span style="font-size:11px;margin-left:2px;">秒</span></div>`
+          : `<div style="height:8px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(healthRatio*100)}%;background:${color};"></div></div>`
+        }
       </div>
     `;
     overlayBottom.appendChild(bottom);
@@ -674,9 +660,7 @@ const draw = () => {
     ctx.restore();
   });
 
-  if (!state.game.waitingForStart) {
-    state.characters.forEach((player, index) => drawPlayer(player, index, width, height));
-  }
+  state.characters.forEach((player, index) => drawPlayer(player, index, width, height));
 
   requestAnimationFrame(draw);
 };
