@@ -442,14 +442,19 @@ const showStageTransition = (stage, stageLabel) => {
   if (!overlayStageTransition || !stageTransitionText) return;
   const labelText = stageLabel || `Stage ${stage}`;
   stageTransitionText.textContent = `${labelText} へ進みます`;
+  
+  // アニメーションを再トリガーするために一度クラスを外してリフローを強制
+  overlayStageTransition.classList.remove('show');
+  void overlayStageTransition.offsetWidth;
   overlayStageTransition.classList.add('show');
+
   if (stageTransitionTimeout) {
     clearTimeout(stageTransitionTimeout);
   }
   stageTransitionTimeout = setTimeout(() => {
     overlayStageTransition.classList.remove('show');
     stageTransitionTimeout = null;
-  }, 3000);
+  }, 3600);
 };
 
 const toCanvasX = (x, width) => width / 2 + x * 70;
