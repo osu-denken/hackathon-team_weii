@@ -20,6 +20,7 @@ const SCORE_UP_AMOUNT = 10;
 
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
+const RETURN_TO_TITLE_DELAY_MS = 10000;
 
 const BULLET_HIT_RANGE = 0.5;
 const PLAYER_HIT_RANGE = 0.7;
@@ -41,12 +42,44 @@ class Stage {
     this.gameStarted = false;
     this.startCountdownAt = null;
     this.startCountdownMs = 10000;
+    this.emptySince = null;
+    this.pausedAt = null;
+    this.mode = 'title';
+  }
+
+  resetToTitle(now = Date.now()) {
+    this.enemies.clear();
+    this.bullets.clear();
+    this.itemEntity = null;
+    this.enemyCounter = 0;
+    this.bulletCounter = 0;
+    this.itemCounter = 0;
+    this.nextPlayerNumber = 1;
+    this.gameStartAt = null;
+    this.gameStarted = false;
+    this.startCountdownAt = null;
+    this.lastEnemySpawnAt = now;
+    this.emptySince = null;
+    this.pausedAt = null;
+    this.mode = 'title';
   }
 
   addPlayer(id, now = Date.now()) {
     const existing = this.players.get(id);
     if (existing) {
       return existing;
+    }
+
+    if (this.players.size === 0) {
+      if (this.mode === 'playing' && this.pausedAt !== null && this.gameStarted && this.gameStartAt !== null) {
+        this.gameStartAt += now - this.pausedAt;
+      } else if (this.mode === 'title') {
+        this.lastEnemySpawnAt = now;
+      }
+
+      this.emptySince = null;
+      this.pausedAt = null;
+      this.mode = 'playing';
     }
 
     const number = this.nextPlayerNumber++;
@@ -67,12 +100,16 @@ class Stage {
     return player;
   }
 
-  removePlayer(id) {
+  removePlayer(id, now = Date.now()) {
     this.players.delete(id);
     if (this.players.size === 0) {
       this.nextPlayerNumber = 1;
       if (!this.gameStarted) {
         this.startCountdownAt = null;
+      }
+      this.emptySince = now;
+      if (this.gameStarted) {
+        this.pausedAt = now;
       }
     }
   }
@@ -149,6 +186,14 @@ class Stage {
   }
 
   update(now) {
+    if (this.players.size === 0) {
+      if (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
+        this.resetToTitle(now);
+      }
+
+      return;
+    }
+
     this.maybeStartGame(now);
     if (!this.gameStarted) {
       return;
@@ -199,11 +244,21 @@ class Stage {
         countdownRemainingMs,
         countdownStarted: this.startCountdownAt !== null,
         playerCount: this.players.size,
+        showReturnNotice: false,
+        returnToTitleRemainingMs: 0,
+        showTitle: true,
       };
     }
 
     const timeRemainingMs = Math.max(0, TIME_LIMIT_MS - (now - this.gameStartAt));
     const cleared = totalScore >= TARGET_SCORE;
+    const returnToTitleRemainingMs = this.emptySince === null
+      ? 0
+      : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
+    const showReturnNotice = this.players.size === 0 && returnToTitleRemainingMs > 0;
+    const showTitle = this.players.size === 0 && (
+      this.mode === 'title' || (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS)
+    );
 
     return {
       totalScore,
@@ -211,6 +266,9 @@ class Stage {
       timeLimitMs: TIME_LIMIT_MS,
       timeRemainingMs,
       cleared,
+      showReturnNotice,
+      returnToTitleRemainingMs,
+      showTitle,
       waitingForStart: false,
       countdownRemainingMs: 0,
       countdownStarted: false,

@@ -10,6 +10,8 @@ const overlayTime = document.getElementById('overlay-time');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
+const returnNoticeOverlay = document.getElementById('return-notice');
+const returnNoticeSeconds = document.getElementById('return-notice-seconds');
 const titleCountdown = document.getElementById('title-countdown');
 const titlePlayers = document.getElementById('title-players');
 const overlayClear = document.getElementById('overlay-clear');
@@ -33,6 +35,9 @@ const state = {
     timeLimitMs: 0,
     timeRemainingMs: 0,
     cleared: false,
+    showReturnNotice: false,
+    returnToTitleRemainingMs: 0,
+    showTitle: true,
     waitingForStart: true,
     countdownRemainingMs: 10000,
     countdownStarted: false,
@@ -171,6 +176,9 @@ const updateGameUI = () => {
     targetScore,
     timeRemainingMs,
     cleared,
+    showTitle,
+    showReturnNotice,
+    returnToTitleRemainingMs,
     waitingForStart,
     countdownRemainingMs,
     countdownStarted,
@@ -181,8 +189,15 @@ const updateGameUI = () => {
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
+  if (overlayPlayerCount) overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
+  if (returnNoticeOverlay) {
+    returnNoticeOverlay.classList.toggle('show', showReturnNotice);
+  }
+  if (returnNoticeSeconds) {
+    returnNoticeSeconds.textContent = String(Math.max(1, Math.ceil(returnToTitleRemainingMs / 1000)));
+  }
   if (overlayClear) {
-    if (cleared) {
+    if (cleared && !showTitle && !showReturnNotice && !waitingForStart) {
       overlayClear.classList.add('show');
       if (overlayClearScore) overlayClearScore.textContent = `${totalScore} / ${targetScore}`;
       if (overlayClearTime) overlayClearTime.textContent = formatTime(timeRemainingMs);
@@ -190,9 +205,10 @@ const updateGameUI = () => {
       overlayClear.classList.remove('show');
     }
   }
+  const shouldShowTitle = showTitle || waitingForStart;
+  setTitleVisible(shouldShowTitle && !showReturnNotice);
 
   if (waitingForStart) {
-    setTitleVisible(true);
     if (titleCountdown) {
       if (countdownStarted && playerCount > 0) {
         titleCountdown.textContent = `ゲーム開始まで ${Math.ceil(countdownRemainingMs / 1000)} 秒`;
@@ -203,10 +219,7 @@ const updateGameUI = () => {
     if (titlePlayers) {
       titlePlayers.textContent = `参加プレイヤー: ${playerCount}人`;
     }
-  } else {
-    setTitleVisible(false);
   }
-
   renderPlayerSummary();
 };
 
@@ -290,6 +303,9 @@ socket.addEventListener('message', (e) => {
           timeLimitMs: payload.game.timeLimitMs ?? 0,
           timeRemainingMs: payload.game.timeRemainingMs ?? 0,
           cleared: payload.game.cleared ?? false,
+          showReturnNotice: payload.game.showReturnNotice ?? false,
+          returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
+          showTitle: payload.game.showTitle ?? false,
           waitingForStart: payload.game.waitingForStart ?? false,
           countdownRemainingMs: payload.game.countdownRemainingMs ?? 0,
           countdownStarted: payload.game.countdownStarted ?? false,
