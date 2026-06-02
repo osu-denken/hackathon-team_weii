@@ -7,9 +7,12 @@ const overlayPlayerCount = document.getElementById('overlay-player-count');
 const overlayScoreFill = document.getElementById('overlay-score-fill');
 const overlayScoreText = document.getElementById('overlay-score-text');
 const overlayTime = document.getElementById('overlay-time');
+const overlayStage = document.getElementById('overlay-stage');
 const overlayStatus = document.getElementById('overlay-status');
 const overlayBottom = document.getElementById('overlay-bottom');
 const titleOverlay = document.getElementById('title-overlay');
+const overlayStageTransition = document.getElementById('overlay-stage-transition');
+const stageTransitionText = document.getElementById('stage-transition-text');
 const returnNoticeOverlay = document.getElementById('return-notice');
 const returnNoticeSeconds = document.getElementById('return-notice-seconds');
 const titleCountdown = document.getElementById('title-countdown');
@@ -59,6 +62,8 @@ const state = {
     countdownStarted: false,
     playerCount: 0,
     difficulty: 'normal',
+    stage: 1,
+    stageLabel: 'Stage 1',
   },
 };
 
@@ -167,6 +172,10 @@ const renderPlayerSummary = () => {
     const maxHp = player.maxHp ?? 1;
     const score = player.score ?? 0;
     const healthRatio = Math.max(0, Math.min(1, maxHp === 0 ? 0 : hp / maxHp));
+    const isDead = player.dead ?? false;
+    const deadUntil = player.deadUntil ?? 0;
+    const respawnRemainingMs = isDead && deadUntil > Date.now() ? deadUntil - Date.now() : 0;
+    const respawnSec = Math.ceil(respawnRemainingMs / 1000);
 
     // side panel card
     const card = document.createElement('div');
@@ -183,18 +192,23 @@ const renderPlayerSummary = () => {
     // bottom overlay (horizontal)
     const bottom = document.createElement('div');
     bottom.className = 'player-card-bottom';
+    if (isDead) {
+      bottom.style.background = 'rgba(239,68,68,0.15)';
+      bottom.style.borderColor = 'rgba(239,68,68,0.4)';
+    }
     bottom.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:${color};display:grid;place-items:center;font-weight:700;color:#031021;">${player.number ?? index + 1}</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:${isDead ? 'rgba(239,68,68,0.5)' : color};display:grid;place-items:center;font-weight:700;color:#fff;${isDead ? 'filter:grayscale(1);' : ''}">${player.number ?? index + 1}</div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
-          <div style="font-weight:700">P${player.number ?? index + 1}</div>
-          <div style="font-size:12px;color:#cfeffd">HP: ${hp}/${maxHp} ・ ${score}pt</div>
+          <div style="font-weight:700;${isDead ? 'color:#fca5a5;' : ''}">P${player.number ?? index + 1}</div>
+          <div style="font-size:12px;color:#cfeffd">${isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`}</div>
         </div>
       </div>
       <div style="width:80px;">
-        <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;">
-          <div style="height:100%;width:${Math.round(healthRatio*100)}%;background:${color};"></div>
-        </div>
+        ${isDead
+          ? `<div style="font-size:18px;font-weight:700;color:#f87171;text-align:right;">${respawnSec}<span style="font-size:11px;margin-left:2px;">秒</span></div>`
+          : `<div style="height:8px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(healthRatio*100)}%;background:${color};"></div></div>`
+        }
       </div>
     `;
     overlayBottom.appendChild(bottom);
@@ -215,12 +229,15 @@ const updateGameUI = () => {
     countdownStarted,
     playerCount,
     difficulty,
+    stage,
+    stageLabel,
   } = state.game;
   const percent = targetScore > 0 ? Math.min(100, Math.round((totalScore / targetScore) * 100)) : 0;
   // overlay updates (no side panel elements)
   if (overlayScoreFill) overlayScoreFill.style.width = `${percent}%`;
   if (overlayScoreText) overlayScoreText.textContent = `${percent}%`;
   if (overlayTime) overlayTime.textContent = formatTime(timeRemainingMs);
+  if (overlayStage) overlayStage.textContent = stageLabel || `Stage ${stage || 1}`;
   if (overlayPlayerCount) overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
   if (returnNoticeOverlay) {
     returnNoticeOverlay.classList.toggle('show', showReturnNotice);
@@ -254,6 +271,10 @@ const updateGameUI = () => {
     if (titleDifficultyNormal && titleDifficultyHard) {
       titleDifficultyNormal.classList.toggle('active', difficulty === 'normal');
       titleDifficultyHard.classList.toggle('active', difficulty === 'hard');
+    }
+    const titleStage = document.getElementById('title-stage');
+    if (titleStage) {
+      titleStage.textContent = stageLabel || `Stage ${stage || 1}`;
     }
   }
   renderPlayerSummary();
@@ -333,6 +354,7 @@ socket.addEventListener('message', (e) => {
   }
 
   if (payload.type === 'update') {
+    const prevStage = state.game.stage;
     state.characters = Array.isArray(payload.characters)
       ? payload.characters.slice(0, MAX_PLAYERS)
       : [];
@@ -355,12 +377,34 @@ socket.addEventListener('message', (e) => {
           playerCount: payload.game.playerCount ?? 0,
           difficulty: payload.game.difficulty ?? 'normal',
           stageNumber: payload.game.stageNumber ?? 1,
+          stage: payload.game.stage ?? 1,
+          stageLabel: payload.game.stageLabel ?? 'Stage 1',
         }
       : state.game;
+
+    if (payload.game && typeof payload.game.stage === 'number' && payload.game.stage > prevStage) {
+      showStageTransition(payload.game.stage, payload.game.stageLabel);
+    }
 
     updateGameUI();
   }
 });
+
+let stageTransitionTimeout = null;
+
+const showStageTransition = (stage, stageLabel) => {
+  if (!overlayStageTransition || !stageTransitionText) return;
+  const labelText = stageLabel || `Stage ${stage}`;
+  stageTransitionText.textContent = `${labelText} へ進みます`;
+  overlayStageTransition.classList.add('show');
+  if (stageTransitionTimeout) {
+    clearTimeout(stageTransitionTimeout);
+  }
+  stageTransitionTimeout = setTimeout(() => {
+    overlayStageTransition.classList.remove('show');
+    stageTransitionTimeout = null;
+  }, 3000);
+};
 
 const toCanvasX = (x, width) => width / 2 + x * 70;
 const toCanvasY = (y, height) => height - 120 - y * 42;
@@ -492,6 +536,19 @@ const drawEnemy = (enemy, width, height) => {
 };
 
 const drawPlayer = (player, index, width, height) => {
+  const isDead = player.dead ?? false;
+  // 死亡中（リスポーン待ち10秒）は非表示。リスポーン直前3秒は点滅させる
+  if (isDead) {
+    const respawnRemainingMs = player.deadUntil && player.deadUntil > Date.now() ? player.deadUntil - Date.now() : 0;
+    if (respawnRemainingMs > 3000) {
+      return; // リスポーンまで3秒以上あれば完全非表示
+    }
+    // 残り3秒以内なら点滅（100msごと）
+    if (Math.floor(Date.now() / 100) % 2 === 0) {
+      return;
+    }
+  }
+
   const x = toCanvasX(player.x, width);
   const y = height - 130;
   const fallbackColor = player.color || ['#22d3ee', '#fbbf24'][index] || '#38bdf8';
@@ -546,6 +603,8 @@ const drawPlayer = (player, index, width, height) => {
   ctx.lineWidth = 1;
   ctx.strokeRect(x - barWidth / 2, barY, barWidth, barHeight);
 
+  ctx.imageSmoothingEnabled = false;
+
   if (guideVisible) {
     const guideFade = Math.min(1, (idleMs - IDLE_GUIDE_DELAY_MS) / IDLE_GUIDE_FADE_MS);
     const guideAlpha = Math.max(0, Math.min(1, guideFade));
@@ -553,10 +612,10 @@ const drawPlayer = (player, index, width, height) => {
     const guideBaseY = barY - 34 + bob;
     const phone = guideSpriteCache.get('phone');
     const arrow = guideSpriteCache.get('arrow');
-    const phoneWidth = 48;
-    const phoneHeight = 48;
-    const arrowWidth = 18;
-    const arrowHeight = 18;
+    const phoneWidth = 64;
+    const phoneHeight = 64;
+    const arrowWidth = 24;
+    const arrowHeight = 24;
 
     ctx.save();
     ctx.globalAlpha = guideAlpha;
@@ -565,14 +624,14 @@ const drawPlayer = (player, index, width, height) => {
 
     if (arrow && arrow.complete) {
       ctx.save();
-      ctx.translate(x - 38, guideBaseY);
+      ctx.translate(x - 32, guideBaseY);
       ctx.scale(-1, 1);
       ctx.rotate(rotate);
       ctx.drawImage(arrow, -arrowWidth / 2, -arrowHeight / 2, arrowWidth, arrowHeight);
       ctx.restore();
 
       ctx.save();
-      ctx.translate(x + 38, guideBaseY);
+      ctx.translate(x + 32, guideBaseY);
       ctx.scale(1, -1);
       ctx.rotate(rotate);
       ctx.drawImage(arrow, -arrowWidth / 2, -arrowHeight / 2, arrowWidth, arrowHeight);
@@ -588,8 +647,8 @@ const drawPlayer = (player, index, width, height) => {
     }
 
     ctx.fillStyle = '#d9f4ff';
-    ctx.font = '700 11px sans-serif';
-    ctx.fillText('スマホを傾けて移動', x, guideBaseY - 28);
+    ctx.font = '700 16px sans-serif';
+    ctx.fillText('スマホをかたむけてね！', x, guideBaseY - 28);
     ctx.restore();
   }
 };
@@ -621,14 +680,15 @@ const draw = () => {
     const x = toCanvasX(bullet.x, width);
     const y = toCanvasY(bullet.y, height);
     ctx.save();
-    ctx.shadowColor = '#22d3ee';
+    const isEnemyBullet = bullet.ownerType === 'enemy';
+    ctx.shadowColor = isEnemyBullet ? 'rgba(248, 113, 113, 0.75)' : '#22d3ee';
     ctx.shadowBlur = 16;
-    if (bulletSprite.complete && bulletSprite.naturalWidth > 0) {
+    if (!isEnemyBullet && bulletSprite.complete && bulletSprite.naturalWidth > 0) {
       const drawWidth = 16;
       const drawHeight = 24;
       ctx.drawImage(bulletSprite, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
     } else {
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = isEnemyBullet ? '#ef4444' : '#38bdf8';
       ctx.fillRect(x - 5, y - 8, 10, 16);
     }
     ctx.restore();

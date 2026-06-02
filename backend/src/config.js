@@ -1,8 +1,8 @@
 import os from 'os';
 import path from 'path';
 
-const PORT = Number(process.env.PORT) || 3001;
-const USE_HTTPS = process.env.USE_HTTPS === 'true';
+const PORT = 443; //Number(process.env.PORT) || 3001;
+const USE_HTTPS = true; //process.env.USE_HTTPS === 'true';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH || path.resolve('../shared/server-key.pem');
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH || path.resolve('../shared/server.pem');
 

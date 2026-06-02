@@ -16,11 +16,46 @@ const MAX_ACTIVE_BULLETS_PER_PLAYER = 12;
 const TRIPLE_SHOT_DURATION_MS = 5000;
 const SHIELD_DURATION_MS = 5000;
 const HEAL_AMOUNT = 2;
-const SCORE_UP_AMOUNT = 10;
+const SCORE_DOUBLE_DURATION_MS = 8000;
+const ENEMY_BULLET_SPEED = 0.12;
 
 const TARGET_SCORE = 100;
 const TIME_LIMIT_MS = 120000;
 const RETURN_TO_TITLE_DELAY_MS = 10000;
+
+const STAGE_CONFIG = {
+  1: {
+    label: 'Stage 1',
+    targetScore: 100,
+    timeLimitMs: 120000,
+    enemySpawnLimit: 5,
+    enemySpawnIntervalMs: EnemyEntity.SPAWN_INTERVAL_MS,
+    enemyBigEvery: EnemyEntity.BIG_EVERY,
+    canEnemiesShoot: false,
+  },
+  2: {
+    label: 'Stage 2',
+    targetScore: 150,
+    timeLimitMs: 120000,
+    enemySpawnLimit: 8,
+    enemySpawnIntervalMs: Math.floor(EnemyEntity.SPAWN_INTERVAL_MS * 0.8),
+    enemyBigEvery: EnemyEntity.BIG_EVERY,
+    canEnemiesShoot: false,
+  },
+  3: {
+    label: 'Stage 3',
+    targetScore: 200,
+    timeLimitMs: 150000,
+    enemySpawnLimit: 7,
+    enemySpawnIntervalMs: 1200,
+    enemyBigEvery: Math.max(4, Math.floor(EnemyEntity.BIG_EVERY * 0.7)),
+    canEnemiesShoot: true,
+    enemyShootCooldownMs: 3000,
+    enemyBulletSpeed: ENEMY_BULLET_SPEED,
+    enemyBottomRowShootDisabled: true,
+    enemyBarrage: false,
+  },
+};
 const RESPAWN_MS = 10000;
 
 const DIFFICULTY_SETTINGS = {
@@ -72,6 +107,8 @@ class Stage {
     this.emptySince = null;
     this.pausedAt = null;
     this.mode = 'title';
+    this.currentStage = 1;
+    this.stageCleared = false;
   }
 
   resetToTitle(now = Date.now()) {
@@ -89,6 +126,8 @@ class Stage {
     this.emptySince = null;
     this.pausedAt = null;
     this.mode = 'title';
+    this.currentStage = 1;
+    this.stageCleared = false;
   }
 
   addPlayer(id, now = Date.now()) {
@@ -214,7 +253,7 @@ class Stage {
     }
 
     if (item.type === 'score_up') {
-      player.score += SCORE_UP_AMOUNT;
+      player.applyScoreDouble(now, SCORE_DOUBLE_DURATION_MS);
       player.lastControlAt = now;
       return;
     }
@@ -233,6 +272,14 @@ class Stage {
   }
 
   update(now) {
+    // 全ステージクリア後にタイトルへ戻るカウントダウン中
+    if (this.stageCleared && this.currentStage >= 3 && this.emptySince !== null) {
+      if (now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
+        this.resetToTitle(now);
+      }
+      return;
+    }
+
     if (this.players.size === 0) {
       if (this.emptySince !== null && now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
         this.resetToTitle(now);
@@ -248,12 +295,22 @@ class Stage {
 
     this.updatePlayerPowers(now);
     this.maybeSpawnEnemy(now);
+    this.maybeSpawnEnemyBullets(now);
     this.updateEnemies();
     this.updateBullets();
     this.updateItem();
     this.handleBulletCollisions();
+    this.handleEnemyBulletCollisions(now);
     this.handleEnemyTouches(now);
     this.handleItemPickup();
+
+    // Check if stage is cleared and advance to next stage
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    const totalScore = this.getTotalScore();
+    if (totalScore >= stageConfig.targetScore && !this.stageCleared) {
+      this.stageCleared = true;
+      this.nextStage(now);
+    }
     this.handlePlayerDeaths(now);
   }
 
@@ -274,8 +331,26 @@ class Stage {
     }
   }
 
+  nextStage(now) {
+    if (this.currentStage >= 3) {
+      // 全ステージクリア: タイトルへ戻るまでのカウントダウンを開始
+      this.emptySince = now;
+      return;
+    }
+    this.currentStage += 1;
+    this.stageCleared = false;
+    this.enemies.clear();
+    this.bullets.clear();
+    this.itemEntity = null;
+    this.bulletCounter = 0;
+    this.itemCounter = 0;
+    this.gameStartAt = now;
+    this.lastEnemySpawnAt = now;
+  }
+
   buildGameState(now) {
     const totalScore = this.getTotalScore();
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
 
     if (!this.gameStarted) {
       const countdownRemainingMs = this.startCountdownAt
@@ -285,7 +360,7 @@ class Stage {
       const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
       return {
         totalScore,
-        targetScore: settings.targetScore,
+        targetScore: stageConfig.targetScore,
         timeLimitMs: this.startCountdownMs,
         timeRemainingMs: countdownRemainingMs,
         cleared: false,
@@ -298,12 +373,14 @@ class Stage {
         showReturnNotice: false,
         returnToTitleRemainingMs: 0,
         showTitle: true,
+        stage: this.currentStage,
+        stageLabel: stageConfig.label,
       };
     }
 
     const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
-    const timeRemainingMs = Math.max(0, settings.timeLimitMs - (now - this.gameStartAt));
-    const cleared = totalScore >= settings.targetScore;
+    const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - this.gameStartAt));
+    const cleared = totalScore >= stageConfig.targetScore;
     const returnToTitleRemainingMs = this.emptySince === null
       ? 0
       : Math.max(0, RETURN_TO_TITLE_DELAY_MS - (now - this.emptySince));
@@ -314,8 +391,8 @@ class Stage {
 
     return {
       totalScore,
-      targetScore: settings.targetScore,
-      timeLimitMs: settings.timeLimitMs,
+      targetScore: stageConfig.targetScore,
+      timeLimitMs: stageConfig.timeLimitMs,
       timeRemainingMs,
       cleared,
       difficulty: this.difficulty,
@@ -327,6 +404,8 @@ class Stage {
       countdownRemainingMs: 0,
       countdownStarted: false,
       playerCount: this.players.size,
+      stage: this.currentStage,
+      stageLabel: stageConfig.label,
     };
   }
 
@@ -407,19 +486,22 @@ class Stage {
   }
 
   maybeSpawnEnemy(now) {
-    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
-    if (this.enemies.size >= settings.enemySpawnLimit) {
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    const difficultySettings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
+    
+    if (this.enemies.size >= stageConfig.enemySpawnLimit) {
       return;
     }
 
-    if (now - this.lastEnemySpawnAt < settings.enemySpawnIntervalMs) {
+    if (now - this.lastEnemySpawnAt < stageConfig.enemySpawnIntervalMs) {
       return;
     }
 
-    const type = this.enemyCounter % settings.enemyBigEvery === 0 ? 'big' : 'normal';
+    const type = this.enemyCounter % stageConfig.enemyBigEvery === 0 ? 'big' : 'normal';
     const baseHp = type === 'big' ? EnemyEntity.BIG_HP : EnemyEntity.NORMAL_HP;
-    const hp = Math.max(1, Math.round(baseHp * (settings.enemyHpMultiplier || 1)));
-    const attack = settings.enemyAttack || 1;
+    const hp = Math.max(1, Math.round(baseHp * (difficultySettings.enemyHpMultiplier || 1)));
+    const attack = difficultySettings.enemyAttack || 1;
+    const canShootBullets = stageConfig.canEnemiesShoot;
     const enemy = new EnemyEntity({
       id: `enemy-${this.enemyCounter++}`,
       x: (Math.random() * 6) - 3,
@@ -428,6 +510,7 @@ class Stage {
       hp,
       maxHp: hp,
       attack,
+      canShootBullets,
     });
     this.enemies.set(enemy.id, enemy);
     this.lastEnemySpawnAt = now;
@@ -440,6 +523,64 @@ class Stage {
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }
+    });
+  }
+
+  maybeSpawnEnemyBullets(now) {
+    const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
+    const shootCooldown = stageConfig.enemyShootCooldownMs || EnemyEntity.SHOOT_COOLDOWN_MS;
+    const enemyBulletSpeed = stageConfig.enemyBulletSpeed || BulletEntity.SPEED;
+    const disableBottomRow = stageConfig.enemyBottomRowShootDisabled;
+    const bottomRowThreshold = 0;
+
+    this.enemies.forEach((enemy) => {
+      if (!enemy.canShoot(now, shootCooldown)) {
+        return;
+      }
+
+      if (disableBottomRow && enemy.y <= bottomRowThreshold) {
+        return;
+      }
+
+      let targetPlayer = null;
+      let closestDistance = Infinity;
+      this.players.forEach((player) => {
+        if (player.isDead()) {
+          return;
+        }
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const distanceSq = dx * dx + dy * dy;
+        if (distanceSq < closestDistance) {
+          closestDistance = distanceSq;
+          targetPlayer = player;
+        }
+      });
+
+      let vx = 0;
+      let vy = -enemyBulletSpeed;
+      if (targetPlayer) {
+        const dx = targetPlayer.x - enemy.x;
+        const dy = targetPlayer.y - enemy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 0.001) {
+          vx = (dx / distance) * enemyBulletSpeed;
+          vy = (dy / distance) * enemyBulletSpeed;
+        }
+      }
+
+      const bullet = new BulletEntity({
+        id: `enemy-bullet-${this.bulletCounter++}`,
+        x: enemy.x,
+        y: enemy.y,
+        vx,
+        vy,
+        ownerId: null,
+        ownerType: 'enemy',
+        damage: enemy.attack,
+      });
+      this.bullets.set(bullet.id, bullet);
+      enemy.markShot(now);
     });
   }
 
@@ -469,6 +610,10 @@ class Stage {
     const kills = [];
 
     this.bullets.forEach((bullet) => {
+      if (bullet.ownerType !== 'player') {
+        return;
+      }
+
       this.enemies.forEach((enemy) => {
         const dx = Math.abs(bullet.x - enemy.x);
         const dy = Math.abs(bullet.y - enemy.y);
@@ -490,7 +635,9 @@ class Stage {
       if (kill.ownerId) {
         const player = this.players.get(kill.ownerId);
         if (player) {
-          player.score += 1;
+          const baseScore = kill.enemy.type === 'big' ? 2 : 1;
+          const multiplier = player.hasScoreDouble(Date.now()) ? 2 : 1;
+          player.score += baseScore * multiplier;
         }
       }
 
@@ -498,6 +645,35 @@ class Stage {
         this.spawnItem(kill.enemy.x, kill.enemy.y);
       }
     });
+  }
+
+  handleEnemyBulletCollisions(now) {
+    const bulletsToRemove = new Set();
+
+    this.bullets.forEach((bullet) => {
+      if (bullet.ownerType !== 'enemy') {
+        return;
+      }
+
+      this.players.forEach((player) => {
+        if (player.isDead()) {
+          return;
+        }
+
+        const dx = Math.abs(bullet.x - player.x);
+        const dy = Math.abs(bullet.y - player.y);
+        if (dx <= BULLET_HIT_RANGE && dy <= BULLET_HIT_RANGE) {
+          bulletsToRemove.add(bullet.id);
+          if (player.hasShield(now)) {
+            player.consumeShield();
+          } else {
+            player.damage(bullet.damage);
+          }
+        }
+      });
+    });
+
+    bulletsToRemove.forEach((id) => this.bullets.delete(id));
   }
 
   handleEnemyTouches(now) {
@@ -583,6 +759,7 @@ class Stage {
       vx: 0,
       vy: BulletEntity.SPEED,
       ownerId: player.id,
+      ownerType: 'player',
       damage,
     });
     this.bullets.set(bullet.id, bullet);
@@ -597,6 +774,7 @@ class Stage {
         vx,
         vy: BulletEntity.SPEED,
         ownerId: player.id,
+        ownerType: 'player',
         damage,
       });
       this.bullets.set(bullet.id, bullet);

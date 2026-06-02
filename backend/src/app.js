@@ -123,7 +123,7 @@ const parseMsg = (ws, raw) => {
     return;
   }
 
-  console.log('Received message:', msg);
+  // console.log('Received message:', msg);
 
   switch (msg.type) {
     case 'join':
