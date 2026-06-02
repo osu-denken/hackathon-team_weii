@@ -360,6 +360,8 @@ class Stage {
         bulletsMax: MAX_ACTIVE_BULLETS_PER_PLAYER,
         canShoot: player.canShoot(now, SHOOT_COOLDOWN_MS),
         cooldownRemainingMs,
+        dead: player.isDead(),
+        respawnRemainingMs: player.deadUntil && player.deadUntil > now ? player.deadUntil - now : 0,
       },
       item: this.itemEntity ? this.itemEntity.toPayload() : null,
       game: this.buildGameState(now),
