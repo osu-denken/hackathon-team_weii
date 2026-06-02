@@ -72,6 +72,12 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
+.btn-floating.btn-square {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .btn-floating.top-right {
     top: 15px;
     right: 15px;
