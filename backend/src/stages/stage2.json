@@ -4,6 +4,6 @@
   "timeLimitMs": 150000,
   "enemySpawnLimit": 8,
   "enemySpawnIntervalMs": 800,
-  "enemyBigEvery": 8,
+  "enemyBigEvery": 7,
   "canEnemiesShoot": false
 }

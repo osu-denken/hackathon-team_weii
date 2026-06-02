@@ -2,8 +2,8 @@
   "label": "Stage 1",
   "targetScore": 100,
   "timeLimitMs": 120000,
-  "enemySpawnLimit": 5,
+  "enemySpawnLimit": 6,
   "enemySpawnIntervalMs": 1000,
-  "enemyBigEvery": 8,
+  "enemyBigEvery": 6,
   "canEnemiesShoot": false
 }
