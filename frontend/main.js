@@ -30,6 +30,40 @@ const setTitleVisible = (visible) => {
   titleOverlay.classList.toggle('show', visible);
 };
 
+const difficultyNormalBtn = document.getElementById('title-difficulty-normal');
+const difficultyHardBtn = document.getElementById('title-difficulty-hard');
+
+if (difficultyNormalBtn) {
+  difficultyNormalBtn.addEventListener('click', () => {
+    difficultyNormalBtn.classList.add('active');
+    difficultyHardBtn.classList.remove('active');
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: 'difficulty', level: 'normal' }));
+    }
+  });
+}
+
+if (difficultyHardBtn) {
+  difficultyHardBtn.addEventListener('click', () => {
+    difficultyHardBtn.classList.add('active');
+    difficultyNormalBtn.classList.remove('active');
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: 'difficulty', level: 'hard' }));
+    }
+  });
+}
+
+// Receive simulateClick from parent window (for /play mode)
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'simulateClick') {
+    const { x, y } = event.data;
+    const target = document.elementFromPoint(x, y);
+    if (target && typeof target.click === 'function') {
+      target.click();
+    }
+  }
+});
+
 const setDifficultyUI = (difficulty) => {
   if (titleDifficultyNormal) titleDifficultyNormal.classList.toggle('active', difficulty === 'normal');
   if (titleDifficultyHard) titleDifficultyHard.classList.toggle('active', difficulty === 'hard');

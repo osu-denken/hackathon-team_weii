@@ -2,7 +2,7 @@ const createId = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID()
 
 const clientId = createId();
 const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const wsUrl = `${wsProtocol}://${window.location.hostname}:3001`;
+const wsUrl = `${wsProtocol}://${window.location.host}`;
 
 const playerState = document.getElementById('player-state');
 const playerBadge = document.getElementById('player-badge');
@@ -320,3 +320,19 @@ window.addEventListener('beforeunload', () => {
 setConnectionState(false);
 setPlayerInfo(null);
 connect();
+
+// Relay clicks from iframe-block to iframe
+const iframeBlock = document.querySelector('.iframe-block');
+const iframe = document.querySelector('iframe');
+
+if (iframeBlock && iframe) {
+  iframeBlock.addEventListener('click', (e) => {
+    const rect = iframeBlock.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'simulateClick', x, y }, '*');
+    }
+  });
+}
