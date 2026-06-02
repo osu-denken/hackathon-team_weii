@@ -501,6 +501,8 @@ const drawPlayer = (player, index, width, height) => {
   ctx.lineWidth = 1;
   ctx.strokeRect(x - barWidth / 2, barY, barWidth, barHeight);
 
+  ctx.imageSmoothingEnabled = false;
+
   if (guideVisible) {
     const guideFade = Math.min(1, (idleMs - IDLE_GUIDE_DELAY_MS) / IDLE_GUIDE_FADE_MS);
     const guideAlpha = Math.max(0, Math.min(1, guideFade));
@@ -508,10 +510,10 @@ const drawPlayer = (player, index, width, height) => {
     const guideBaseY = barY - 34 + bob;
     const phone = guideSpriteCache.get('phone');
     const arrow = guideSpriteCache.get('arrow');
-    const phoneWidth = 48;
-    const phoneHeight = 48;
-    const arrowWidth = 18;
-    const arrowHeight = 18;
+    const phoneWidth = 64;
+    const phoneHeight = 64;
+    const arrowWidth = 24;
+    const arrowHeight = 24;
 
     ctx.save();
     ctx.globalAlpha = guideAlpha;
@@ -520,14 +522,14 @@ const drawPlayer = (player, index, width, height) => {
 
     if (arrow && arrow.complete) {
       ctx.save();
-      ctx.translate(x - 38, guideBaseY);
+      ctx.translate(x - 32, guideBaseY);
       ctx.scale(-1, 1);
       ctx.rotate(rotate);
       ctx.drawImage(arrow, -arrowWidth / 2, -arrowHeight / 2, arrowWidth, arrowHeight);
       ctx.restore();
 
       ctx.save();
-      ctx.translate(x + 38, guideBaseY);
+      ctx.translate(x + 32, guideBaseY);
       ctx.scale(1, -1);
       ctx.rotate(rotate);
       ctx.drawImage(arrow, -arrowWidth / 2, -arrowHeight / 2, arrowWidth, arrowHeight);
@@ -543,8 +545,8 @@ const drawPlayer = (player, index, width, height) => {
     }
 
     ctx.fillStyle = '#d9f4ff';
-    ctx.font = '700 11px sans-serif';
-    ctx.fillText('スマホを傾けて移動', x, guideBaseY - 28);
+    ctx.font = '700 16px sans-serif';
+    ctx.fillText('スマホをかたむけてね！', x, guideBaseY - 28);
     ctx.restore();
   }
 };
