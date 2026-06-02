@@ -201,54 +201,76 @@ const formatTime = (ms) => {
 };
 
 const renderPlayerSummary = () => {
-  overlayBottom.innerHTML = '';
+  while (overlayBottom.children.length > state.characters.length) {
+    overlayBottom.removeChild(overlayBottom.lastChild);
+  }
+  while (overlayBottom.children.length < state.characters.length) {
+    const bottom = document.createElement('div');
+    bottom.className = 'player-card-bottom';
+    
+    bottom.innerHTML = `
+      <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
+        <div class="pcb-icon" style="width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;"></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;">
+          <div class="pcb-name" style="font-weight:700;transition:color 0.2s;"></div>
+          <div class="pcb-status" style="font-size:12px;color:#cfeffd"></div>
+        </div>
+      </div>
+      <div class="pcb-right" style="display:flex; align-items: center; justify-content: flex-end; min-width: 80px;">
+      </div>
+    `;
+    overlayBottom.appendChild(bottom);
+  }
 
   state.characters.forEach((player, index) => {
     const color = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6'][index] || '#38bdf8';
     const hp = player.hp ?? 0;
     const maxHp = player.maxHp ?? 1;
     const score = player.score ?? 0;
-    const healthRatio = Math.max(0, Math.min(1, maxHp === 0 ? 0 : hp / maxHp));
     const isDead = player.dead ?? false;
     const deadUntil = player.deadUntil ?? 0;
     const respawnRemainingMs = isDead && deadUntil > Date.now() ? deadUntil - Date.now() : 0;
     const respawnSec = Math.ceil(respawnRemainingMs / 1000);
+    const pNum = player.number ?? index + 1;
 
-    // side panel card
-    const card = document.createElement('div');
-    card.className = 'player-card';
-    card.innerHTML = `
-      <div class="player-icon" style="background: ${color};">${player.number ?? index + 1}</div>
-      <div class="player-info">
-        <div>HP: ${hp} / ${maxHp} ・ Score: ${score}</div>
-        <div class="player-bar"><div class="player-bar-fill" style="width: ${Math.round(healthRatio * 100)}%; background: linear-gradient(90deg, ${color}, #ffffff);"></div></div>
-      </div>
-    `;
-    // no side panel; only bottom overlay
+    const bottom = overlayBottom.children[index];
+    
+    const stateHash = `${color}:${hp}:${maxHp}:${score}:${isDead}:${respawnSec}:${pNum}`;
+    if (bottom.dataset.hash === stateHash) return;
+    bottom.dataset.hash = stateHash;
 
-    // bottom overlay (horizontal)
-    const bottom = document.createElement('div');
-    bottom.className = 'player-card-bottom';
     if (isDead) {
       bottom.style.background = 'rgba(239,68,68,0.15)';
       bottom.style.borderColor = 'rgba(239,68,68,0.4)';
+    } else {
+      bottom.style.background = '';
+      bottom.style.borderColor = '';
     }
-    bottom.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:${isDead ? 'rgba(239,68,68,0.5)' : color};display:grid;place-items:center;font-weight:700;color:#fff;${isDead ? 'filter:grayscale(1);' : ''}">${player.number ?? index + 1}</div>
-        <div style="display:flex;flex-direction:column;align-items:flex-start;">
-          <div style="font-weight:700;${isDead ? 'color:#fca5a5;' : ''}">P${player.number ?? index + 1}</div>
-          <div style="font-size:12px;color:#cfeffd">${isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`}</div>
-        </div>
-      </div>
-      <div style="width:80px;">
-        ${isDead
-          ? `<div style="font-size:18px;font-weight:700;color:#f87171;text-align:right;">${respawnSec}<span style="font-size:11px;margin-left:2px;">秒</span></div>`
-          : `<div style="height:8px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(healthRatio*100)}%;background:${color};"></div></div>`
-        }
-      </div>
-    `;
-    overlayBottom.appendChild(bottom);
+
+    const icon = bottom.querySelector('.pcb-icon');
+    icon.style.background = isDead ? 'rgba(239,68,68,0.5)' : color;
+    icon.style.filter = isDead ? 'grayscale(1)' : '';
+    icon.textContent = pNum;
+
+    const name = bottom.querySelector('.pcb-name');
+    name.style.color = isDead ? '#fca5a5' : '';
+    name.textContent = `P${pNum}`;
+
+    const status = bottom.querySelector('.pcb-status');
+    status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `HP: ${hp}/${maxHp} ・ ${score}pt`;
+
+    const right = bottom.querySelector('.pcb-right');
+    if (isDead) {
+      right.innerHTML = `<div style="font-size:18px;font-weight:700;color:#f87171;text-align:right;">${respawnSec}<span style="font-size:11px;margin-left:2px;">秒</span></div>`;
+    } else {
+      let hpBlocks = `<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">`;
+      for (let i = 0; i < maxHp; i++) {
+        const isFilled = i < hp;
+        hpBlocks += `<div style="width:12px;height:12px;border-radius:2px;background:${isFilled ? color : 'rgba(255,255,255,0.15)'};box-shadow:${isFilled ? `0 0 6px ${color}` : 'none'};transition:all 0.2s;"></div>`;
+      }
+      hpBlocks += `</div>`;
+      right.innerHTML = hpBlocks;
+    }
   });
 };
 
