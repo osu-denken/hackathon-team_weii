@@ -197,14 +197,29 @@ canvas { z-index: 0; }
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(0,0,0,0.5) 0%, transparent 60%);
+  background: rgba(2, 6, 20, 0.7);
+  backdrop-filter: blur(2px);
   opacity: 0;
   visibility: hidden;
+}
+
+.overlay-stage-transition::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .overlay-stage-transition.show {
   visibility: visible;
   animation: stageTransitionBg 3.5s forwards;
+}
+
+.overlay-stage-transition.show::before {
+  animation: stageFlash 3.5s forwards;
 }
 
 .overlay-stage-transition.show .stage-transition-text {
@@ -215,6 +230,13 @@ canvas { z-index: 0; }
   0% { opacity: 0; }
   10% { opacity: 1; }
   85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes stageFlash {
+  0% { opacity: 0; }
+  5% { opacity: 0.8; }
+  15% { opacity: 0; }
   100% { opacity: 0; }
 }
 

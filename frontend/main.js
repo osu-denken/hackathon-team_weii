@@ -441,7 +441,7 @@ let stageTransitionTimeout = null;
 const showStageTransition = (stage, stageLabel) => {
   if (!overlayStageTransition || !stageTransitionText) return;
   const labelText = stageLabel || `Stage ${stage}`;
-  stageTransitionText.textContent = `${labelText} へ進みます`;
+  stageTransitionText.textContent = `${labelText}`;
   
   // アニメーションを再トリガーするために一度クラスを外してリフローを強制
   overlayStageTransition.classList.remove('show');
@@ -739,6 +739,43 @@ const drawPlayer = (player, index, width, height) => {
   }
 };
 
+const stars = Array.from({ length: 120 }).map(() => ({
+  x: Math.random(),
+  y: Math.random(),
+  size: Math.random() * 1.5 + 0.5,
+  speed: Math.random() * 0.0015 + 0.0005,
+  brightness: Math.random(),
+  glow: Math.random() > 0.85
+}));
+
+const drawStars = (width, height) => {
+  ctx.save();
+  stars.forEach((star) => {
+    star.y += star.speed;
+    if (star.y > 1.0) {
+      star.y = 0;
+      star.x = Math.random();
+    }
+    
+    star.brightness += (Math.random() - 0.5) * 0.08;
+    star.brightness = Math.max(0.2, Math.min(1.0, star.brightness));
+
+    if (star.glow) {
+      ctx.shadowColor = '#bae6fd';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = `rgba(224, 242, 254, ${star.brightness})`;
+    } else {
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = `rgba(186, 230, 253, ${star.brightness * 0.6})`;
+    }
+    
+    ctx.beginPath();
+    ctx.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+};
+
 const draw = () => {
   const rect = canvas.getBoundingClientRect();
   const width = rect.width;
@@ -753,6 +790,8 @@ const draw = () => {
     ctx.fillStyle = '#040916';
     ctx.fillRect(0, 0, width, height);
   }
+
+  drawStars(width, height);
 
   drawGrid(width, height);
   ctx.fillStyle = '#0f172a';
