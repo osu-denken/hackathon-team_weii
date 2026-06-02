@@ -15,9 +15,9 @@ class BulletEntity extends Entity {
     this.damage = damage;
   }
 
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
+  update(dtFactor = 1.0) {
+    this.x += this.vx * dtFactor;
+    this.y += this.vy * dtFactor;
   }
 
   toPayload() {

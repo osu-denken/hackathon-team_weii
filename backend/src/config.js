@@ -46,7 +46,8 @@ const STATIC_ROUTES = {
   asset: path.resolve('../asset'),
 };
 
-const TICK_MS = Number(process.env.TICK_MS) || 40; // ゲームの状態を更新してViewer(フロントエンド)に送る間隔 (40ms = 25fps)
+// const TICK_MS = Number(process.env.TICK_MS) || 40; // ゲームの状態を更新してViewer(フロントエンド)に送る間隔 (40ms = 25fps)
+const TICK_MS = 10;
 
 const getLanIPv4 = () => {
   const interfaces = os.networkInterfaces();

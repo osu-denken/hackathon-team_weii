@@ -3,6 +3,9 @@ import { EnemyEntity } from './entities/EnemyEntity.js';
 import { BulletEntity } from './entities/BulletEntity.js';
 import { Item } from './Item.js';
 import { ItemEntity } from './entities/ItemEntity.js';
+import { TICK_MS } from './config.js';
+
+const dtFactor = TICK_MS / 40.0;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -304,11 +307,15 @@ class Stage {
     }
 
     this.updatePlayerPowers(now);
+
     this.maybeSpawnEnemy(now);
+    this.updateEnemies(dtFactor);
+
     this.maybeSpawnEnemyBullets(now);
-    this.updateEnemies();
-    this.updateBullets();
-    this.updateItem();
+    this.updateBullets(dtFactor);
+
+    this.maybeSpawnItem(now);
+    this.updateItem(dtFactor);
     this.handleBulletCollisions();
     this.handleEnemyBulletCollisions(now);
     this.handleEnemyTouches(now);
@@ -545,10 +552,10 @@ class Stage {
     this.lastEnemySpawnAt = now;
   }
 
-  updateEnemies() {
+  updateEnemies(dt) {
     const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
     this.enemies.forEach((enemy, id) => {
-      enemy.update(settings.enemySpeed);
+      enemy.update(settings.enemySpeed * dt);
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }
@@ -613,21 +620,21 @@ class Stage {
     });
   }
 
-  updateBullets() {
+  updateBullets(dt) {
     this.bullets.forEach((bullet, id) => {
-      bullet.update();
+      bullet.update(dt);
       if (bullet.y > BulletEntity.MAX_Y || bullet.y < -5 || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
         this.bullets.delete(id);
       }
     });
   }
 
-  updateItem() {
+  updateItem(dt) {
     if (!this.itemEntity) {
       return;
     }
 
-    this.itemEntity.update(ItemEntity.SPEED);
+    this.itemEntity.update(ItemEntity.SPEED * dt);
     if (this.itemEntity.y < -5) {
       this.itemEntity = null;
     }
