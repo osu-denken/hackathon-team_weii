@@ -44,11 +44,13 @@ const guideSpritePaths = {
   phone: '/asset/images/phone.png',
   arrow: '/asset/images/arrow.png',
 };
+const bulletSpritePath = '/asset/images/bullet.png';
 
 const spriteCache = new Map();
 const spriteColors = new Map();
 const itemSpriteCache = new Map();
 const guideSpriteCache = new Map();
+const bulletSprite = new Image();
 
 const IDLE_GUIDE_DELAY_MS = 3500;
 const IDLE_GUIDE_FADE_MS = 700;
@@ -94,6 +96,8 @@ const loadSprites = () => {
     img.src = src;
     guideSpriteCache.set(key, img);
   });
+
+  bulletSprite.src = bulletSpritePath;
 };
 
 const formatTime = (ms) => {
@@ -500,8 +504,14 @@ const draw = () => {
     ctx.save();
     ctx.shadowColor = '#22d3ee';
     ctx.shadowBlur = 16;
-    ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(x - 5, y - 8, 10, 16);
+    if (bulletSprite.complete && bulletSprite.naturalWidth > 0) {
+      const drawWidth = 16;
+      const drawHeight = 24;
+      ctx.drawImage(bulletSprite, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
+    } else {
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(x - 5, y - 8, 10, 16);
+    }
     ctx.restore();
   });
 
