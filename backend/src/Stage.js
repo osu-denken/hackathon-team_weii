@@ -314,7 +314,6 @@ class Stage {
     this.maybeSpawnEnemyBullets(now);
     this.updateBullets(dtFactor);
 
-    this.maybeSpawnItem(now);
     this.updateItem(dtFactor);
     this.handleBulletCollisions();
     this.handleEnemyBulletCollisions(now);
