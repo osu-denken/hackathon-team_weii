@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>Controller of "phone ∧ shoot"</title>
-        <link rel="stylesheet" href="styles.css?v=17" />
+        <link rel="stylesheet" href="styles.css?v=18" />
     </head>
     <body>
         <button id="btn-fullscreen" class="btn-floating top-right btn-square" title="全画面表示">
@@ -22,20 +22,18 @@
                 <button id="btn-join" class="btn-flat join-state">JOIN</button>
 
                 <div class="player-card-bottom" id="player-info" style="visibility: hidden; width:100%;">
-                    <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
+                    <div class="pcb-left" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
                         <div id="pcb-meter" class="pcb-item-meter" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);flex-shrink:0;">
                             <div id="pcb-icon" class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:180%;background-position:center 20%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid #1e293b;"></div>
                         </div>
-                        <div style="display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;">
+                        <div style="display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;gap:2px;">
                             <div id="pcb-name" class="pcb-name" style="font-weight:700;transition:color 0.2s;white-space:nowrap;font-size:14px;"></div>
-                            <div id="pcb-status" class="pcb-status" style="font-size:12px;color:#cfeffd;white-space:nowrap;"></div>
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <div id="pcb-status" class="pcb-status" style="font-size:12px;color:#cfeffd;white-space:nowrap;"></div>
+                                <div id="pcb-respawn" class="pcb-respawn" style="display:none;font-size:12px;font-weight:700;color:#f87171;white-space:nowrap;"></div>
+                            </div>
+                            <div id="pcb-hp-blocks" class="pcb-hp-blocks" style="display:flex;gap:2px;flex-wrap:wrap;"></div>
                         </div>
-                    </div>
-                    <div class="pcb-right" style="display:flex; flex-direction:column; align-items: flex-end; justify-content: center; min-width: 60px;">
-                        <div id="pcb-respawn" class="pcb-respawn" style="display:none;font-size:14px;font-weight:700;color:#f87171;text-align:right;">
-                            <span id="respawn-sec" class="respawn-sec"></span><span style="font-size:10px;margin-left:2px;">秒</span>
-                        </div>
-                        <div id="pcb-hp-blocks" class="pcb-hp-blocks" style="display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end;"></div>
                     </div>
                 </div>
 
@@ -55,6 +53,6 @@
                 <button id="btn-shoot" disabled>SHOOT</button>
             </div>
         </div>
-        <script src="main.js?v=17"></script>
+        <script src="main.js?v=18"></script>
     </body>
 </html>

@@ -193,7 +193,7 @@ function updatePlayerInfo(player) {
                 pcbStatus.textContent = `復活まで: ${respawnSec}秒`;
                 pcbStatus.style.color = '#fca5a5';
             } else {
-                pcbStatus.textContent = `Score: ${score}`;
+                pcbStatus.textContent = `${score}pt`;
                 pcbStatus.style.color = '#cfeffd';
             }
         }
@@ -261,7 +261,7 @@ function updatePlayerInfo(player) {
                 pcbMeter.style.background = `conic-gradient(${meterColor} 0% ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}% 100%)`;
             }
             if (pcbStatus) {
-                pcbStatus.textContent = `Score: ${score}`;
+                pcbStatus.textContent = `${score}pt`;
                 pcbStatus.style.color = meterColor;
             }
         } else {
