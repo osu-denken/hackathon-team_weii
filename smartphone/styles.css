@@ -95,27 +95,30 @@ body {
     cursor: not-allowed;
 }
 
-/* プレイヤー情報 */
-.player-info {
+/* プレイヤー情報（フロントエンド準拠） */
+.player-card-bottom {
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(10,10,50,0.5), rgba(50,50,255,0.08));
+    border: 1px solid rgba(25,25,50);
+    color: #eaf6ff;
     display: flex;
+    gap: 8px;
     align-items: center;
-    gap: 12px;
-    background-color: #1a1a1a;
-    padding: 10px;
-    border: 1px solid #333333;
+    justify-content: space-between;
+    font-size: 13px;
+    box-sizing: border-box;
+    height: 64px;
 }
-.player-badge {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 16px;
+.hp-block {
+    width: 8px;
+    height: 12px;
+    background: #3b82f6;
+    border: 1px solid #1e40af;
 }
-.player-label {
-    font-size: 16px;
-    color: #dddddd;
+.hp-block.empty {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 /* アイテムスロット: 下部に配置 */

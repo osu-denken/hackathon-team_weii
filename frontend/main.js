@@ -214,7 +214,7 @@ const renderPlayerSummary = () => {
     bottom.innerHTML = `
       <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
         <div class="pcb-item-meter" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);transition:background 0.1s;">
-          <div class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:175%;background-position:center 15%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid #1e293b;"></div>
+          <div class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:180%;background-position:center 20%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid #1e293b;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
           <div class="pcb-name" style="font-weight:700;transition:color 0.2s;"></div>

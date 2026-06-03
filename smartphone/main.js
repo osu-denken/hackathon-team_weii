@@ -17,10 +17,13 @@ const iconFullscreenExit = document.getElementById('icon-fullscreen-exit');
 const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
 const playerInfoContainer = document.getElementById('player-info');
-const playerBadge = document.getElementById('player-badge');
-const playerNumberSpan = document.getElementById('player-number');
-const playerNumberText = document.getElementById('player-number-text');
-const playerStatus = document.getElementById('player-status');
+const pcbMeter = document.getElementById('pcb-meter');
+const pcbIcon = document.getElementById('pcb-icon');
+const pcbName = document.getElementById('pcb-name');
+const pcbStatus = document.getElementById('pcb-status');
+const pcbRespawn = document.getElementById('pcb-respawn');
+const respawnSecSpan = document.getElementById('respawn-sec');
+const pcbHpBlocks = document.getElementById('pcb-hp-blocks');
 let _currentHeldItem = null;
 const difficultyControls = document.getElementById('difficulty-controls');
 const difficultyNormalBtn = document.getElementById('difficulty-normal');
@@ -135,23 +138,119 @@ function updatePlayerInfo(player) {
     const num = player.number || player.id || '';
     const color = player.color || '#888';
     _currentHeldItem = player.heldItem || null;
-    
-    if (playerNumberSpan) playerNumberSpan.textContent = num;
-    if (playerNumberText) playerNumberText.textContent = num;
-    if (playerBadge) playerBadge.style.backgroundColor = color;
     _localPlayerNumber = player.number || null;
     
-    // 死亡状態の処理
     const isDead = Boolean(player.dead);
     const respawnMs = player.respawnRemainingMs || 0;
-    if (playerStatus) {
+    const respawnSec = Math.ceil(respawnMs / 1000);
+    const hp = Math.floor(player.hp ?? 0);
+    const maxHp = Math.floor(player.maxHp ?? 1);
+    const score = Math.floor(player.score ?? 0);
+
+    // Update Card UI
+    if (playerInfoContainer.dataset.isDead !== String(isDead)) {
+      playerInfoContainer.dataset.isDead = String(isDead);
+      if (isDead) {
+        playerInfoContainer.style.background = 'rgba(239,68,68,0.15)';
+        playerInfoContainer.style.borderColor = 'rgba(239,68,68,0.4)';
+      } else {
+        playerInfoContainer.style.background = '';
+        playerInfoContainer.style.borderColor = '';
+      }
+    }
+
+    if (pcbIcon) {
+        const iconHash = `${num}:${isDead}`;
+        if (pcbIcon.dataset.hash !== iconHash) {
+          pcbIcon.dataset.hash = iconHash;
+          
+          let validNum = num;
+          if (typeof validNum !== 'number' || validNum < 1 || validNum > 7) {
+            validNum = 1;
+          }
+          const spriteUrl = `/asset/images/character-${validNum}.png`;
+          
+          pcbIcon.style.backgroundImage = `url('${spriteUrl}')`;
+          pcbIcon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
+          pcbIcon.style.filter = isDead ? 'grayscale(1)' : '';
+        }
+    }
+
+    if (pcbName) {
+        if (pcbName.dataset.pNum !== String(num) || pcbName.dataset.isDead !== String(isDead)) {
+          pcbName.dataset.pNum = String(num);
+          pcbName.dataset.isDead = String(isDead);
+          pcbName.style.color = isDead ? '#fca5a5' : '';
+          pcbName.textContent = `P${num}`;
+        }
+    }
+
+    if (pcbStatus) {
+        const statusHash = `${isDead}:${respawnSec}:${hp}:${maxHp}:${score}`;
+        if (pcbStatus.dataset.hash !== statusHash) {
+          pcbStatus.dataset.hash = statusHash;
+          pcbStatus.textContent = isDead ? `リスポーンまで` : `${score}pt`;
+        }
+    }
+
+    if (pcbRespawn && pcbHpBlocks) {
         if (isDead) {
-            playerStatus.style.display = 'block';
-            const sec = Math.ceil(respawnMs / 1000);
-            playerStatus.textContent = `死亡中…復活まで ${sec} 秒`;
+          if (pcbRespawn.style.display !== 'block') {
+            pcbRespawn.style.display = 'block';
+            pcbHpBlocks.style.display = 'none';
+          }
+          if (respawnSecSpan && respawnSecSpan.textContent !== String(respawnSec)) {
+            respawnSecSpan.textContent = String(respawnSec);
+          }
         } else {
-            playerStatus.style.display = 'none';
-            playerStatus.textContent = '';
+          if (pcbRespawn.style.display !== 'none') {
+            pcbRespawn.style.display = 'none';
+            pcbHpBlocks.style.display = 'flex';
+          }
+          
+          const hpHash = `${hp}:${maxHp}`;
+          if (pcbHpBlocks.dataset.hash !== hpHash) {
+            pcbHpBlocks.dataset.hash = hpHash;
+            pcbHpBlocks.innerHTML = '';
+            for (let i = 0; i < maxHp; i++) {
+              const b = document.createElement('div');
+              b.className = 'hp-block';
+              if (i >= hp) {
+                b.classList.add('empty');
+              }
+              pcbHpBlocks.appendChild(b);
+            }
+          }
+        }
+    }
+
+    if (pcbMeter) {
+        let remaining = 0;
+        let maxDuration = 1;
+        let meterColor = 'transparent';
+        const shieldRem = player.shieldRemainingMs || 0;
+        const tripleRem = player.tripleShotRemainingMs || 0;
+        const scoreRem = player.scoreDoubleRemainingMs || 0;
+
+        if (shieldRem > 0) {
+          remaining = shieldRem;
+          maxDuration = 5000;
+          meterColor = '#60a5fa';
+        } else if (tripleRem > 0) {
+          remaining = tripleRem;
+          maxDuration = 5000;
+          meterColor = '#f87171';
+        } else if (scoreRem > 0) {
+          remaining = scoreRem;
+          maxDuration = 8000;
+          meterColor = '#fbbf24';
+        }
+
+        if (remaining > 0) {
+          const percentage = Math.max(0, Math.min(100, (remaining / maxDuration) * 100));
+          pcbMeter.style.background = `conic-gradient(${meterColor} ${percentage}%, rgba(255,255,255,0.2) 0)`;
+        } else {
+          pcbMeter.style.background = 'rgba(255,255,255,0.2)';
         }
     }
 

@@ -90,6 +90,7 @@ export class PayloadBuilder {
         powerRemainingMs: Math.max(0, player.powerUntil - now),
         shieldRemainingMs: Math.max(0, player.shieldUntil - now),
         tripleShotRemainingMs: Math.max(0, player.tripleShotUntil - now),
+        scoreDoubleRemainingMs: Math.max(0, player.scoreDoubleUntil - now),
         number: player.number,
         color: player.color,
         heldItem: player.heldItem,
