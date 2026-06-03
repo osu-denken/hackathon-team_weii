@@ -356,7 +356,9 @@ function handleOrientation(e) {
 
     // 送信頻度を60fpsに上げたため、1回あたりの移動量をスケーリング
     const SPEED_SCALE = 0.25;
-    const delta = (Math.round((steer / MAX_TILT) * 1000) / 1000) * SPEED_SCALE;
+    // const delta = (Math.round((steer / MAX_TILT) * 1000) / 1000) * SPEED_SCALE;
+    const ratio = steer / MAX_TILT;
+    const delta = (ratio * Math.abs(ratio)) * SPEED_SCALE;
 
     sendMove(delta, 0, e.beta, e.gamma);
 }
