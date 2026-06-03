@@ -281,7 +281,7 @@ const renderPlayerSummary = () => {
     const statusHash = `${isDead}:${respawnSec}:${hp}:${maxHp}:${score}`;
     if (status.dataset.hash !== statusHash) {
       status.dataset.hash = statusHash;
-      status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `${score}pt`;
+      status.textContent = isDead ? `リスポーンまで` : `${score}pt`;
     }
 
     const now = Date.now();
