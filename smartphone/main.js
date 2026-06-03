@@ -1,3 +1,20 @@
+// --- iOS Fullscreen Workaround (Qiita) ---
+const _ua = navigator.userAgent.toLowerCase();
+const _fs = document.getElementById('fs');
+if (_fs && /iphone/.test(_ua) && !/crios|edgios/.test(_ua)) {
+    document.body.classList.add('ios-landscape');
+    const fs_display = () => {
+        if (window.orientation === 0 || (window.orientation !== 0 && screen.width - window.innerHeight <= 20)) {
+            _fs.style.display = 'none';
+        } else if (screen.width - window.innerHeight > 20) {
+            _fs.style.display = 'flex';
+        }
+    };
+    document.addEventListener('DOMContentLoaded', fs_display);
+    window.addEventListener('resize', fs_display);
+    fs_display();
+}
+
 // --- 1. UUIDの生成 ---
 const myUUID = window.crypto && crypto.randomUUID ? crypto.randomUUID() : "local-test-uuid";
 

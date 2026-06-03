@@ -112,6 +112,7 @@ const spritePaths = {
   5: '/asset/images/character-5.png',
   6: '/asset/images/character-6.png',
   7: '/asset/images/character-7.png',
+  8: '/asset/images/character-8.png',
 };
 
 const itemSpritePaths = {
@@ -723,8 +724,9 @@ const drawPlayer = (player, index, width, height) => {
   const maxHp = player.maxHp ?? 1;
   const hpRatio = Math.max(0, Math.min(1, hp / maxHp));
   const number = player.number ?? index + 1;
-  const sprite = spriteCache.get(number);
-  const sampledColor = spriteColors.get(number);
+  const charNum = player.characterNumber || number;
+  const sprite = spriteCache.get(charNum);
+  const sampledColor = spriteColors.get(charNum);
   const color = sampledColor || fallbackColor; // キャラクターごとの色をスプライトからサンプリングして使用。失敗した場合はフォールバックカラーを使用
   const spriteSize = 70;
   const lastControlAt = player.lastControlAt ?? 0;
@@ -794,7 +796,8 @@ const drawPlayer = (player, index, width, height) => {
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`P${number}`, x, y + 52);
+  const displayName = player.name || `P${number}`;
+  ctx.fillText(displayName, x, y + 52);
 
   const barWidth = 60;
   const barHeight = 10;
