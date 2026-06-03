@@ -262,18 +262,13 @@ function updatePlayerInfo(player) {
           const meterHash = `${meterColor}:${roundedPercentage}`;
           if (pcbMeter.dataset.hash !== meterHash) {
             pcbMeter.dataset.hash = meterHash;
-            pcbMeter.style.background = `conic-gradient(${meterColor} 0% ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}% 100%)`;
-          }
-          if (pcbStatus) {
-              pcbStatus.style.color = meterColor;
+            // Use highly compatible linear-gradient for fluid fill effect
+            pcbMeter.style.background = `linear-gradient(to top, ${meterColor} ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}%)`;
           }
         } else {
           if (pcbMeter.dataset.hash !== 'empty') {
             pcbMeter.dataset.hash = 'empty';
             pcbMeter.style.background = 'rgba(255,255,255,0.2)';
-          }
-          if (pcbStatus) {
-              pcbStatus.style.color = '#cfeffd';
           }
         }
     }
