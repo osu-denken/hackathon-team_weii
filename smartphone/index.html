@@ -4,10 +4,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>Controller of "phone ∧ shoot"</title>
-        <link rel="stylesheet" href="styles.css?v=28" />
+        <link rel="stylesheet" href="styles.css?v=33" />
     </head>
     <body>
-        <div id="fs" onclick="this.style.display='none'; document.body.classList.remove('fs-active');">
+        <div id="fs" onclick="this.style.display='none'; document.body.classList.remove('fs-active'); document.documentElement.classList.remove('fs-active');">
             ↑↓<br>SWIPE<br>
             <span style="font-size: 14px; font-weight: normal;">(Tap to cancel)</span>
         </div>
@@ -73,6 +73,6 @@
                 <button id="btn-shoot" disabled>SHOOT</button>
             </div>
         </div>
-        <script src="main.js?v=29"></script>
+        <script src="main.js?v=34"></script>
     </body>
 </html>

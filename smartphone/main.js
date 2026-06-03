@@ -1,13 +1,20 @@
 // --- Fullscreen Workaround (Swipe fallback) ---
 let fsInitialInnerHeight = 0;
+let fsResizeTimer = null;
+
 const fs_display = () => {
     const fsEl = document.getElementById('fs');
     if (fsEl && fsEl.style.display === 'flex') {
-        // Hide if innerHeight increases (address bar hidden) or portrait
-        if (window.innerHeight > fsInitialInnerHeight + 10 || window.orientation === 0) {
-            fsEl.style.display = 'none';
-            document.body.classList.remove('fs-active');
-        }
+        // Debounce resize to wait for address bar animation to completely finish
+        clearTimeout(fsResizeTimer);
+        fsResizeTimer = setTimeout(() => {
+            // If innerHeight significantly increased, address bar is hidden
+            if (window.innerHeight > fsInitialInnerHeight + 20) {
+                fsEl.style.display = 'none';
+                document.body.classList.remove('fs-active');
+                document.documentElement.classList.remove('fs-active');
+            }
+        }, 300);
     }
 };
 window.addEventListener('resize', fs_display);
@@ -391,6 +398,7 @@ const triggerSwipeWorkaround = () => {
     if (fsEl) {
         fsInitialInnerHeight = window.innerHeight;
         document.body.classList.add('fs-active');
+        document.documentElement.classList.add('fs-active');
         fsEl.style.display = 'flex';
     }
 };

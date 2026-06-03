@@ -10,7 +10,6 @@ body {
     height: 100dvh;
     width: 100dvw;
     overflow: hidden;
-    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
 }
@@ -24,6 +23,7 @@ body {
     padding: 15px;
     gap: 15px;
     position: relative;
+    touch-action: none;
 }
 
 /* 左側パネル: 丸みと影を排除したフラットデザイン */
@@ -451,11 +451,13 @@ body {
 
 /* iOS Fullscreen workaround (from Qiita) */
 /* https://qiita.com/MARUMOTOSHINICHI/items/151e93e54d367e36d7eb */
-body.fs-active {
-    height: 100% !important;
-    overflow: auto !important;
+html.fs-active, body.fs-active {
+    height: 150vh !important;
+    min-height: 150vh !important;
+    overflow: visible !important;
     touch-action: auto !important;
 }
+
 body.fs-active .main-layout {
     height: 100vh !important;
 }
@@ -467,10 +469,10 @@ body.fs-active .main-layout {
     display: none;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: calc(100vh + 1px);
+    width: 100vw;
+    height: 150vh;
     background-color: rgba(0, 0, 0, 0.85);
-    touch-action: pan-y;
+    touch-action: auto;
     left: 0;
     top: 0;
     color: white;
