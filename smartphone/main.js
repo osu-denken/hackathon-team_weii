@@ -13,6 +13,30 @@ const fs_display = () => {
                 fsEl.style.display = 'none';
                 document.body.classList.remove('fs-active');
                 document.documentElement.classList.remove('fs-active');
+                
+                // Restore original styles
+                document.documentElement.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.touchAction = '';
+                document.documentElement.style.webkitUserSelect = '';
+                document.documentElement.style.userSelect = '';
+
+                document.body.style.minHeight = '';
+                document.body.style.height = '';
+                document.body.style.overflow = '';
+                document.body.style.touchAction = '';
+                document.body.style.webkitUserSelect = '';
+                document.body.style.userSelect = '';
+
+                const mainLayout = document.querySelector('.main-layout');
+                if (mainLayout) {
+                    mainLayout.style.touchAction = '';
+                    mainLayout.style.webkitUserSelect = '';
+                    mainLayout.style.userSelect = '';
+                }
+                
+                const dummy = document.getElementById('chrome-ios-dummy');
+                if (dummy) dummy.style.display = 'none';
             }
         }, 300);
     }
@@ -400,6 +424,43 @@ const triggerSwipeWorkaround = () => {
         document.body.classList.add('fs-active');
         document.documentElement.classList.add('fs-active');
         fsEl.style.display = 'flex';
+
+        // Apply scrollability and remove ALL touch/select restrictions via JS
+        document.documentElement.style.setProperty('height', '100%', 'important');
+        document.documentElement.style.setProperty('overflow', 'visible', 'important');
+        document.documentElement.style.setProperty('touch-action', 'auto', 'important');
+        document.documentElement.style.setProperty('-webkit-user-select', 'auto', 'important');
+        document.documentElement.style.setProperty('user-select', 'auto', 'important');
+
+        document.body.style.setProperty('height', 'auto', 'important');
+        document.body.style.setProperty('min-height', '200vh', 'important');
+        document.body.style.setProperty('overflow', 'visible', 'important');
+        document.body.style.setProperty('touch-action', 'auto', 'important');
+        document.body.style.setProperty('-webkit-user-select', 'auto', 'important');
+        document.body.style.setProperty('user-select', 'auto', 'important');
+
+        const mainLayout = document.querySelector('.main-layout');
+        if (mainLayout) {
+            mainLayout.style.setProperty('touch-action', 'auto', 'important');
+            mainLayout.style.setProperty('-webkit-user-select', 'auto', 'important');
+            mainLayout.style.setProperty('user-select', 'auto', 'important');
+        }
+
+        // Chrome iOS Hack: Force scroll calculation and unlock scroll
+        let dummy = document.getElementById('chrome-ios-dummy');
+        if (!dummy) {
+            dummy = document.createElement('div');
+            dummy.id = 'chrome-ios-dummy';
+            dummy.style.height = '150vh';
+            dummy.style.width = '1px';
+            dummy.style.position = 'static';
+            document.body.appendChild(dummy);
+        }
+        dummy.style.display = 'block';
+
+        setTimeout(() => {
+            window.scrollTo(0, 1);
+        }, 50);
     }
 };
 
@@ -424,7 +485,7 @@ const toggleFullscreen = (e) => {
             if (exitFs) exitFs.call(document);
         }
     } else {
-        // Fullscreen API unavailable (e.g. iOS Safari)
+        // Fullscreen API unavailable (e.g. iOS Safari/Chrome)
         triggerSwipeWorkaround();
     }
 };

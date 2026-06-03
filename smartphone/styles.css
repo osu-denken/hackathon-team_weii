@@ -451,13 +451,6 @@ body {
 
 /* iOS Fullscreen workaround (from Qiita) */
 /* https://qiita.com/MARUMOTOSHINICHI/items/151e93e54d367e36d7eb */
-html.fs-active, body.fs-active {
-    height: 150vh !important;
-    min-height: 150vh !important;
-    overflow: visible !important;
-    touch-action: auto !important;
-}
-
 body.fs-active .main-layout {
     height: 100vh !important;
 }
@@ -469,8 +462,8 @@ body.fs-active .main-layout {
     display: none;
     justify-content: center;
     align-items: center;
-    width: 100vw;
-    height: 150vh;
+    width: 100%;
+    height: 200vh;
     background-color: rgba(0, 0, 0, 0.85);
     touch-action: auto;
     left: 0;

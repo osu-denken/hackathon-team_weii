@@ -260,10 +260,17 @@ const renderPlayerSummary = () => {
     }
 
     const icon = bottom.querySelector('.pcb-icon');
-    const iconHash = `${pNum}:${isDead}`;
+    const charNum = player.characterNumber || pNum || 1;
+    const iconHash = `${charNum}:${isDead}`;
     if (icon.dataset.hash !== iconHash) {
       icon.dataset.hash = iconHash;
-      const spriteUrl = spritePaths[pNum] || '/asset/images/character-1.png';
+      
+      let validCharNum = charNum;
+      if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 7) {
+          validCharNum = 1;
+      }
+      const spriteUrl = `/asset/images/character-${validCharNum}.png`;
+      
       icon.style.backgroundImage = `url('${spriteUrl}')`;
       icon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
       icon.style.filter = isDead ? 'grayscale(1)' : '';
@@ -271,11 +278,14 @@ const renderPlayerSummary = () => {
     }
 
     const name = bottom.querySelector('.pcb-name');
-    if (name.dataset.pNum !== String(pNum) || name.dataset.isDead !== String(isDead)) {
+    const displayName = player.name || `P${pNum}`;
+    const nameHash = `${displayName}:${isDead}`;
+    if (name.dataset.hash !== nameHash) {
+      name.dataset.hash = nameHash;
       name.dataset.pNum = String(pNum);
       name.dataset.isDead = String(isDead);
       name.style.color = isDead ? '#fca5a5' : '';
-      name.textContent = `P${pNum}`;
+      name.textContent = displayName;
     }
 
     const status = bottom.querySelector('.pcb-status');
