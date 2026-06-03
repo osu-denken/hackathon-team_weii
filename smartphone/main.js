@@ -208,14 +208,19 @@ function updatePlayerInfo(player) {
             pcbHpBlocks.style.display = 'flex';
           }
           
-          const hpHash = `${hp}:${maxHp}`;
+          const hpHash = `${hp}:${maxHp}:${color}`;
           if (pcbHpBlocks.dataset.hash !== hpHash) {
             pcbHpBlocks.dataset.hash = hpHash;
             pcbHpBlocks.innerHTML = '';
             for (let i = 0; i < maxHp; i++) {
               const b = document.createElement('div');
               b.className = 'hp-block';
-              if (i >= hp) {
+              b.style.transition = 'all 0.2s';
+              const isFilled = i < hp;
+              b.style.background = isFilled ? color : '#3b82f6';
+              b.style.boxShadow = isFilled ? `0 0 6px ${color}` : 'none';
+            //   b.style.border = isFilled ? 'none' : '1px solid rgba(255,255,255,0.2)';
+              if (!isFilled) {
                 b.classList.add('empty');
               }
               pcbHpBlocks.appendChild(b);
