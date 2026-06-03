@@ -3,7 +3,8 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #151515; /* よりソリッドな黒へ */
+    background-color: #151515;
+    /* よりソリッドな黒へ */
     color: #ffffff;
     /* 画面全体に収め、スクロールやズームを完全に防止 */
     height: 100dvh;
@@ -50,9 +51,11 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
+
 .btn-flat.leave-state {
     background-color: #555555;
 }
+
 .btn-flat:disabled {
     background-color: #333333;
     color: #666666;
@@ -72,24 +75,29 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
+
 .btn-floating.btn-square {
     padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
 .btn-floating.top-right {
     top: 15px;
     right: 15px;
 }
+
 .btn-floating.bottom-right {
     bottom: 15px;
     right: 15px;
 }
+
 .btn-floating:active {
     background-color: rgba(0, 0, 0, 0.8);
     transform: scale(0.95);
 }
+
 .btn-floating:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -98,8 +106,8 @@ body {
 /* プレイヤー情報（フロントエンド準拠） */
 .player-card-bottom {
     padding: 8px 10px;
-    background: rgba(10,10,40);
-    border: 1px solid rgba(25,25,50);
+    background: rgba(10, 10, 40);
+    border: 1px solid rgba(25, 25, 50);
     color: #eaf6ff;
     display: flex;
     gap: 8px;
@@ -109,6 +117,7 @@ body {
     box-sizing: border-box;
     height: 64px;
 }
+
 .hp-block {
     width: 8px;
     height: 12px;
@@ -126,6 +135,7 @@ body {
     flex-direction: column;
     justify-content: flex-end;
 }
+
 .item-slot {
     width: 100%;
     height: 100px;
@@ -137,11 +147,13 @@ body {
     padding: 0;
     cursor: pointer;
 }
+
 .item-slot:disabled {
     background-color: #151515;
     border-color: #222222;
     cursor: default;
 }
+
 #item-icon {
     width: 60px;
     height: 60px;
@@ -156,6 +168,7 @@ body {
     gap: 8px;
     margin-top: 8px;
 }
+
 .difficulty-btn {
     flex: 1;
     padding: 10px 8px;
@@ -165,6 +178,7 @@ body {
     font-weight: 700;
     cursor: pointer;
 }
+
 .difficulty-btn.active {
     background-color: #ffd166;
     color: #071013;
@@ -185,7 +199,7 @@ body {
     height: 55vmin;
     max-width: 260px;
     max-height: 260px;
-    
+
     /* 指定されたデザイン */
     border-radius: 50%;
     background-color: #ff0000;
@@ -193,9 +207,9 @@ body {
     color: #ffffff;
     font-size: 36px;
     font-weight: bold;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
     transition: transform 0.1s;
-    
+
     /* line-heightの代わりにflexで常にテキストを中央配置 */
     display: flex;
     justify-content: center;
@@ -203,10 +217,12 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
+
 #btn-shoot:active {
     transform: scale(0.95);
     background-color: #cc0000;
 }
+
 #btn-shoot:disabled {
     background-color: #444444;
     border-color: #555555;
@@ -240,9 +256,11 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
+
 .btn-flat.leave-state {
     background-color: #555555;
 }
+
 .btn-flat:disabled {
     background-color: #333333;
     color: #666666;
@@ -262,24 +280,29 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
+
 .btn-floating.btn-square {
     padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
 .btn-floating.top-right {
     top: 15px;
     right: 15px;
 }
+
 .btn-floating.bottom-right {
     bottom: 15px;
     right: 15px;
 }
+
 .btn-floating:active {
     background-color: rgba(0, 0, 0, 0.8);
     transform: scale(0.95);
 }
+
 .btn-floating:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -288,8 +311,8 @@ body {
 /* プレイヤー情報（フロントエンド準拠） */
 .player-card-bottom {
     padding: 8px 10px;
-    background: rgba(10,10,40);
-    border: 1px solid rgba(25,25,50);
+    background: rgba(10, 10, 40);
+    border: 1px solid rgba(25, 25, 50);
     color: #eaf6ff;
     display: flex;
     gap: 8px;
@@ -299,6 +322,7 @@ body {
     box-sizing: border-box;
     height: 64px;
 }
+
 .hp-block {
     width: 8px;
     height: 12px;
@@ -316,6 +340,7 @@ body {
     flex-direction: column;
     justify-content: flex-end;
 }
+
 .item-slot {
     width: 100%;
     height: 100px;
@@ -327,11 +352,13 @@ body {
     padding: 0;
     cursor: pointer;
 }
+
 .item-slot:disabled {
     background-color: #151515;
     border-color: #222222;
     cursor: default;
 }
+
 #item-icon {
     width: 60px;
     height: 60px;
@@ -346,6 +373,7 @@ body {
     gap: 8px;
     margin-top: 8px;
 }
+
 .difficulty-btn {
     flex: 1;
     padding: 10px 8px;
@@ -355,6 +383,7 @@ body {
     font-weight: 700;
     cursor: pointer;
 }
+
 .difficulty-btn.active {
     background-color: #ffd166;
     color: #071013;
@@ -375,7 +404,7 @@ body {
     height: 55vmin;
     max-width: 260px;
     max-height: 260px;
-    
+
     /* 指定されたデザイン */
     border-radius: 50%;
     background-color: #ff0000;
@@ -383,9 +412,9 @@ body {
     color: #ffffff;
     font-size: 36px;
     font-weight: bold;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
     transition: transform 0.1s;
-    
+
     /* line-heightの代わりにflexで常にテキストを中央配置 */
     display: flex;
     justify-content: center;
@@ -393,10 +422,12 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
+
 #btn-shoot:active {
     transform: scale(0.95);
     background-color: #cc0000;
 }
+
 #btn-shoot:disabled {
     background-color: #444444;
     border-color: #555555;
@@ -407,7 +438,7 @@ body {
 
 /* 縦画面（ポートレート）時に画面を90度回転させるハック */
 @media screen and (orientation: portrait) {
-    body {
+    body:not(.fs-active) {
         transform: rotate(90deg);
         transform-origin: left top;
         width: 100dvh;
@@ -419,6 +450,16 @@ body {
 }
 
 /* iOS Fullscreen workaround (from Qiita) */
+/* https://qiita.com/MARUMOTOSHINICHI/items/151e93e54d367e36d7eb */
+body.fs-active {
+    height: 100% !important;
+    overflow: auto !important;
+    touch-action: auto !important;
+}
+body.fs-active .main-layout {
+    height: 100vh !important;
+}
+
 #fs {
     overflow: hidden;
     position: absolute;

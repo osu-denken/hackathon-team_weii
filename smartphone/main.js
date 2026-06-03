@@ -1,19 +1,17 @@
-// --- iOS Fullscreen Workaround (Qiita) ---
-const _ua = navigator.userAgent.toLowerCase();
-const _fs = document.getElementById('fs');
-if (_fs && /iphone/.test(_ua) && !/crios|edgios/.test(_ua)) {
-    document.body.classList.add('ios-landscape');
-    const fs_display = () => {
-        if (window.orientation === 0 || (window.orientation !== 0 && screen.width - window.innerHeight <= 20)) {
-            _fs.style.display = 'none';
-        } else if (screen.width - window.innerHeight > 20) {
-            _fs.style.display = 'flex';
+// --- Fullscreen Workaround (Swipe fallback) ---
+let fsInitialInnerHeight = 0;
+const fs_display = () => {
+    const fsEl = document.getElementById('fs');
+    if (fsEl && fsEl.style.display === 'flex') {
+        // Hide if innerHeight increases (address bar hidden) or portrait
+        if (window.innerHeight > fsInitialInnerHeight + 10 || window.orientation === 0) {
+            fsEl.style.display = 'none';
+            document.body.classList.remove('fs-active');
         }
-    };
-    document.addEventListener('DOMContentLoaded', fs_display);
-    window.addEventListener('resize', fs_display);
-    fs_display();
-}
+    }
+};
+window.addEventListener('resize', fs_display);
+// Workaround is triggered manually via fullscreen button
 
 // --- 1. UUIDの生成 ---
 const myUUID = window.crypto && crypto.randomUUID ? crypto.randomUUID() : "local-test-uuid";
@@ -52,7 +50,7 @@ let _localPlayerNumber = null;
 
 // --- キャラクター選択（カルーセル） ---
 let selectedCharacterNumber = 1;
-const CHAR_COUNT = 7;
+const CHAR_COUNT = 8;
 
 const charPreview = document.getElementById('char-preview');
 const charLabel = document.getElementById('char-label');
@@ -388,22 +386,43 @@ const updateFullscreenIcons = () => {
 
 document.addEventListener('fullscreenchange', updateFullscreenIcons);
 
+const triggerSwipeWorkaround = () => {
+    const fsEl = document.getElementById('fs');
+    if (fsEl) {
+        fsInitialInnerHeight = window.innerHeight;
+        document.body.classList.add('fs-active');
+        fsEl.style.display = 'flex';
+    }
+};
+
 const toggleFullscreen = (e) => {
     if (e) e.preventDefault();
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.error(`Error attempting to enable fullscreen: ${err.message}`);
-        });
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
+    
+    const docEl = document.documentElement;
+    const requestFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+    const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
+    if (requestFs) {
+        if (!isFullscreen) {
+            const promise = requestFs.call(docEl);
+            if (promise) {
+                promise.catch(err => {
+                    console.error(`Fullscreen API error: ${err.message}`);
+                    triggerSwipeWorkaround();
+                });
+            }
+        } else {
+            if (exitFs) exitFs.call(document);
         }
+    } else {
+        // Fullscreen API unavailable (e.g. iOS Safari)
+        triggerSwipeWorkaround();
     }
 };
 
 if (btnFullscreen) {
     btnFullscreen.addEventListener('click', toggleFullscreen);
-    btnFullscreen.addEventListener('touchstart', toggleFullscreen, { passive: false });
 }
 
 // --- 4. 移動量検知と送信 (move) ---
