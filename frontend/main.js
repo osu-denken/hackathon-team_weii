@@ -213,7 +213,9 @@ const renderPlayerSummary = () => {
 
     bottom.innerHTML = `
       <div class="pcb-left" style="display:flex;align-items:center;gap:8px;">
-        <div class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:175%;background-position:center 15%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid rgba(255,255,255,0.2);"></div>
+        <div class="pcb-item-meter" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);transition:background 0.1s;">
+          <div class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:175%;background-position:center 15%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid #1e293b;"></div>
+        </div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;">
           <div class="pcb-name" style="font-weight:700;transition:color 0.2s;"></div>
           <div class="pcb-status" style="font-size:12px;color:#cfeffd"></div>
@@ -280,6 +282,39 @@ const renderPlayerSummary = () => {
     if (status.dataset.hash !== statusHash) {
       status.dataset.hash = statusHash;
       status.textContent = isDead ? `リスポーンまで ${respawnSec} 秒` : `${score}pt`;
+    }
+
+    const now = Date.now();
+    const shieldUntil = player.shieldUntil || 0;
+    const tripleShotUntil = player.tripleShotUntil || 0;
+    const scoreDoubleUntil = player.scoreDoubleUntil || 0;
+
+    let remaining = 0;
+    let maxDuration = 1;
+    let meterColor = 'transparent';
+
+    if (shieldUntil > now) {
+      remaining = shieldUntil - now;
+      maxDuration = 5000;
+      meterColor = '#60a5fa';
+    } else if (tripleShotUntil > now) {
+      remaining = tripleShotUntil - now;
+      maxDuration = 5000;
+      meterColor = '#f87171';
+    } else if (scoreDoubleUntil > now) {
+      remaining = scoreDoubleUntil - now;
+      maxDuration = 8000;
+      meterColor = '#fbbf24';
+    }
+
+    const meter = bottom.querySelector('.pcb-item-meter');
+    if (meter) {
+      if (remaining > 0) {
+        const percentage = Math.max(0, Math.min(100, (remaining / maxDuration) * 100));
+        meter.style.background = `conic-gradient(${meterColor} ${percentage}%, rgba(255,255,255,0.2) 0)`;
+      } else {
+        meter.style.background = 'rgba(255,255,255,0.2)';
+      }
     }
 
     const respawnDiv = bottom.querySelector('.pcb-respawn');

@@ -116,7 +116,8 @@ class PlayerEntity extends LivingEntity {
       lastControlAt: this.lastControlAt,
       dead: this.isDead(),
       deadUntil: this.deadUntil ?? 0,
-      scoreDouble: this.scoreDoubleUntil > Date.now(),
+      scoreDoubleUntil: this.scoreDoubleUntil ?? 0,
+      tripleShotUntil: this.tripleShotUntil ?? 0,
       shieldUntil: this.shieldUntil ?? 0,
     };
   }
