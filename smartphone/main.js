@@ -4,7 +4,7 @@ const myUUID = window.crypto && crypto.randomUUID ? crypto.randomUUID() : "local
 // --- 変数定義 ---
 let ws = null;
 let lastMoveSendTime = 0;
-const THROTTLE_MS = 16; 
+const THROTTLE_MS = 20; 
 
 // --- DOM要素 ---
 const wsUrlInput = document.getElementById('ws-url');
