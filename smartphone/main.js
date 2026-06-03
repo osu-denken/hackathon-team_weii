@@ -458,6 +458,48 @@ const triggerSwipeWorkaround = () => {
         }
         dummy.style.display = 'block';
 
+        const isChromeIOS = /CriOS/i.test(navigator.userAgent);
+        if (isChromeIOS) {
+            let debugLog = document.getElementById('chrome-ios-debug-log');
+            if (!debugLog) {
+                debugLog = document.createElement('div');
+                debugLog.id = 'chrome-ios-debug-log';
+                debugLog.style.position = 'absolute';
+                debugLog.style.bottom = '10px';
+                debugLog.style.left = '10px';
+                debugLog.style.background = 'rgba(0,0,0,0.8)';
+                debugLog.style.color = 'lime';
+                debugLog.style.fontSize = '12px';
+                debugLog.style.fontFamily = 'monospace';
+                debugLog.style.padding = '5px';
+                debugLog.style.pointerEvents = 'none';
+                debugLog.style.zIndex = '10000';
+                debugLog.style.textAlign = 'left';
+                debugLog.style.lineHeight = '1.2';
+                fsEl.appendChild(debugLog);
+
+                let touchStartY = 0;
+                fsEl.addEventListener('touchstart', (e) => {
+                    touchStartY = e.touches[0].clientY;
+                }, {passive: true});
+
+                fsEl.addEventListener('touchmove', (e) => {
+                    const currentY = e.touches[0].clientY;
+                    const deltaY = currentY - touchStartY;
+                    debugLog.innerHTML = `
+                        innerHeight: ${window.innerHeight}<br>
+                        pageYOffset: ${window.pageYOffset}<br>
+                        body height: ${document.body.scrollHeight}<br>
+                        html height: ${document.documentElement.scrollHeight}<br>
+                        touch delta: ${Math.round(deltaY)}<br>
+                        swipe: ${deltaY < 0 ? 'UP' : 'DOWN'}
+                    `;
+                }, {passive: true});
+            }
+            debugLog.style.display = 'block';
+            debugLog.innerHTML = `Chrome iOS Debug<br>innerHeight: ${window.innerHeight}<br>body: ${document.body.scrollHeight}<br>html: ${document.documentElement.scrollHeight}`;
+        }
+
         setTimeout(() => {
             window.scrollTo(0, 1);
         }, 50);
