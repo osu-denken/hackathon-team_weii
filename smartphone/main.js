@@ -16,6 +16,7 @@ const iconFullscreenEnter = document.getElementById('icon-fullscreen-enter');
 const iconFullscreenExit = document.getElementById('icon-fullscreen-exit');
 const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
+const itemSection = document.getElementById('item-section');
 const playerInfoContainer = document.getElementById('player-info');
 const pcbMeter = document.getElementById('pcb-meter');
 const pcbIcon = document.getElementById('pcb-icon');
@@ -24,11 +25,46 @@ const pcbStatus = document.getElementById('pcb-status');
 const pcbRespawn = document.getElementById('pcb-respawn');
 const respawnSecSpan = document.getElementById('respawn-sec');
 const pcbHpBlocks = document.getElementById('pcb-hp-blocks');
+const customizationPanel = document.getElementById('customization-panel');
+const playerNameInput = document.getElementById('player-name-input');
 let _currentHeldItem = null;
 const difficultyControls = document.getElementById('difficulty-controls');
 const difficultyNormalBtn = document.getElementById('difficulty-normal');
 const difficultyHardBtn = document.getElementById('difficulty-hard');
 let _localPlayerNumber = null;
+
+// --- キャラクター選択（カルーセル） ---
+let selectedCharacterNumber = 1;
+const CHAR_COUNT = 7;
+
+const charPreview = document.getElementById('char-preview');
+const charLabel = document.getElementById('char-label');
+const charPrevBtn = document.getElementById('char-prev');
+const charNextBtn = document.getElementById('char-next');
+
+const updateCharPreview = () => {
+    const base = `${window.location.protocol}//${window.location.host}/asset/images/`;
+    if (charPreview) {
+        charPreview.src = `${base}character-${selectedCharacterNumber}.png`;
+        charPreview.alt = `キャラ ${selectedCharacterNumber}`;
+    }
+    if (charLabel) charLabel.textContent = `${selectedCharacterNumber} / ${CHAR_COUNT}`;
+};
+
+if (charPrevBtn) {
+    charPrevBtn.addEventListener('click', () => {
+        selectedCharacterNumber = selectedCharacterNumber <= 1 ? CHAR_COUNT : selectedCharacterNumber - 1;
+        updateCharPreview();
+    });
+}
+if (charNextBtn) {
+    charNextBtn.addEventListener('click', () => {
+        selectedCharacterNumber = selectedCharacterNumber >= CHAR_COUNT ? 1 : selectedCharacterNumber + 1;
+        updateCharPreview();
+    });
+}
+
+updateCharPreview();
 
 let neutralBeta = null; // 傾きのニュートラル位置（初期値はnullで、最初のセンサーイベントで設定）
 
@@ -84,9 +120,15 @@ function connectWebSocket() {
         neutralBeta = null;
 
         updateUI(true);
+        // カスタマイズパネルを非表示 → アイテム欄を表示
+        if (customizationPanel) customizationPanel.style.display = 'none';
+        if (itemSection) itemSection.style.display = 'flex';
+        const name = playerNameInput ? playerNameInput.value.trim() : '';
         const joinData = {
             type: "join",
-            id: myUUID
+            id: myUUID,
+            name: name || undefined,
+            characterNumber: selectedCharacterNumber,
         };
         ws.send(JSON.stringify(joinData));
     };
@@ -98,9 +140,10 @@ function connectWebSocket() {
                 if (data.player) updatePlayerInfo(data.player);
                 if (data.game) updateGameInfo(data.game);
             } else if (data && data.type === 'gameReset') {
-                // タイトルに戻ったのでjoinを再送してプレイヤー登録し直す
-                const joinData = { type: 'join', id: myUUID };
-                ws.send(JSON.stringify(joinData));
+                // タイトルに戻ったのでjoinを再送（カスタマイズは維持）
+                const name2 = playerNameInput ? playerNameInput.value.trim() : '';
+                const rejoinData = { type: 'join', id: myUUID, name: name2 || undefined, characterNumber: selectedCharacterNumber };
+                ws.send(JSON.stringify(rejoinData));
             }
         } catch (err) {
             console.error('ws.onmessage parse error', err);
@@ -108,6 +151,9 @@ function connectWebSocket() {
     };
 
     ws.onclose = () => {
+        // 切断時：カスタマイズパネルを再表示、アイテム欄を非表示
+        if (customizationPanel) customizationPanel.style.display = 'flex';
+        if (itemSection) itemSection.style.display = 'none';
         updateUI(false);
         updatePlayerInfo(null);
     };
@@ -115,6 +161,8 @@ function connectWebSocket() {
     ws.onerror = (err) => {
         console.error("WebSocket Error:", err);
         alert("WebSocket接続エラー。サーバーが起動しているか確認してください。");
+        if (customizationPanel) customizationPanel.style.display = 'flex';
+        if (itemSection) itemSection.style.display = 'none';
         updateUI(false);
     };
 }
@@ -136,6 +184,8 @@ function updatePlayerInfo(player) {
 
     playerInfoContainer.style.visibility = 'visible';
     const num = player.number || player.id || '';
+    const charNum = player.characterNumber || player.number || 1;
+    const displayName = player.name || `P${num}`;
     const color = player.color || '#888';
     _currentHeldItem = player.heldItem || null;
     _localPlayerNumber = player.number || null;
@@ -160,15 +210,15 @@ function updatePlayerInfo(player) {
     }
 
     if (pcbIcon) {
-        const iconHash = `${num}:${isDead}`;
+        const iconHash = `${charNum}:${isDead}`;
         if (pcbIcon.dataset.hash !== iconHash) {
             pcbIcon.dataset.hash = iconHash;
 
-            let validNum = num;
-            if (typeof validNum !== 'number' || validNum < 1 || validNum > 7) {
-                validNum = 1;
+            let validCharNum = charNum;
+            if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 7) {
+                validCharNum = 1;
             }
-            const spriteUrl = `/asset/images/character-${validNum}.png`;
+            const spriteUrl = `/asset/images/character-${validCharNum}.png`;
 
             pcbIcon.style.backgroundImage = `url('${spriteUrl}')`;
             pcbIcon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
@@ -181,7 +231,7 @@ function updatePlayerInfo(player) {
             pcbName.dataset.pNum = String(num);
             pcbName.dataset.isDead = String(isDead);
             pcbName.style.color = isDead ? '#fca5a5' : '';
-            pcbName.textContent = `P${num}`;
+            pcbName.textContent = isDead ? displayName : displayName;
         }
     }
 

@@ -73,7 +73,11 @@ const handleJoin = (ws, msg) => {
     return;
   }
 
-  const player = stage.addPlayer(msg.id, Date.now());
+  const name = typeof msg.name === 'string' ? msg.name.trim().slice(0, 12) : '';
+  const characterNumber = (Number.isInteger(msg.characterNumber) && msg.characterNumber >= 1 && msg.characterNumber <= 7)
+    ? msg.characterNumber : null;
+
+  const player = stage.addPlayer(msg.id, Date.now(), { name, characterNumber });
   socketToPlayerId.set(ws, player.id);
 
   if (ws.readyState === WebSocket.OPEN) {
@@ -83,6 +87,8 @@ const handleJoin = (ws, msg) => {
         id: player.id,
         number: player.number,
         color: player.color,
+        name: player.name,
+        characterNumber: player.characterNumber,
       },
     });
   }

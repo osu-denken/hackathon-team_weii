@@ -30,6 +30,22 @@
 						</div>
 					</section>
 
+					<section id="customization-section" class="control-card">
+						<div style="display:flex;flex-direction:column;gap:10px;">
+							<input id="player-name-input" type="text" maxlength="12" placeholder="名前（最大12文字）"
+								style="width:100%;box-sizing:border-box;padding:8px 10px;background:#0f172a;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:13px;border-radius:4px;">
+							<div style="font-size:11px;color:#64748b;">キャラクター選択</div>
+							<div style="display:flex;align-items:center;gap:8px;">
+								<button id="char-prev" style="flex-shrink:0;width:32px;height:32px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:18px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;">&#8249;</button>
+								<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+									<img id="char-preview" src="" alt="" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;display:block;">
+									<span id="char-label" style="font-size:11px;color:#64748b;"></span>
+								</div>
+								<button id="char-next" style="flex-shrink:0;width:32px;height:32px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:18px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+							</div>
+						</div>
+					</section>
+
 					<section class="button-row">
 						<button id="btn-join" class="action-button primary" type="button">JOIN</button>
 						<button id="btn-shoot" class="action-button" type="button" disabled>SHOOT</button>
@@ -48,6 +64,6 @@
 				</aside>
 			</main>
 		</div>
-		<script src="./main.js?v=2"></script>
+		<script src="./main.js?v=4"></script>
 	</body>
 </html>

@@ -22,6 +22,40 @@ const itemIconMap = {
   empty: '/asset/images/empty.png',
 };
 
+const playerNameInput = document.getElementById('player-name-input');
+const customizationSection = document.getElementById('customization-section');
+let selectedCharacterNumber = 1;
+const CHAR_COUNT = 7;
+
+// キャラクター選択カルーセルの初期化
+const charPreview = document.getElementById('char-preview');
+const charLabel = document.getElementById('char-label');
+const charPrevBtn = document.getElementById('char-prev');
+const charNextBtn = document.getElementById('char-next');
+
+const updateCharPreview = () => {
+  if (charPreview) {
+    charPreview.src = `/asset/images/character-${selectedCharacterNumber}.png`;
+    charPreview.alt = `キャラ ${selectedCharacterNumber}`;
+  }
+  if (charLabel) charLabel.textContent = `${selectedCharacterNumber} / ${CHAR_COUNT}`;
+};
+
+if (charPrevBtn) {
+  charPrevBtn.addEventListener('click', () => {
+    selectedCharacterNumber = selectedCharacterNumber <= 1 ? CHAR_COUNT : selectedCharacterNumber - 1;
+    updateCharPreview();
+  });
+}
+if (charNextBtn) {
+  charNextBtn.addEventListener('click', () => {
+    selectedCharacterNumber = selectedCharacterNumber >= CHAR_COUNT ? 1 : selectedCharacterNumber + 1;
+    updateCharPreview();
+  });
+}
+
+updateCharPreview();
+
 let socket = null;
 let connected = false;
 let currentHeldItem = null;
@@ -45,6 +79,10 @@ const setConnectionState = (value) => {
   }
   if (btnShoot) {
     btnShoot.disabled = !value;
+  }
+  // JOIN中はカスタマイズセクションを非表示、切断時は再表示
+  if (customizationSection) {
+    customizationSection.style.display = value ? 'none' : 'block';
   }
 };
 
@@ -91,7 +129,8 @@ const send = (payload) => {
 };
 
 const sendJoin = () => {
-  send({ type: 'join', id: clientId });
+  const name = playerNameInput ? playerNameInput.value.trim() : '';
+  send({ type: 'join', id: clientId, name: name || undefined, characterNumber: selectedCharacterNumber });
 };
 
 const sendLeave = () => {

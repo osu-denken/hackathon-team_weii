@@ -93,6 +93,8 @@ export class PayloadBuilder {
         scoreDoubleRemainingMs: Math.max(0, player.scoreDoubleUntil - now),
         number: player.number,
         color: player.color,
+        name: player.name,
+        characterNumber: player.characterNumber,
         heldItem: player.heldItem,
         bulletsActive: stage.countBulletsByOwner(player.id),
         bulletsMax: MAX_ACTIVE_BULLETS_PER_PLAYER,

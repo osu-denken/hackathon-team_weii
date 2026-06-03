@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>Controller of "phone ∧ shoot"</title>
-        <link rel="stylesheet" href="styles.css?v=18" />
+        <link rel="stylesheet" href="styles.css?v=21" />
     </head>
     <body>
         <button id="btn-fullscreen" class="btn-floating top-right btn-square" title="全画面表示">
@@ -19,6 +19,22 @@
         <div class="main-layout">
             <div class="left-panel">
                 <input type="hidden" id="ws-url" value="">
+
+                <!-- キャラ選択・名前入力パネル（JOIN前のみ表示） -->
+                <div id="customization-panel" style="display:flex;flex-direction:column;gap:8px;">
+                    <input id="player-name-input" type="text" maxlength="12" placeholder="名前（最大12文字）"
+                        style="width:100%;box-sizing:border-box;padding:8px 10px;background:#1a1a1a;border:1px solid #444;color:#fff;font-size:14px;">
+                    <div style="font-size:11px;color:#888;margin-bottom:2px;">キャラクター選択</div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                        <button id="char-prev" style="flex-shrink:0;width:32px;height:32px;background:#2a2a2a;border:1px solid #555;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8249;</button>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                            <img id="char-preview" src="" alt="" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;display:block;">
+                            <span id="char-label" style="font-size:11px;color:#aaa;"></span>
+                        </div>
+                        <button id="char-next" style="flex-shrink:0;width:32px;height:32px;background:#2a2a2a;border:1px solid #555;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+                    </div>
+                </div>
+
                 <button id="btn-join" class="btn-flat join-state">JOIN</button>
 
                 <div class="player-card-bottom" id="player-info" style="visibility: hidden; width:100%;">
@@ -42,7 +58,7 @@
                     <button id="difficulty-hard" class="difficulty-btn" type="button">ハード</button>
                 </div>
 
-                <div class="item-section">
+                <div class="item-section" id="item-section" style="display:none;">
                     <button id="btn-use-item" class="item-slot" disabled>
                         <img id="item-icon" alt="" />
                     </button>
@@ -53,6 +69,6 @@
                 <button id="btn-shoot" disabled>SHOOT</button>
             </div>
         </div>
-        <script src="main.js?v=18"></script>
+        <script src="main.js?v=21"></script>
     </body>
 </html>

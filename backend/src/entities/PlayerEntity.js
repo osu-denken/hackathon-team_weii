@@ -5,7 +5,7 @@ const BASE_ATTACK = 1;
 const POWER_ATTACK = 2;
 
 class PlayerEntity extends LivingEntity {
-  constructor({ id, number, color, maxHp = DEFAULT_HP }) {
+  constructor({ id, number, color, maxHp = DEFAULT_HP, name = '', characterNumber = null }) {
     super({ id, x: 0, y: 0, hp: maxHp, maxHp });
     this.score = 0;
     this.attackPower = BASE_ATTACK;
@@ -18,6 +18,8 @@ class PlayerEntity extends LivingEntity {
     this.number = number;
     this.color = color;
     this.heldItem = null;
+    this.name = name || `P${number}`;
+    this.characterNumber = characterNumber || number; // 1〜7のキャラクター番号
   }
 
   move(delta, minX, maxX) {
@@ -113,6 +115,8 @@ class PlayerEntity extends LivingEntity {
       score: this.score,
       number: this.number,
       color: this.color,
+      name: this.name,
+      characterNumber: this.characterNumber,
       lastControlAt: this.lastControlAt,
       dead: this.isDead(),
       deadUntil: this.deadUntil ?? 0,

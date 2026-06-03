@@ -78,9 +78,12 @@ class Stage {
     this.gameOverAt = null;
   }
 
-  addPlayer(id, now = Date.now()) {
+  addPlayer(id, now = Date.now(), { name = '', characterNumber = null } = {}) {
     const existing = this.players.get(id);
     if (existing) {
+      // Update customization even if already joined
+      if (name) existing.name = name;
+      if (characterNumber) existing.characterNumber = characterNumber;
       return existing;
     }
 
@@ -103,6 +106,8 @@ class Stage {
       number,
       color,
       maxHp: DEFAULT_HP,
+      name: name || `P${number}`,
+      characterNumber: characterNumber || number,
     });
 
     this.players.set(id, player);
