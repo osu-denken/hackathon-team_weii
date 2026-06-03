@@ -217,7 +217,7 @@ function updatePlayerInfo(player) {
               b.className = 'hp-block';
               b.style.transition = 'all 0.2s';
               const isFilled = i < hp;
-              b.style.background = isFilled ? color : '#3b82f6';
+              b.style.background = isFilled ? color : 'transparent';
               b.style.boxShadow = isFilled ? `0 0 6px ${color}` : 'none';
             //   b.style.border = isFilled ? 'none' : '1px solid rgba(255,255,255,0.2)';
               if (!isFilled) {
@@ -354,7 +354,9 @@ function handleOrientation(e) {
 
     steer = Math.max(-MAX_TILT, Math.min(MAX_TILT, steer));
 
-    const delta = Math.round((steer / MAX_TILT) * 1000) / 1000;
+    // 送信頻度を60fpsに上げたため、1回あたりの移動量をスケーリング
+    const SPEED_SCALE = 0.25;
+    const delta = (Math.round((steer / MAX_TILT) * 1000) / 1000) * SPEED_SCALE;
 
     sendMove(delta, 0, e.beta, e.gamma);
 }
