@@ -8,6 +8,7 @@ import os from 'os';
 import path from 'path';
 import * as config from './constants/systemConfig.js';
 import { sendRaw, send, sendError } from './utilites/NetworkUtil.js';
+import { PayloadBuilder } from './utils/PayloadBuilder.js';
 
 const app = express();
 
@@ -61,7 +62,7 @@ const sendStateToPlayers = () => {
     const player = stage.getPlayer(id);
     if (!player) return;
 
-    const payload = stage.buildPlayerState(player, now);
+    const payload = PayloadBuilder.buildPlayerState(stage, player, now);
     send(ws, payload);
   });
 };

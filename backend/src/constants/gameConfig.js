@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 export const X_MIN = -6;
 export const X_MAX = 6;
 
-export const PLAYER_COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6'];
+export const PLAYER_COLORS = ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6', '#47D8B2', '#2549BA'];
 
 export const SHOOT_COOLDOWN_MS = 250;
 export const MAX_ACTIVE_BULLETS_PER_PLAYER = 12;

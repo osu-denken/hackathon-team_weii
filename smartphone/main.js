@@ -189,18 +189,23 @@ function updatePlayerInfo(player) {
         const statusHash = `${isDead}:${respawnSec}:${hp}:${maxHp}:${score}`;
         if (pcbStatus.dataset.hash !== statusHash) {
           pcbStatus.dataset.hash = statusHash;
-          pcbStatus.textContent = isDead ? `リスポーンまで` : `${score}pt`;
+          if (isDead) {
+            pcbStatus.textContent = `復帰まで: ${respawnSec}秒`;
+            pcbStatus.style.color = '#fca5a5';
+          } else {
+            // We'll update the exact text down below with item info
+            pcbStatus.style.color = '#cfeffd';
+          }
         }
     }
 
     if (pcbRespawn && pcbHpBlocks) {
         if (isDead) {
-          if (pcbRespawn.style.display !== 'block') {
-            pcbRespawn.style.display = 'block';
-            pcbHpBlocks.style.display = 'none';
+          if (pcbRespawn.style.display !== 'none') {
+            pcbRespawn.style.display = 'none'; // 移動したため右側では非表示にする
           }
-          if (respawnSecSpan && respawnSecSpan.textContent !== String(respawnSec)) {
-            respawnSecSpan.textContent = String(respawnSec);
+          if (pcbHpBlocks.style.display !== 'none') {
+            pcbHpBlocks.style.display = 'none';
           }
         } else {
           if (pcbRespawn.style.display !== 'none') {
@@ -257,12 +262,18 @@ function updatePlayerInfo(player) {
           const meterHash = `${meterColor}:${roundedPercentage}`;
           if (pcbMeter.dataset.hash !== meterHash) {
             pcbMeter.dataset.hash = meterHash;
-            pcbMeter.style.background = `conic-gradient(${meterColor} ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}%)`;
+            pcbMeter.style.background = `conic-gradient(${meterColor} 0% ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}% 100%)`;
+          }
+          if (pcbStatus) {
+              pcbStatus.style.color = meterColor;
           }
         } else {
           if (pcbMeter.dataset.hash !== 'empty') {
             pcbMeter.dataset.hash = 'empty';
             pcbMeter.style.background = 'rgba(255,255,255,0.2)';
+          }
+          if (pcbStatus) {
+              pcbStatus.style.color = '#cfeffd';
           }
         }
     }
