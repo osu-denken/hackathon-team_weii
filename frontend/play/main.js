@@ -24,8 +24,8 @@ const itemIconMap = {
 
 const playerNameInput = document.getElementById('player-name-input');
 const customizationSection = document.getElementById('customization-section');
-let selectedCharacterNumber = 1;
-const CHAR_COUNT = 7;
+let selectedCharacterNumber = 0;
+const CHAR_COUNT = 8;
 
 // キャラクター選択カルーセルの初期化
 const charPreview = document.getElementById('char-preview');
@@ -35,21 +35,27 @@ const charNextBtn = document.getElementById('char-next');
 
 const updateCharPreview = () => {
   if (charPreview) {
-    charPreview.src = `/asset/images/character-${selectedCharacterNumber}.png`;
-    charPreview.alt = `キャラ ${selectedCharacterNumber}`;
+    if (selectedCharacterNumber === 0) {
+        charPreview.style.display = 'none';
+        if (charLabel) charLabel.textContent = '自動選択';
+    } else {
+        charPreview.style.display = 'block';
+        charPreview.src = `/asset/images/character-${selectedCharacterNumber}.png`;
+        charPreview.alt = `キャラ ${selectedCharacterNumber}`;
+        if (charLabel) charLabel.textContent = `${selectedCharacterNumber} / ${CHAR_COUNT}`;
+    }
   }
-  if (charLabel) charLabel.textContent = `${selectedCharacterNumber} / ${CHAR_COUNT}`;
 };
 
 if (charPrevBtn) {
   charPrevBtn.addEventListener('click', () => {
-    selectedCharacterNumber = selectedCharacterNumber <= 1 ? CHAR_COUNT : selectedCharacterNumber - 1;
+    selectedCharacterNumber = selectedCharacterNumber <= 0 ? CHAR_COUNT : selectedCharacterNumber - 1;
     updateCharPreview();
   });
 }
 if (charNextBtn) {
   charNextBtn.addEventListener('click', () => {
-    selectedCharacterNumber = selectedCharacterNumber >= CHAR_COUNT ? 1 : selectedCharacterNumber + 1;
+    selectedCharacterNumber = selectedCharacterNumber >= CHAR_COUNT ? 0 : selectedCharacterNumber + 1;
     updateCharPreview();
   });
 }

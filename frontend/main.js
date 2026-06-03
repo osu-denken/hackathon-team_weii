@@ -266,7 +266,7 @@ const renderPlayerSummary = () => {
       icon.dataset.hash = iconHash;
       
       let validCharNum = charNum;
-      if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 7) {
+      if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 8) {
           validCharNum = 1;
       }
       const spriteUrl = `/asset/images/character-${validCharNum}.png`;

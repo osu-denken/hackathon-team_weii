@@ -74,7 +74,7 @@ const handleJoin = (ws, msg) => {
   }
 
   const name = typeof msg.name === 'string' ? msg.name.trim().slice(0, 12) : '';
-  const characterNumber = (Number.isInteger(msg.characterNumber) && msg.characterNumber >= 1 && msg.characterNumber <= 7)
+  const characterNumber = (Number.isInteger(msg.characterNumber) && msg.characterNumber >= 1 && msg.characterNumber <= 8)
     ? msg.characterNumber : null;
 
   const player = stage.addPlayer(msg.id, Date.now(), { name, characterNumber });
