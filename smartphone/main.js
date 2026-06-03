@@ -193,7 +193,7 @@ function updatePlayerInfo(player) {
                 pcbStatus.textContent = `復活まで: ${respawnSec}秒`;
                 pcbStatus.style.color = '#fca5a5';
             } else {
-                // We'll update the exact text down below with item info
+                pcbStatus.textContent = `Score: ${score}`;
                 pcbStatus.style.color = '#cfeffd';
             }
         }
@@ -201,17 +201,13 @@ function updatePlayerInfo(player) {
 
     if (pcbRespawn && pcbHpBlocks) {
         if (isDead) {
-            if (pcbRespawn.style.display !== 'none') {
-                pcbRespawn.style.display = 'none'; // 移動したため右側では非表示にする
-            }
-            if (pcbHpBlocks.style.display !== 'none') {
-                pcbHpBlocks.style.display = 'none';
-            }
+            // 死亡中：HPバーを隠す
+            pcbRespawn.style.display = 'none';
+            pcbHpBlocks.style.display = 'none';
         } else {
-            if (pcbRespawn.style.display !== 'none') {
-                pcbRespawn.style.display = 'none';
-                pcbHpBlocks.style.display = 'flex';
-            }
+            // 生存中：HPバーを常に表示する（復活後も確実に再表示）
+            pcbRespawn.style.display = 'none';
+            pcbHpBlocks.style.display = 'flex';
 
             const hpHash = `${hp}:${maxHp}:${color}`;
             if (pcbHpBlocks.dataset.hash !== hpHash) {
@@ -265,7 +261,7 @@ function updatePlayerInfo(player) {
                 pcbMeter.style.background = `conic-gradient(${meterColor} 0% ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}% 100%)`;
             }
             if (pcbStatus) {
-                pcbStatus.textContent = `Score: ${score} | Item: ${Math.ceil(remaining / 1000)}s`;
+                pcbStatus.textContent = `Score: ${score}`;
                 pcbStatus.style.color = meterColor;
             }
         } else {

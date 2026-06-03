@@ -1,15 +1,17 @@
 import os from 'os';
 import path from 'path';
 
-const PORT = 443; //Number(process.env.PORT) || 3001;
-const USE_HTTPS = true; //process.env.USE_HTTPS === 'true';
+// const PORT = 443; 
+const PORT = Number(process.env.PORT) || 3001;
+const USE_HTTPS = false; //process.env.USE_HTTPS === 'true';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH || path.resolve('../shared/server-key.pem');
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH || path.resolve('../shared/server.pem');
 
 // const FRONTEND_URL = null; // nullの場合は自動に
 // const FRONTEND_URL = 'https://hackathon-team-weii.fly.dev/client/';
 // const FRONTEND_URL = "https://obtundent-britteny-handily.ngrok-free.dev/client/";
-const FRONTEND_URL = "https://phoneshoot.kmmz.jp/client/";
+// const FRONTEND_URL = "https://phoneshoot.kmmz.jp/client/";
+const FRONTEND_URL = "https://univ-pc.kmmz.jp/client/";
 
 const LOCALHOST_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 
