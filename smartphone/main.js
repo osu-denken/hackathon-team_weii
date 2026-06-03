@@ -4,7 +4,7 @@ const myUUID = window.crypto && crypto.randomUUID ? crypto.randomUUID() : "local
 // --- 変数定義 ---
 let ws = null;
 let lastMoveSendTime = 0;
-const THROTTLE_MS = 100; 
+const THROTTLE_MS = 16; 
 
 // --- DOM要素 ---
 const wsUrlInput = document.getElementById('ws-url');
@@ -253,17 +253,9 @@ function updatePlayerInfo(player) {
 
         if (remaining > 0) {
           const percentage = Math.max(0, Math.min(100, (remaining / maxDuration) * 100));
-          const roundedPercentage = percentage.toFixed(1);
-          const meterHash = `${meterColor}:${roundedPercentage}`;
-          if (pcbMeter.dataset.hash !== meterHash) {
-            pcbMeter.dataset.hash = meterHash;
-            pcbMeter.style.background = `conic-gradient(${meterColor} ${roundedPercentage}%, rgba(255,255,255,0.2) 0)`;
-          }
+          pcbMeter.style.background = `conic-gradient(${meterColor} ${percentage}%, rgba(255,255,255,0.2) 0)`;
         } else {
-          if (pcbMeter.dataset.hash !== 'empty') {
-            pcbMeter.dataset.hash = 'empty';
-            pcbMeter.style.background = 'rgba(255,255,255,0.2)';
-          }
+          pcbMeter.style.background = 'rgba(255,255,255,0.2)';
         }
     }
 
@@ -291,8 +283,7 @@ if (btnUseItem) {
 
 const tryResetPosition = (e) => {
     if (e) e.preventDefault();
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    ws.send(JSON.stringify({ type: 'resetPosition' }));
+    neutralBeta = null;
 };
 
 if (btnResetPosition) {
