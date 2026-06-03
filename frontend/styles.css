@@ -507,6 +507,7 @@ canvas { z-index: 0; }
   pointer-events: auto;
   min-width: 120px;
   max-width: 220px;
+  height: 64px;
   padding: 8px 10px;
   border-radius: 4px;
   background: linear-gradient(180deg, rgba(10,10,50,0.5), rgba(50,50,255,0.08));
