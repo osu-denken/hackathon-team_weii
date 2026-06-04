@@ -30,6 +30,7 @@ export class SpawnSystem {
       maxHp: hp,
       attack,
       canShootBullets,
+      speed: difficultySettings.enemySpeed || EnemyEntity.SPEED,
     });
     stage.enemies.set(enemy.id, enemy);
     stage.lastEnemySpawnAt = now;

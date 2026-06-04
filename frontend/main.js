@@ -78,6 +78,8 @@ const selectDifficulty = (difficulty) => {
   }
 };
 
+let serverTimeOffset = 0;
+
 const state = {
   players: [],
   enemies: [],
@@ -498,6 +500,9 @@ socket.addEventListener('message', (e) => {
         for (const key in payload.game) {
           state.game[key] = payload.game[key];
         }
+        if (payload.game.serverNow) {
+          serverTimeOffset = Date.now() - payload.game.serverNow;
+        }
       }
     } else {
       state.players = Array.isArray(payload.players)
@@ -508,6 +513,9 @@ socket.addEventListener('message', (e) => {
       state.items = Array.isArray(payload.items) ? payload.items : [];
       if (payload.game) {
         state.game = { ...state.game, ...payload.game };
+        if (payload.game.serverNow) {
+          serverTimeOffset = Date.now() - payload.game.serverNow;
+        }
       }
     }
 
@@ -894,11 +902,40 @@ const draw = () => {
   ctx.fillStyle = '#38bdf8';
   ctx.fillRect(40, height - 96, width - 80, 2);
 
-  state.items.forEach((item) => drawItem(item, width, height));
-  state.enemies.forEach((enemy) => drawEnemy(enemy, width, height));
+  const getRenderCoords = (entity) => {
+    if (entity.isPredictable) {
+      if (!entity._calc && entity.fx && entity.fy) {
+        try {
+          entity._calc = new Function('t', 'startX', 'startY', 'vx', 'vy',
+            `return { x: ${entity.fx}, y: ${entity.fy} };`
+          );
+        } catch (e) {
+          console.error("Failed to compile entity formula:", e);
+          entity._calc = () => ({ x: entity.x, y: entity.y });
+        }
+      }
+
+      if (entity._calc) {
+        const estimatedServerNow = Date.now() - serverTimeOffset;
+        const elapsedDt = (estimatedServerNow - entity.createdAt) / 40.0;
+        return entity._calc(elapsedDt, entity.startX, entity.startY, entity.vx || 0, entity.vy || 0);
+      }
+    }
+    return { x: entity.x, y: entity.y };
+  };
+
+  state.items.forEach((item) => {
+    const coords = getRenderCoords(item);
+    drawItem({ ...item, ...coords }, width, height);
+  });
+  state.enemies.forEach((enemy) => {
+    const coords = getRenderCoords(enemy);
+    drawEnemy({ ...enemy, ...coords }, width, height);
+  });
   state.bullets.forEach((bullet) => {
-    const x = toCanvasX(bullet.x, width);
-    const y = toCanvasY(bullet.y, height);
+    const coords = getRenderCoords(bullet);
+    const x = toCanvasX(coords.x, width);
+    const y = toCanvasY(coords.y, height);
     ctx.save();
     const isEnemyBullet = bullet.ownerType === 'enemy';
     if (isEnemyBullet && enemyBulletSprite.complete && enemyBulletSprite.naturalWidth > 0) {

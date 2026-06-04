@@ -20,13 +20,16 @@ class BulletEntity extends Entity {
     this.y += this.vy * dtFactor;
   }
 
+  get isPredictable() {
+    return true;
+  }
+
+  get fx() { return `startX + ${this.vx} * t`; }
+  get fy() { return `startY + ${this.vy} * t`; }
+
   toPayload() {
     return {
-      id: this.id,
-      x: this.x,
-      y: this.y,
-      vx: this.vx,
-      vy: this.vy,
+      ...super.toPayload(),
       ownerId: this.ownerId,
       ownerType: this.ownerType,
       damage: this.damage,

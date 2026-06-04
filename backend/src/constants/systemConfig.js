@@ -50,6 +50,11 @@ const STATIC_ROUTES = {
 // const TICK_MS = Number(process.env.TICK_MS) || 40; // ゲームの状態を更新してViewer(フロントエンド)に送る間隔 (40ms = 25fps)
 const TICK_MS = 10;
 
+// --- Prediction System Settings ---
+const ENABLE_PREDICTION = true;
+const RESYNC_INTERVAL_MS = 2000;
+// ----------------------------------
+
 const getLanIPv4 = () => {
   const interfaces = os.networkInterfaces();
   let fallbackPrivateIp = null;
@@ -98,4 +103,4 @@ const buildClientUrl = (req) => {
   return `${protocol}://${hostHeader}/client/`;
 };
 
-export { PORT, USE_HTTPS, SSL_KEY_PATH, SSL_CERT_PATH, FRONTEND_URL, VIRTUAL_INTERFACE_PATTERNS, PREFERRED_INTERFACE_PATTERNS, STATIC_ROUTES, TICK_MS, getLanIPv4, buildClientUrl };
+export { PORT, USE_HTTPS, SSL_KEY_PATH, SSL_CERT_PATH, FRONTEND_URL, VIRTUAL_INTERFACE_PATTERNS, PREFERRED_INTERFACE_PATTERNS, STATIC_ROUTES, TICK_MS, ENABLE_PREDICTION, RESYNC_INTERVAL_MS, getLanIPv4, buildClientUrl };
