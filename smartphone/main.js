@@ -185,13 +185,23 @@ function connectWebSocket() {
         ws.send(JSON.stringify(joinData));
     };
 
+let currentState = { player: null, game: null };
+
     ws.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
             if (data && (data.type === 'joinAck' || data.type === 'playerState')) { // joinAck or playerState
-                if (data.player) updatePlayerInfo(data.player);
-                if (data.game) updateGameInfo(data.game);
+                if (data.isDelta) {
+                    if (data.player) currentState.player = { ...currentState.player, ...data.player };
+                    if (data.game) currentState.game = { ...currentState.game, ...data.game };
+                } else {
+                    if (data.player !== undefined) currentState.player = data.player;
+                    if (data.game !== undefined) currentState.game = data.game;
+                }
+                updatePlayerInfo(currentState.player);
+                updateGameInfo(currentState.game);
             } else if (data && data.type === 'gameReset') {
+                currentState = { player: null, game: null };
                 // タイトルに戻ったのでjoinを再送（カスタマイズは維持）
                 const name2 = playerNameInput ? playerNameInput.value.trim() : '';
                 const rejoinData = { type: 'join', id: myUUID, name: name2 || undefined, characterNumber: selectedCharacterNumber };

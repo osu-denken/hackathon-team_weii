@@ -34,6 +34,8 @@ const stage = new Stage();
 const socketToPlayerId = new Map();
 const viewers = new Set(); // モニター用のWebSocket接続
 
+let lastViewerPayload = null;
+
 const sendToViewer = (data) => {
   const payload = JSON.stringify(data);
   viewers.forEach((ws) => {
@@ -42,9 +44,26 @@ const sendToViewer = (data) => {
 };
 
 // ゲームの状態を更新してViewer(フロントエンド)に送る
-const sendState = () => {
-  const payload = stage.buildViewerPayload(Date.now());
-  sendToViewer(payload);
+const sendState = (isDelta = true) => {
+  const currentPayload = stage.buildViewerPayload(Date.now());
+  const forceFull = !isDelta || !lastViewerPayload || 
+                    currentPayload.game.stage !== lastViewerPayload.game.stage || 
+                    currentPayload.game.gameOver !== lastViewerPayload.game.gameOver ||
+                    currentPayload.game.showTitle !== lastViewerPayload.game.showTitle ||
+                    currentPayload.game.showReturnNotice !== lastViewerPayload.game.showReturnNotice;
+  
+  if (forceFull) {
+    sendToViewer(currentPayload);
+    lastViewerPayload = currentPayload;
+  } else {
+    const delta = PayloadBuilder.makeDelta(currentPayload, lastViewerPayload);
+    if (delta !== undefined) {
+      delta.type = 'update';
+      delta.isDelta = true;
+      sendToViewer(delta);
+      lastViewerPayload = currentPayload;
+    }
+  }
 };
 
 // タイトルリセット時に全プレイヤーのスマホに通知しsocketToPlayerIdをクリアする
@@ -53,17 +72,40 @@ const handleGameReset = () => {
     send(ws, { type: 'gameReset' });
   });
   socketToPlayerId.clear();
+  lastPlayerPayloads.clear();
+  lastViewerPayload = null;
 };
 
+let lastPlayerPayloads = new Map();
+
 // 各プレイヤー(スマートフォン)に自分の状態を送る
-const sendStateToPlayers = () => {
+const sendStateToPlayers = (isDelta = true) => {
   const now = Date.now();
   socketToPlayerId.forEach((id, ws) => {
     const player = stage.getPlayer(id);
     if (!player) return;
 
-    const payload = PayloadBuilder.buildPlayerState(stage, player, now);
-    send(ws, payload);
+    const currentPayload = PayloadBuilder.buildPlayerState(stage, player, now);
+    const lastPayload = lastPlayerPayloads.get(id);
+
+    const forceFull = !isDelta || !lastPayload ||
+                      currentPayload.game.stage !== lastPayload.game.stage ||
+                      currentPayload.player.dead !== lastPayload.player.dead ||
+                      currentPayload.game.showTitle !== lastPayload.game.showTitle ||
+                      currentPayload.game.showReturnNotice !== lastPayload.game.showReturnNotice;
+
+    if (forceFull) {
+      send(ws, currentPayload);
+      lastPlayerPayloads.set(id, currentPayload);
+    } else {
+      const delta = PayloadBuilder.makeDelta(currentPayload, lastPayload);
+      if (delta !== undefined) {
+        delta.type = 'playerState';
+        delta.isDelta = true;
+        send(ws, delta);
+        lastPlayerPayloads.set(id, currentPayload);
+      }
+    }
   });
 };
 
@@ -96,7 +138,10 @@ const handleJoin = (ws, msg) => {
 
 const handleLeave = (ws) => {
   const id = socketToPlayerId.get(ws);
-  if (id) stage.removePlayer(id);
+  if (id) {
+    stage.removePlayer(id);
+    lastPlayerPayloads.delete(id);
+  }
 
   socketToPlayerId.delete(ws);
 };
@@ -156,7 +201,7 @@ const parseMsg = (ws, raw) => {
     case 'setDifficulty':
       if (typeof msg.difficulty === 'string') {
         stage.setDifficulty(msg.difficulty);
-        sendState();
+        sendState(false);
       }
       break;
     case 'leave':
@@ -202,8 +247,8 @@ setInterval(() => {
   if ((wasStarted || wasPlayers > 0) && !stage.gameStarted && stage.players.size === 0 && stage.mode === 'title') {
     handleGameReset();
   }
-  sendState();
-  sendStateToPlayers();
+  sendState(true);
+  sendStateToPlayers(true);
 }, config.TICK_MS);
 
 server.listen(config.PORT, () => {

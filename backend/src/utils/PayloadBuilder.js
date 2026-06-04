@@ -123,4 +123,33 @@ export class PayloadBuilder {
   static listItems(stage) {
     return Array.from(stage.itemEntities.values()).map((itemEntity) => itemEntity.toPayload());
   }
+
+  static makeDelta(current, previous) {
+    if (current === previous) return undefined;
+    if (current === null || previous === null
+       || typeof current !== 'object' || typeof previous !== 'object')
+      return current;
+    
+    if (Array.isArray(current)) {
+      if (!Array.isArray(previous) || current.length !== previous.length) return current;
+      for (let i = 0; i < current.length; i++) {
+        if (PayloadBuilder.makeDelta(current[i], previous[i]) !== undefined) {
+          return current;
+        }
+      }
+      
+      return undefined;
+    }
+
+    const delta = {};
+    let hasChanges = false;
+    for (const key in current) {
+      const d = PayloadBuilder.makeDelta(current[key], previous[key]);
+      if (d !== undefined) {
+        delta[key] = d;
+        hasChanges = true;
+      }
+    }
+    return hasChanges ? delta : undefined;
+  }
 }

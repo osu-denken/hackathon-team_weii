@@ -488,34 +488,28 @@ socket.addEventListener('message', (e) => {
 
   if (payload.type === 'update') {
     const prevStage = state.game.stage;
-    state.players = Array.isArray(payload.players)
-      ? payload.players.slice(0, MAX_PLAYERS)
-      : [];
-    state.enemies = Array.isArray(payload.enemies) ? payload.enemies : [];
-    state.bullets = Array.isArray(payload.bullets) ? payload.bullets : [];
-    state.items = Array.isArray(payload.items) ? payload.items : [];
-    state.game = payload.game
-      ? {
-        stageScore: payload.game.stageScore ?? 0,
-        totalPlayerScore: payload.game.totalPlayerScore ?? 0,
-        targetScore: payload.game.targetScore ?? 100,
-        timeLimitMs: payload.game.timeLimitMs ?? 0,
-        timeRemainingMs: payload.game.timeRemainingMs ?? 0,
-        cleared: payload.game.cleared ?? false,
-        gameOver: payload.game.gameOver ?? false,
-        showReturnNotice: payload.game.showReturnNotice ?? false,
-        returnToTitleRemainingMs: payload.game.returnToTitleRemainingMs ?? 0,
-        showTitle: payload.game.showTitle ?? false,
-        waitingForStart: payload.game.waitingForStart ?? false,
-        countdownRemainingMs: payload.game.countdownRemainingMs ?? 0,
-        countdownStarted: payload.game.countdownStarted ?? false,
-        playerCount: payload.game.playerCount ?? 0,
-        difficulty: payload.game.difficulty ?? 'normal',
-        stageNumber: payload.game.stageNumber ?? 1,
-        stage: payload.game.stage ?? 1,
-        stageLabel: payload.game.stageLabel ?? 'Stage 1',
+    
+    if (payload.isDelta) {
+      if (payload.players !== undefined) state.players = payload.players;
+      if (payload.enemies !== undefined) state.enemies = payload.enemies;
+      if (payload.bullets !== undefined) state.bullets = payload.bullets;
+      if (payload.items !== undefined) state.items = payload.items;
+      if (payload.game !== undefined) {
+        for (const key in payload.game) {
+          state.game[key] = payload.game[key];
+        }
       }
-      : state.game;
+    } else {
+      state.players = Array.isArray(payload.players)
+        ? payload.players.slice(0, MAX_PLAYERS)
+        : [];
+      state.enemies = Array.isArray(payload.enemies) ? payload.enemies : [];
+      state.bullets = Array.isArray(payload.bullets) ? payload.bullets : [];
+      state.items = Array.isArray(payload.items) ? payload.items : [];
+      if (payload.game) {
+        state.game = { ...state.game, ...payload.game };
+      }
+    }
 
     if (payload.game && typeof payload.game.stage === 'number' && payload.game.stage > prevStage) {
       showStageTransition(payload.game.stage, payload.game.stageLabel);
