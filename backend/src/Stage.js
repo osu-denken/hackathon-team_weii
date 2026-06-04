@@ -6,7 +6,7 @@ import { TICK_MS } from './constants/systemConfig.js';
 
 import { CollisionSystem } from './systems/CollisionSystem.js';
 import { SpawnSystem } from './systems/SpawnSystem.js';
-import { PayloadBuilder } from './utils/PayloadBuilder.js';
+import { PayloadBuilder } from './utilites/PayloadBuilder.js';
 
 import {
   X_MIN,
@@ -120,7 +120,7 @@ class Stage {
   setDifficulty(difficulty) {
     // if (this.gameStarted) return;
     if (!Object.prototype.hasOwnProperty.call(DIFFICULTY_SETTINGS, difficulty)) return;
-    
+
     this.difficulty = difficulty;
   }
 
@@ -188,7 +188,7 @@ class Stage {
     const player = this.getPlayer(id);
     if (!player) return;
     if (player.isDead()) return;
-    
+
     const item = player.consumeHeldItem();
     if (!item) return;
 
@@ -237,7 +237,7 @@ class Stage {
 
     // Check if stage is cleared and advance to next stage
     const stageConfig = STAGE_CONFIG[this.currentStage] || STAGE_CONFIG[1];
-    
+
     // Check game over by time limit
     const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - this.gameStartAt));
     if (timeRemainingMs <= 0 && !this.stageCleared) {
@@ -255,7 +255,7 @@ class Stage {
 
   maybeStartGame(now) {
     if (this.gameStarted || this.players.size === 0
-       || this.startCountdownAt === null) return;
+      || this.startCountdownAt === null) return;
 
     if (now - this.startCountdownAt >= this.startCountdownMs) {
       this.gameStarted = true;
@@ -333,7 +333,7 @@ class Stage {
     this.bullets.forEach((bullet, id) => {
       bullet.update(dt);
       if (bullet.y > BulletEntity.MAX_Y || bullet.y < -5
-         || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
+        || bullet.x < -BulletEntity.MAX_X || bullet.x > BulletEntity.MAX_X) {
         this.bullets.delete(id);
       }
     });

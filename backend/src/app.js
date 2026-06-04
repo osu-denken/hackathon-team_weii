@@ -8,7 +8,7 @@ import os from 'os';
 import path from 'path';
 import * as config from './constants/systemConfig.js';
 import { sendRaw, send, sendError } from './utilites/NetworkUtil.js';
-import { PayloadBuilder } from './utils/PayloadBuilder.js';
+import { PayloadBuilder } from './utilites/PayloadBuilder.js';
 
 const app = express();
 
@@ -46,12 +46,12 @@ const sendToViewer = (data) => {
 // ゲームの状態を更新してViewer(フロントエンド)に送る
 const sendState = (isDelta = true) => {
   const currentPayload = stage.buildViewerPayload(Date.now());
-  const forceFull = !isDelta || !lastViewerPayload || 
-                    currentPayload.game.stage !== lastViewerPayload.game.stage || 
-                    currentPayload.game.gameOver !== lastViewerPayload.game.gameOver ||
-                    currentPayload.game.showTitle !== lastViewerPayload.game.showTitle ||
-                    currentPayload.game.showReturnNotice !== lastViewerPayload.game.showReturnNotice;
-  
+  const forceFull = !isDelta || !lastViewerPayload ||
+    currentPayload.game.stage !== lastViewerPayload.game.stage ||
+    currentPayload.game.gameOver !== lastViewerPayload.game.gameOver ||
+    currentPayload.game.showTitle !== lastViewerPayload.game.showTitle ||
+    currentPayload.game.showReturnNotice !== lastViewerPayload.game.showReturnNotice;
+
   if (forceFull) {
     sendToViewer(currentPayload);
     lastViewerPayload = currentPayload;
@@ -89,10 +89,10 @@ const sendStateToPlayers = (isDelta = true) => {
     const lastPayload = lastPlayerPayloads.get(id);
 
     const forceFull = !isDelta || !lastPayload ||
-                      currentPayload.game.stage !== lastPayload.game.stage ||
-                      currentPayload.player.dead !== lastPayload.player.dead ||
-                      currentPayload.game.showTitle !== lastPayload.game.showTitle ||
-                      currentPayload.game.showReturnNotice !== lastPayload.game.showReturnNotice;
+      currentPayload.game.stage !== lastPayload.game.stage ||
+      currentPayload.player.dead !== lastPayload.player.dead ||
+      currentPayload.game.showTitle !== lastPayload.game.showTitle ||
+      currentPayload.game.showReturnNotice !== lastPayload.game.showReturnNotice;
 
     if (forceFull) {
       send(ws, currentPayload);
