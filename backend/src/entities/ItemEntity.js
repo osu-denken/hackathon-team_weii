@@ -13,6 +13,9 @@ class ItemEntity extends Entity {
     return true;
   }
 
+  get fx() { return `startX`; }
+  get fy() { return `startY - ${this.speed} * t`; }
+
   update(dtFactor) {
     this.y -= this.speed * dtFactor;
   }
@@ -21,8 +24,6 @@ class ItemEntity extends Entity {
     return {
       ...super.toPayload(),
       type: this.item.type,
-      vx: 0,
-      vy: -this.speed,
     };
   }
 }

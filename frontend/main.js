@@ -904,12 +904,22 @@ const draw = () => {
 
   const getRenderCoords = (entity) => {
     if (entity.isPredictable) {
-      const estimatedServerNow = Date.now() - serverTimeOffset;
-      const elapsedDt = (estimatedServerNow - entity.createdAt) / 40.0;
-      return {
-        x: entity.startX + entity.vx * elapsedDt,
-        y: entity.startY + entity.vy * elapsedDt,
-      };
+      if (!entity._calc && entity.fx && entity.fy) {
+        try {
+          entity._calc = new Function('t', 'startX', 'startY', 'vx', 'vy',
+            `return { x: ${entity.fx}, y: ${entity.fy} };`
+          );
+        } catch (e) {
+          console.error("Failed to compile entity formula:", e);
+          entity._calc = () => ({ x: entity.x, y: entity.y });
+        }
+      }
+
+      if (entity._calc) {
+        const estimatedServerNow = Date.now() - serverTimeOffset;
+        const elapsedDt = (estimatedServerNow - entity.createdAt) / 40.0;
+        return entity._calc(elapsedDt, entity.startX, entity.startY, entity.vx || 0, entity.vy || 0);
+      }
     }
     return { x: entity.x, y: entity.y };
   };

@@ -22,6 +22,9 @@ class EnemyEntity extends LivingEntity {
     return true;
   }
 
+  get fx() { return `startX`; }
+  get fy() { return `startY - ${this.speed} * t`; }
+
   update(dtFactor) {
     this.y -= this.speed * dtFactor;
   }
@@ -43,8 +46,6 @@ class EnemyEntity extends LivingEntity {
       maxHp: this.maxHp,
       type: this.type,
       attack: this.attack,
-      vx: 0,
-      vy: -this.speed,
     };
   }
 }

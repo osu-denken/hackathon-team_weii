@@ -10,6 +10,10 @@ const __dirname = path.dirname(__filename);
 export const X_MIN = -6;
 export const X_MAX = 6;
 
+// --- Prediction System Settings ---
+// Moved to systemConfig.js to avoid circular dependencies
+// ----------------------------------
+
 export const PLAYER_COLORS = ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6', '#47D8B2', '#2549BA'];
 
 export const SHOOT_COOLDOWN_MS = 250;

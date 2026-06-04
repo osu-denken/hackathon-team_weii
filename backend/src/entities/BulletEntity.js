@@ -24,11 +24,12 @@ class BulletEntity extends Entity {
     return true;
   }
 
+  get fx() { return `startX + ${this.vx} * t`; }
+  get fy() { return `startY + ${this.vy} * t`; }
+
   toPayload() {
     return {
       ...super.toPayload(),
-      vx: this.vx,
-      vy: this.vy,
       ownerId: this.ownerId,
       ownerType: this.ownerType,
       damage: this.damage,
