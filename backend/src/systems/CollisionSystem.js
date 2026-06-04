@@ -97,8 +97,11 @@ export class CollisionSystem {
     for (const [itemId, itemEntity] of stage.itemEntities.entries()) {
       for (const player of stage.players.values()) {
         const dx = Math.abs(itemEntity.x - player.x);
-        const dy = Math.abs(itemEntity.y - player.y);
-        if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE) {
+        // アイテムの描画がY座標より上（画面上）にズレているため、
+        // 当たり判定の中心点を上にシフトしつつ、判定範囲も少し広げる
+        const hitCenterY = itemEntity.y + 0.8; 
+        const dy = Math.abs(hitCenterY - player.y);
+        if (dx <= ITEM_HIT_RANGE && dy <= ITEM_HIT_RANGE + 0.4) {
           if (itemEntity.item.isInstant()) {
             itemEntity.item.applyInstant(player, stage, Date.now());
             stage.itemEntities.delete(itemId);
