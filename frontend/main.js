@@ -79,7 +79,7 @@ const selectDifficulty = (difficulty) => {
 };
 
 const state = {
-  characters: [],
+  players: [],
   enemies: [],
   bullets: [],
   items: [],
@@ -175,10 +175,10 @@ const formatTime = (ms) => {
 };
 
 const renderPlayerSummary = () => {
-  while (overlayBottom.children.length > state.characters.length) {
+  while (overlayBottom.children.length > state.players.length) {
     overlayBottom.removeChild(overlayBottom.lastChild);
   }
-  while (overlayBottom.children.length < state.characters.length) {
+  while (overlayBottom.children.length < state.players.length) {
     const bottom = document.createElement('div');
     bottom.className = 'player-card-bottom';
 
@@ -202,7 +202,7 @@ const renderPlayerSummary = () => {
     overlayBottom.appendChild(bottom);
   }
 
-  state.characters.forEach((player, index) => {
+  state.players.forEach((player, index) => {
     const pNum = player.number ?? index + 1;
     const fallbackColor = player.color || ['#3D8FCD', '#E25252', '#40AD1D', '#C38F24', '#C846D6', '#47D8B2', '#2549BA'][index] || '#38bdf8';
     const sampledColor = spriteColors.get(pNum);
@@ -488,8 +488,8 @@ socket.addEventListener('message', (e) => {
 
   if (payload.type === 'update') {
     const prevStage = state.game.stage;
-    state.characters = Array.isArray(payload.characters)
-      ? payload.characters.slice(0, MAX_PLAYERS)
+    state.players = Array.isArray(payload.players)
+      ? payload.players.slice(0, MAX_PLAYERS)
       : [];
     state.enemies = Array.isArray(payload.enemies) ? payload.enemies : [];
     state.bullets = Array.isArray(payload.bullets) ? payload.bullets : [];
@@ -926,7 +926,7 @@ const draw = () => {
     ctx.restore();
   });
 
-  state.characters.forEach((player, index) => drawPlayer(player, index, width, height));
+  state.players.forEach((player, index) => drawPlayer(player, index, width, height));
 
   requestAnimationFrame(draw);
 };

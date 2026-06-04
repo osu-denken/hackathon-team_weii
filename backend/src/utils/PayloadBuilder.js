@@ -68,7 +68,7 @@ export class PayloadBuilder {
   static buildViewerPayload(stage, now) {
     return {
       type: 'update',
-      characters: PayloadBuilder.listPlayers(stage),
+      players: PayloadBuilder.listPlayers(stage),
       enemies: PayloadBuilder.listEnemies(stage),
       bullets: PayloadBuilder.listBullets(stage),
       items: PayloadBuilder.listItems(stage),

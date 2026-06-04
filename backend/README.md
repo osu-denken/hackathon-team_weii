@@ -38,7 +38,7 @@ WebSocketで実装する。クライアント(スマートフォン)からのメ
 ```json
 {
   "type": "update",
-  "characters": [
+  "players": [
     {
       "id": "<端末のuuid>",
       "x": 3

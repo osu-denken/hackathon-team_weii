@@ -11,7 +11,7 @@
 ```json
 {
   "type": "update",
-  "characters": [
+  "players": [
     {
       "id": "<端末のuuid>",
       "x": 3,
