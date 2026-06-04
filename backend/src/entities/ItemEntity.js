@@ -3,21 +3,26 @@ import { Entity } from './Entity.js';
 class ItemEntity extends Entity {
   static SPEED = 0.06;
 
-  constructor({ id, item, x, y }) {
+  constructor({ id, item, x, y, speed = ItemEntity.SPEED }) {
     super({ id, x, y });
     this.item = item;
+    this.speed = speed;
   }
 
-  update(speed) {
-    this.y -= speed;
+  get isPredictable() {
+    return true;
+  }
+
+  update(dtFactor) {
+    this.y -= this.speed * dtFactor;
   }
 
   toPayload() {
     return {
-      id: this.id,
+      ...super.toPayload(),
       type: this.item.type,
-      x: this.x,
-      y: this.y,
+      vx: 0,
+      vy: -this.speed,
     };
   }
 }

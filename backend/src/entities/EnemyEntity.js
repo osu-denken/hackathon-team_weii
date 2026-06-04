@@ -9,16 +9,21 @@ class EnemyEntity extends LivingEntity {
   static SPAWN_INTERVAL_MS = 1000;
   static SHOOT_COOLDOWN_MS = 2000;
 
-  constructor({ id, x, y, type, hp, maxHp, attack = 1, canShootBullets = false }) {
+  constructor({ id, x, y, type, hp, maxHp, attack = 1, canShootBullets = false, speed = EnemyEntity.SPEED }) {
     super({ id, x, y, hp, maxHp });
     this.type = type;
     this.attack = attack;
     this.canShootBullets = canShootBullets;
     this.lastShotAt = null;
+    this.speed = speed;
   }
 
-  update(speed) {
-    this.y -= speed;
+  get isPredictable() {
+    return true;
+  }
+
+  update(dtFactor) {
+    this.y -= this.speed * dtFactor;
   }
 
   canShoot(now, cooldownMs) {
@@ -33,13 +38,13 @@ class EnemyEntity extends LivingEntity {
 
   toPayload() {
     return {
-      id: this.id,
-      x: this.x,
-      y: this.y,
+      ...super.toPayload(),
       hp: this.hp,
       maxHp: this.maxHp,
       type: this.type,
       attack: this.attack,
+      vx: 0,
+      vy: -this.speed,
     };
   }
 }

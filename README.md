@@ -21,6 +21,8 @@
 
 <img width="1919" height="1199" alt="image" src="https://github.com/user-attachments/assets/734bacab-c780-4ecd-bc75-2adda2da4eb2" />
 
+## 工夫点
+- 処理が増えるため、プレイヤー以外の動きはあらかじめ決定しておき、フロントエンドに関数やベクトルを送るようにした
 
 ## 技術構成
 ### モニター (フロントエンド)

@@ -320,9 +320,8 @@ class Stage {
   }
 
   updateEnemies(dt) {
-    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
     this.enemies.forEach((enemy, id) => {
-      enemy.update(settings.enemySpeed * dt);
+      enemy.update(dt);
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }
@@ -341,7 +340,7 @@ class Stage {
 
   updateItems(dt) {
     this.itemEntities.forEach((itemEntity, id) => {
-      itemEntity.update(ItemEntity.SPEED * dt);
+      itemEntity.update(dt);
       if (itemEntity.y < -5) {
         this.itemEntities.delete(id);
       }
