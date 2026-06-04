@@ -2,7 +2,7 @@ import { PlayerEntity, DEFAULT_HP, BASE_ATTACK } from './entities/PlayerEntity.j
 import { BulletEntity } from './entities/BulletEntity.js';
 import { ItemFactory } from './items/ItemFactory.js';
 import { ItemEntity } from './entities/ItemEntity.js';
-import { TICK_MS } from './constants/systemConfig.js';
+import { TICK_MS, RESYNC_INTERVAL_MS } from './constants/systemConfig.js';
 
 import { CollisionSystem } from './systems/CollisionSystem.js';
 import { SpawnSystem } from './systems/SpawnSystem.js';
@@ -53,6 +53,7 @@ class Stage {
     this.stageScore = 0;
     this.gameOver = false;
     this.gameOverAt = null;
+    this.lastPredictionSync = Date.now();
   }
 
   resetToTitle(now = Date.now()) {
@@ -76,6 +77,7 @@ class Stage {
     this.stageScore = 0;
     this.gameOver = false;
     this.gameOverAt = null;
+    this.lastPredictionSync = now;
   }
 
   addPlayer(id, now = Date.now(), { name = '', characterNumber = null } = {}) {
@@ -230,6 +232,15 @@ class Stage {
     this.updateBullets(dtFactor);
 
     this.updateItems(dtFactor);
+    CollisionSystem.checkCollisions(this, now);
+
+    if (now - this.lastPredictionSync >= RESYNC_INTERVAL_MS) {
+      this.enemies.forEach(e => e.syncPrediction(now));
+      this.bullets.forEach(b => b.syncPrediction(now));
+      this.itemEntities.forEach(i => i.syncPrediction(now));
+      this.lastPredictionSync = now;
+    }
+
     this.handleBulletCollisions();
     this.handleEnemyBulletCollisions(now);
     this.handleEnemyTouches(now);
@@ -320,9 +331,8 @@ class Stage {
   }
 
   updateEnemies(dt) {
-    const settings = DIFFICULTY_SETTINGS[this.difficulty] || DIFFICULTY_SETTINGS.normal;
     this.enemies.forEach((enemy, id) => {
-      enemy.update(settings.enemySpeed * dt);
+      enemy.update(dt);
       if (enemy.y < -5) {
         this.enemies.delete(id);
       }
@@ -341,7 +351,7 @@ class Stage {
 
   updateItems(dt) {
     this.itemEntities.forEach((itemEntity, id) => {
-      itemEntity.update(ItemEntity.SPEED * dt);
+      itemEntity.update(dt);
       if (itemEntity.y < -5) {
         this.itemEntities.delete(id);
       }

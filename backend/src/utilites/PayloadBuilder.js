@@ -29,6 +29,7 @@ export class PayloadBuilder {
         showTitle: true,
         stage: stage.currentStage,
         stageLabel: stageConfig.label,
+        serverNow: now,
       };
     }
 
@@ -62,6 +63,7 @@ export class PayloadBuilder {
       playerCount: stage.players.size,
       stage: stage.currentStage,
       stageLabel: stageConfig.label,
+      serverNow: now,
     };
   }
 
