@@ -427,13 +427,24 @@ const getGameScale = () => {
 const resize = () => {
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(rect.width * dpr);
-  canvas.height = Math.floor(rect.height * dpr);
-  
   const gameScale = getGameScale();
-  ctx.setTransform(dpr * gameScale, 0, 0, dpr * gameScale, 0, 0);
   
-  // ドット絵を拡大した際にぼやけないようにする
+  // 超解像度＋縮小でキャラのがたついた表示を修正する
+  // 1. 理想の拡大率 (DPR考慮)
+  const desiredScale = dpr * gameScale;
+  
+  // 2. 内部描画は「絶対に整数倍」にしてジッター（ガタつき）を防ぐ
+  const integerScale = Math.ceil(desiredScale);
+  
+  // 3. キャンバスの内部画素数を integerScale に合わせて広げる
+  // (ブラウザの CSS width: 100% によって、自動的に美しく縮小表示される)
+  canvas.width = Math.floor(rect.width * (integerScale / gameScale));
+  canvas.height = Math.floor(rect.height * (integerScale / gameScale));
+  
+  // 4. コンテキストは整数倍で拡大
+  ctx.setTransform(integerScale, 0, 0, integerScale, 0, 0);
+  
+  // 5. 内部描画時はピクセルをくっきり（ニアレストネイバー）に保つ
   ctx.imageSmoothingEnabled = false;
 };
 
