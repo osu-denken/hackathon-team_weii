@@ -24,8 +24,6 @@ import {
   DIFFICULTY_SETTINGS
 } from './constants/gameConfig.js';
 
-const dtFactor = TICK_MS / 40.0;
-
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 class Stage {
@@ -54,6 +52,7 @@ class Stage {
     this.gameOver = false;
     this.gameOverAt = null;
     this.lastPredictionSync = Date.now();
+    this.lastUpdateAt = Date.now();
   }
 
   resetToTitle(now = Date.now()) {
@@ -78,6 +77,7 @@ class Stage {
     this.gameOver = false;
     this.gameOverAt = null;
     this.lastPredictionSync = now;
+    this.lastUpdateAt = now;
   }
 
   addPlayer(id, now = Date.now(), { name = '', characterNumber = null } = {}) {
@@ -198,6 +198,12 @@ class Stage {
   }
 
   update(now) {
+    let actualDt = now - this.lastUpdateAt;
+    if (actualDt < 0) actualDt = 0;
+    if (actualDt > 100) actualDt = 100;
+    this.lastUpdateAt = now;
+    const currentDtFactor = actualDt / 40.0;
+
     // 全ステージクリア後にタイトルへ戻るカウントダウン中
     if (this.stageCleared && this.currentStage >= 3 && this.emptySince !== null) {
       if (now - this.emptySince >= RETURN_TO_TITLE_DELAY_MS) {
@@ -226,13 +232,12 @@ class Stage {
     this.updatePlayerPowers(now);
 
     this.maybeSpawnEnemy(now);
-    this.updateEnemies(dtFactor);
+    this.updateEnemies(currentDtFactor);
 
     this.maybeSpawnEnemyBullets(now);
-    this.updateBullets(dtFactor);
+    this.updateBullets(currentDtFactor);
 
-    this.updateItems(dtFactor);
-    CollisionSystem.checkCollisions(this, now);
+    this.updateItems(currentDtFactor);
 
     if (now - this.lastPredictionSync >= RESYNC_INTERVAL_MS) {
       this.enemies.forEach(e => e.syncPrediction(now));
