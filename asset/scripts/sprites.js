@@ -15,6 +15,7 @@ const itemSpritePaths = {
   score_up: '/asset/images/score_up.png',
   shield: '/asset/images/shield.png',
   triple_shot: '/asset/images/triple_shot.png',
+  empty: '/asset/images/empty.png',
 };
 
 const guideSpritePaths = {

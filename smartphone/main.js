@@ -120,15 +120,15 @@ updateCharPreview();
 
 let neutralBeta = null; // 傾きのニュートラル位置（初期値はnullで、最初のセンサーイベントで設定）
 
-const assetBase = `${window.location.protocol}//${window.location.host}/asset/images/`;
-const itemIconMap = {
-    health_potion: `${assetBase}health_potion.png`,
-    health_increase: `${assetBase}heart_increase.png`,
-    score_up: `${assetBase}score_up.png`,
-    shield: `${assetBase}shield.png`,
-    triple_shot: `${assetBase}triple_shot.png`,
-    empty: `${assetBase}empty.png`
-};
+// const assetBase = `${window.location.protocol}//${window.location.host}/asset/images/`;
+// const itemIconMap = {
+//     health_potion: `${assetBase}health_potion.png`,
+//     health_increase: `${assetBase}heart_increase.png`,
+//     score_up: `${assetBase}score_up.png`,
+//     shield: `${assetBase}shield.png`,
+//     triple_shot: `${assetBase}triple_shot.png`,
+//     empty: `${assetBase}empty.png`
+// };
 
 const currentUrl = window.location.href;
 const defaultWsUrl = currentUrl.replace(/^http/, 'ws').replace(/\/client\/?$/, '');
@@ -236,7 +236,7 @@ function updatePlayerInfo(player) {
         _currentHeldItem = null;
         if (btnUseItem) btnUseItem.disabled = true;
         if (itemIcon) {
-            itemIcon.src = itemIconMap.empty;
+            itemIcon.src = itemSpritePaths.empty;
             itemIcon.style.opacity = 0.3;
         }
         _localPlayerNumber = null;
@@ -390,8 +390,8 @@ function updatePlayerInfo(player) {
     if (btnUseItem) btnUseItem.disabled = !_currentHeldItem || isDead;
     if (btnResetPosition) btnResetPosition.disabled = isDead || !ws || ws.readyState !== WebSocket.OPEN;
     if (itemIcon) {
-        const iconSrc = _currentHeldItem ? itemIconMap[_currentHeldItem.type] : itemIconMap.empty;
-        itemIcon.src = iconSrc || itemIconMap.empty;
+        const iconSrc = _currentHeldItem ? itemSpritePaths[_currentHeldItem.type] : itemSpritePaths.empty;
+        itemIcon.src = iconSrc || itemSpritePaths.empty;
         itemIcon.style.opacity = _currentHeldItem ? 1 : 0.3;
     }
     if (btnShoot) btnShoot.disabled = isDead || !ws || ws.readyState !== WebSocket.OPEN;

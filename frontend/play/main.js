@@ -13,14 +13,14 @@ const btnShoot = document.getElementById('btn-shoot');
 const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
 
-const itemIconMap = {
-  health_potion: '/asset/images/health_potion.png',
-  health_increase: '/asset/images/heart_increase.png',
-  score_up: '/asset/images/score_up.png',
-  shield: '/asset/images/shield.png',
-  triple_shot: '/asset/images/triple_shot.png',
-  empty: '/asset/images/empty.png',
-};
+// const itemIconMap = {
+//   health_potion: '/asset/images/health_potion.png',
+//   health_increase: '/asset/images/heart_increase.png',
+//   score_up: '/asset/images/score_up.png',
+//   shield: '/asset/images/shield.png',
+//   triple_shot: '/asset/images/triple_shot.png',
+//   empty: '/asset/images/empty.png',
+// };
 
 const playerNameInput = document.getElementById('player-name-input');
 const customizationSection = document.getElementById('customization-section');
@@ -101,7 +101,7 @@ const setPlayerInfo = (player) => {
     if (btnUseItem) btnUseItem.disabled = true;
     if (itemState) itemState.textContent = 'none';
     if (itemIcon) {
-      itemIcon.src = itemIconMap.empty;
+      itemIcon.src = itemSpritePaths.empty;
       itemIcon.style.opacity = '0.35';
     }
     return;
@@ -122,7 +122,7 @@ const setPlayerInfo = (player) => {
   if (itemState) itemState.textContent = currentHeldItem ? currentHeldItem.type : 'none';
   if (itemIcon) {
     const key = currentHeldItem ? currentHeldItem.type : 'empty';
-    itemIcon.src = itemIconMap[key] || itemIconMap.empty;
+    itemIcon.src = itemSpritePaths[key] || itemSpritePaths.empty;
     itemIcon.style.opacity = currentHeldItem ? '1' : '0.35';
   }
 };
