@@ -415,12 +415,23 @@ const updateGameUI = () => {
   renderPlayerSummary();
 };
 
+const getGameScale = () => {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (w >= 2000 && h >= 1080) return 2.0;
+  if (w >= 1600 && h >= 900) return 1.5;
+  if (w >= 1200 && h >= 800) return 1.2;
+  return 1.0;
+};
+
 const resize = () => {
   const rect = canvas.getBoundingClientRect();
-  const scale = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(rect.width * scale);
-  canvas.height = Math.floor(rect.height * scale);
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.floor(rect.width * dpr);
+  canvas.height = Math.floor(rect.height * dpr);
+  
+  const gameScale = getGameScale();
+  ctx.setTransform(dpr * gameScale, 0, 0, dpr * gameScale, 0, 0);
 };
 
 window.addEventListener('resize', resize);
@@ -881,8 +892,9 @@ const drawStars = (width, height) => {
 
 const draw = () => {
   const rect = canvas.getBoundingClientRect();
-  const width = rect.width;
-  const height = rect.height;
+  const gameScale = getGameScale();
+  const width = rect.width / gameScale;
+  const height = rect.height / gameScale;
 
   const currentStage = state.game.stage || 1;
   const stageBackground = stageBackgroundCache.get(currentStage);
