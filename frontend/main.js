@@ -432,6 +432,9 @@ const resize = () => {
   
   const gameScale = getGameScale();
   ctx.setTransform(dpr * gameScale, 0, 0, dpr * gameScale, 0, 0);
+  
+  // ドット絵を拡大した際にぼやけないようにする
+  ctx.imageSmoothingEnabled = false;
 };
 
 window.addEventListener('resize', resize);
