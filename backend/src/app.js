@@ -25,6 +25,7 @@ app.use('/client', express.static('../smartphone')); // スマートフォン操
 app.use('/viewer', express.static('../frontend')); // モニター表示用
 app.use('/play', express.static('../frontend/play')); // キーボード操作ができる
 app.use('/asset', express.static('../asset')); // アイテムの画像などの静的ファイル
+app.use('/favicon.ico', express.static('../asset/images/favicon.ico'));
 
 app.get('/api/client-url', (req, res) => {
   res.json({ clientUrl: config.buildClientUrl(req) });
