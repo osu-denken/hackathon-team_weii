@@ -461,9 +461,8 @@ const setQrOverlay = (clientUrl) => {
 const loadClientUrl = async () => {
   try {
     const response = await fetch('/api/client-url', { cache: 'no-store' });
-    if (!response.ok) {
+    if (!response.ok)
       return fallbackClientUrl;
-    }
 
     const data = await response.json();
     return typeof data.clientUrl === 'string' && data.clientUrl ? data.clientUrl : fallbackClientUrl;
