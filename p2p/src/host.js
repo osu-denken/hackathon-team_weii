@@ -18,6 +18,7 @@ const connectedPeers = new Map(); // peerId -> connection
 const networkAdapter = new HostPeerAdapter(stage);
 initViewer(networkAdapter);
 
+// app.jsの代わり
 const messageHandler = new MessageHandler(stage, {
   send: (peerId, data) => {
     const conn = connectedPeers.get(peerId);
@@ -28,8 +29,19 @@ const messageHandler = new MessageHandler(stage, {
   }
 });
 
+function getRandStr(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+const roomId = getRandStr(8);
+
 // Initialize PeerJS
-const peer = new Peer({
+const peer = new Peer(roomId, {
   // Use public PeerJS server
   host: '0.peerjs.com',
   port: 443,
