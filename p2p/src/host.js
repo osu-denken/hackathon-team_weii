@@ -52,9 +52,9 @@ peer.on('open', (id) => {
   console.log('PeerJS Host connection established. ID:', id);
   setViewerConnected(true);
 
-  // Create Join URL (e.g., https://domain.com/p2p/?room=xyz)
-  const currentUrl = new URL(window.location.href);
-  const clientUrl = `${currentUrl.origin}${currentUrl.pathname.replace('/host.html', '/client.html')}?room=${id}`;
+  // Create Join URL: host/ の親ディレクトリから client/ を解決する
+  const clientBaseUrl = new URL('../client/', window.location.href).href;
+  const clientUrl = `${clientBaseUrl}?room=${id}`;
 
   const roomIdDisplay = document.getElementById('room-id-display');
   if (roomIdDisplay) {

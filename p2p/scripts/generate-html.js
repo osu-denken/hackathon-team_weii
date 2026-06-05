@@ -18,8 +18,8 @@ try {
 //  hostHtml = hostHtml.replace('<title>Viewer of "phone ∧ shoot"</title>', '<title>Host (P2P) - "phone ∧ shoot"</title>');
   // Remove CSS link (handled by Vite import in JS)
   hostHtml = hostHtml.replace(/<link rel="stylesheet" href="styles\.css"[^>]*>/, '');
-  // Make asset scripts relative
-  hostHtml = hostHtml.replace('src="/asset/scripts/sprites.js"', 'src="./asset/scripts/sprites.js"');
+  // Make asset scripts relative (one level up from host/index.html)
+  hostHtml = hostHtml.replace('src="/asset/scripts/sprites.js"', 'src="../asset/scripts/sprites.js"');
 
   // Inject Room ID display after qr-overlay
   hostHtml = hostHtml.replace(
@@ -56,8 +56,8 @@ try {
 //  clientHtml = clientHtml.replace('<title>Controller of "phone ∧ shoot"</title>', '<title>Controller (P2P) - "phone ∧ shoot"</title>');
   // Remove CSS link (handled by Vite import in JS)
   clientHtml = clientHtml.replace(/<link rel="stylesheet" href="styles\.css[^>]*>/, '');
-  // Make asset scripts relative
-  clientHtml = clientHtml.replace('src="/asset/scripts/sprites.js"', 'src="./asset/scripts/sprites.js"');
+  // Make asset scripts relative (one level up from client/index.html)
+  clientHtml = clientHtml.replace('src="/asset/scripts/sprites.js"', 'src="../asset/scripts/sprites.js"');
 
   // Inject Room ID Panel replacing hidden input
   clientHtml = clientHtml.replace(
