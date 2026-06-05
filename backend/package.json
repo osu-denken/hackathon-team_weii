@@ -1,5 +1,6 @@
 {
   "name": "backend",
+  "private": true,
   "version": "1.0.0",
   "description": "backend for the project",
   "type": "module",
@@ -11,7 +12,7 @@
   },
   "keywords": [],
   "author": "kmmz1127, osu-denken",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "express": "^5.2.1",
     "fs": "^0.0.1-security",
