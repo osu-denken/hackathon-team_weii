@@ -44,7 +44,7 @@ export const formatTime = (ms) => {
 
 export const renderPlayerSummary = () => {
   if (!elements.overlayBottom) return;
-  
+
   while (elements.overlayBottom.children.length > state.players.length) {
     elements.overlayBottom.removeChild(elements.overlayBottom.lastChild);
   }
@@ -104,13 +104,13 @@ export const renderPlayerSummary = () => {
     const iconHash = `${charNum}:${isDead}`;
     if (icon.dataset.hash !== iconHash) {
       icon.dataset.hash = iconHash;
-      
+
       let validCharNum = charNum;
       if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 8) {
-          validCharNum = 1;
+        validCharNum = 1;
       }
-      const spriteUrl = `./asset/images/character-${validCharNum}.png`;
-      
+      const spriteUrl = `../asset/images/character-${validCharNum}.png`;
+
       icon.style.backgroundImage = `url('${spriteUrl}')`;
       icon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
       icon.style.filter = isDead ? 'grayscale(1)' : '';
@@ -229,22 +229,22 @@ export const updateGameUI = () => {
     stage,
     stageLabel,
   } = state.game;
-  
+
   const percent = targetScore > 0 ? Math.min(100, Math.round((stageScore / targetScore) * 100)) : 0;
-  
+
   if (elements.overlayScoreFill) elements.overlayScoreFill.style.width = `${percent}%`;
   if (elements.overlayScoreText) elements.overlayScoreText.textContent = `${percent}%`;
   if (elements.overlayTime) elements.overlayTime.textContent = formatTime(timeRemainingMs);
   if (elements.overlayStage) elements.overlayStage.textContent = stageLabel + '/3' || `Stage ${stage || 1}/3`;
   if (elements.overlayPlayerCount) elements.overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
-  
+
   if (elements.returnNoticeOverlay) {
     elements.returnNoticeOverlay.classList.toggle('show', showReturnNotice);
   }
   if (elements.returnNoticeSeconds) {
     elements.returnNoticeSeconds.textContent = String(Math.max(1, Math.ceil(returnToTitleRemainingMs / 1000)));
   }
-  
+
   if (elements.overlayClear) {
     if (cleared && !showTitle && !showReturnNotice && !waitingForStart) {
       elements.overlayClear.classList.add('show');
@@ -254,7 +254,7 @@ export const updateGameUI = () => {
       elements.overlayClear.classList.remove('show');
     }
   }
-  
+
   if (elements.overlayGameOver) {
     if (gameOver && !showTitle && !showReturnNotice && !waitingForStart) {
       elements.overlayGameOver.style.display = 'flex';
@@ -264,7 +264,7 @@ export const updateGameUI = () => {
       elements.overlayGameOver.classList.remove('show');
     }
   }
-  
+
   const shouldShowTitle = showTitle || waitingForStart;
   setTitleVisible(shouldShowTitle && !showReturnNotice);
 

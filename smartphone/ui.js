@@ -29,12 +29,12 @@ export const elements = {
 };
 
 const itemSpritePaths = {
-    health_potion: `./asset/images/health_potion.png`,
-    health_increase: `./asset/images/heart_increase.png`,
-    score_up: `./asset/images/score_up.png`,
-    shield: `./asset/images/shield.png`,
-    triple_shot: `./asset/images/triple_shot.png`,
-    empty: `./asset/images/empty.png`
+    health_potion: `../asset/images/health_potion.png`,
+    health_increase: `../asset/images/heart_increase.png`,
+    score_up: `../asset/images/score_up.png`,
+    shield: `../asset/images/shield.png`,
+    triple_shot: `../asset/images/triple_shot.png`,
+    empty: `../asset/images/empty.png`
 };
 
 export let localState = {
@@ -72,7 +72,7 @@ export const updateGameInfo = (game) => {
 };
 
 export const updateCharPreview = (charNum, maxCharCount) => {
-    const base = `./asset/images/`;
+    const base = `../asset/images/`;
     if (elements.charPreview) {
         if (charNum === 0) {
             elements.charPreview.style.display = 'none';
@@ -147,7 +147,7 @@ export const updatePlayerInfo = (player, isConnected) => {
             if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 8) {
                 validCharNum = 1;
             }
-            const spriteUrl = `./asset/images/character-${validCharNum}.png`;
+            const spriteUrl = `../asset/images/character-${validCharNum}.png`;
 
             elements.pcbIcon.style.backgroundImage = `url('${spriteUrl}')`;
             elements.pcbIcon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;
