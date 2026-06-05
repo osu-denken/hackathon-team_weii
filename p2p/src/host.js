@@ -90,6 +90,19 @@ peer.on('connection', (conn) => {
       case 'resetPosition':
         messageHandler.handleResetPosition(conn.peer, now);
         break;
+      case 'setDifficulty':
+        {
+          const playerId = messageHandler.getPlayerId(conn.peer);
+          const player = stage.getPlayer(playerId);
+          if (player && player.number === 1 && msg.difficulty) {
+            if (state.game.difficulty !== msg.difficulty) {
+              state.game.difficulty = msg.difficulty;
+              setDifficultyUI(msg.difficulty);
+              stage.setDifficulty(msg.difficulty);
+            }
+          }
+        }
+        break;
     }
   });
 
