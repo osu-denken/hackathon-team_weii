@@ -4,6 +4,8 @@
 
 - https://osu-denken.github.io/phone-and-shoot/
 
+ソースコード: https://github.com/osu-denken/hackathon-team_weii
+
 ゲームのロジックは `../backend/src` のものを共有・再利用しつつ、Viteを用いて静的サイトとしてビルド・デプロイできる構成になっています。
 
 ## 特徴
