@@ -17,6 +17,10 @@ export default defineConfig({
         {
           src: 'README.md',
           dest: ''
+        },
+        {
+          src: '../asset/images/favicon.ico',
+          dest: ''
         }
       ]
     })
