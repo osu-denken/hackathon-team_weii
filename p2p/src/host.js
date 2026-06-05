@@ -8,14 +8,14 @@ import { MessageHandler } from '../../backend/src/systems/MessageHandler.js';
 import { state, serverInfo } from '../../frontend/state.js';
 import { elements, setDifficultyUI, setConnected } from '../../frontend/ui.js';
 import { initViewer, processViewerPayload, setViewerConnected } from '../../frontend/core.js';
-import HostAdapter from './HostAdapter.js';
+import HostPeerAdapter from './HostPeerAdapter.js';
 
 // Initialize Game Stage (The Backend)
 const stage = new Stage();
 const connectedPeers = new Map(); // peerId -> connection
 
 // Setup frontend rendering (Viewer Core)
-const networkAdapter = new HostAdapter(stage);
+const networkAdapter = new HostPeerAdapter(stage);
 initViewer(networkAdapter);
 
 const messageHandler = new MessageHandler(stage, {

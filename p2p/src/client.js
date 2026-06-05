@@ -1,6 +1,6 @@
 import '../../smartphone/styles.css';
 import { setupController } from '../../smartphone/core.js';
-import PeerAdapter from './PeerAdapter.js';
+import ClientPeerAdapter from './ClientPeerAdapter.js';
 
-const networkAdapter = new PeerAdapter();
+const networkAdapter = new ClientPeerAdapter();
 setupController(networkAdapter);

@@ -3,11 +3,11 @@ import NetworkAdapter from '../../smartphone/NetworkAdapter.js';
 import { handleNetworkPayload, handleDisconnectUI, handleConnectUI } from '../../smartphone/core.js';
 
 /**
- * PeerAdapter - PeerJS（P2P直接通信）用のネットワークアダプター
+ * ClientPeerAdapter - PeerJS（P2P直接通信）用のネットワークアダプター
  *
  * PeerJS を使ってホストに直接接続し、コントローラーの入力を送信します。
  */
-class PeerAdapter extends NetworkAdapter {
+class ClientPeerAdapter extends NetworkAdapter {
     constructor() {
         super();
         this._peer = null;
@@ -111,4 +111,4 @@ class PeerAdapter extends NetworkAdapter {
     }
 }
 
-export default PeerAdapter;
+export default ClientPeerAdapter;

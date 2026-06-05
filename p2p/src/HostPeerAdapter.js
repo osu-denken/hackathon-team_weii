@@ -1,14 +1,14 @@
 import NetworkAdapter from '../../smartphone/NetworkAdapter.js';
 
 /**
- * HostAdapter - P2Pホスト側のビューワー用アダプター
+ * HostPeerAdapter - P2Pホスト側のビューワー用アダプター
  *
  * ホストはネットワーク経由ではなく Stage に直接アクセスして難易度を設定します。
  * initViewer(networkAdapter) の sendDifficulty インターフェースを満たすためのアダプターです。
  *
  * @param {Stage} stage - ゲームステージインスタンス
  */
-class HostAdapter extends NetworkAdapter {
+class HostPeerAdapter extends NetworkAdapter {
     constructor(stage) {
         super();
         this._stage = stage;
@@ -25,11 +25,11 @@ class HostAdapter extends NetworkAdapter {
     }
 
     // ホスト側では以下のメソッドは不要なため、何もしない実装を提供します。
-    _sendMove() {}
-    sendShoot() {}
-    sendLeave() {}
-    sendUseItem() {}
-    connect() {}
+    _sendMove() { }
+    sendShoot() { }
+    sendLeave() { }
+    sendUseItem() { }
+    connect() { }
 }
 
-export default HostAdapter;
+export default HostPeerAdapter;
