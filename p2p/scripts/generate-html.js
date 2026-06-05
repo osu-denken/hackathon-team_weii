@@ -49,10 +49,10 @@ try {
   // Inject Room ID Panel replacing hidden input
   clientHtml = clientHtml.replace(
     '<input type="hidden" id="ws-url" value="">',
-    `<!-- Room ID 入力欄 -->
+    `<!-- ルームID入力欄 -->
                 <div id="room-id-panel" style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
-                    <div style="font-size:11px;color:#888;">Room ID (ホスト画面を参照)</div>
-                    <input type="text" id="ws-url" value="" placeholder="Room IDを入力"
+                    <div style="font-size:11px;color:#888;">ルームID (ホスト画面を参照)</div>
+                    <input type="text" id="ws-url" value="" placeholder="ルームIDを入力"
                         style="width:100%;box-sizing:border-box;padding:8px 10px;background:#1a1a1a;border:1px solid #444;color:#fff;font-size:14px;">
                 </div>`
   );
