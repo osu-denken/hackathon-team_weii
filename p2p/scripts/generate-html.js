@@ -30,8 +30,21 @@ try {
                 <div id="room-id-display" style="position: absolute; left: 12px; top: 180px; color: white; padding: 4px 8px; font-size: 14px; border-radius: 4px; z-index: 50; user-select: all; font-family: monospace; white-space: nowrap;">Room ID 取得中...</div>`
   );
 
-  fs.writeFileSync(path.resolve(p2pDir, 'host.html'), hostHtml);
-  console.log('Successfully generated p2p/host.html from frontend/index.html');
+  // host/index.html に出力
+  const hostDir = path.resolve(p2pDir, 'host');
+  if (!fs.existsSync(hostDir)) fs.mkdirSync(hostDir, { recursive: true });
+  fs.writeFileSync(path.resolve(hostDir, 'index.html'), hostHtml);
+  console.log('Successfully generated p2p/host/index.html from frontend/index.html');
+
+  // host.html はリダイレクト用
+  const hostRedirect = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=./host/"></head>
+<body><p>Redirecting to <a href="./host/">host/</a>...</p></body>
+</html>
+`;
+  fs.writeFileSync(path.resolve(p2pDir, 'host.html'), hostRedirect);
+  console.log('Successfully generated redirect p2p/host.html -> host/');
 
   // 2. Generate client.html from smartphone/index.html
   const smartphoneHtmlPath = path.resolve(__dirname, '../../smartphone/index.html');
@@ -57,8 +70,21 @@ try {
                 </div>`
   );
 
-  fs.writeFileSync(path.resolve(p2pDir, 'client.html'), clientHtml);
-  console.log('Successfully generated p2p/client.html from smartphone/index.html');
+  // client/index.html に出力
+  const clientDir = path.resolve(p2pDir, 'client');
+  if (!fs.existsSync(clientDir)) fs.mkdirSync(clientDir, { recursive: true });
+  fs.writeFileSync(path.resolve(clientDir, 'index.html'), clientHtml);
+  console.log('Successfully generated p2p/client/index.html from smartphone/index.html');
+
+  // client.html はリダイレクト用
+  const clientRedirect = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=./client/"></head>
+<body><p>Redirecting to <a href="./client/">client/</a>...</p></body>
+</html>
+`;
+  fs.writeFileSync(path.resolve(p2pDir, 'client.html'), clientRedirect);
+  console.log('Successfully generated redirect p2p/client.html -> client/');
 
 } catch (err) {
   console.error('Error generating HTML files:', err);

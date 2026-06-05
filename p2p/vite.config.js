@@ -40,14 +40,16 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    open: '/host.html'
+    open: '/host/'
   },
   build: {
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        client: resolve(__dirname, 'client.html'),
-        host: resolve(__dirname, 'host.html')
+        client: resolve(__dirname, 'client/index.html'),
+        host: resolve(__dirname, 'host/index.html'),
+        clientRedirect: resolve(__dirname, 'client.html'),
+        hostRedirect: resolve(__dirname, 'host.html')
       }
     }
   }
