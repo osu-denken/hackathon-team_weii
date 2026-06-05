@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Host (P2P) - "phone ∧ shoot"</title>
+    </head>
+    <body>
+        <div class="frame">
+            <div class="stage-wrapper">
+                <canvas id="stage"></canvas>
+                <div class="overlay-qr">
+                    <img id="qr-overlay" alt="QR" />
+                    <div id="room-id-display" style="background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; font-size: 14px; border-radius: 4px; margin-top: 4px; text-align: center; user-select: all; font-family: monospace;">Room ID 取得中...</div>
+                </div>
+
+                <div class="overlay-top">
+                    <div class="overlay-score">
+                        <div class="gauge-track"><div id="overlay-score-fill" class="gauge-fill"></div></div>
+                        <div id="overlay-score-text" class="gauge-label">0%</div>
+                    </div>
+                    <div id="overlay-time" class="overlay-time">00:00</div>
+                    <div id="overlay-stage" class="overlay-stage">Stage 1/3</div>
+                    <div id="overlay-status" class="overlay-status disconnected">disconnected</div>
+                </div>
+
+                <div class="overlay-stage-transition" id="overlay-stage-transition" aria-live="polite">
+                    <div class="stage-transition-text" id="stage-transition-text">次のステージに進みます</div>
+                </div>
+
+                <div class="overlay-title show" id="title-overlay" aria-live="polite">
+                    <div class="title-card">
+                        <div class="title-hero">phone ∧ shoot</div>
+                        <div class="title-subtitle">スマートフォンで参加して、みんなでステージを突破しよう</div>
+                        <div class="title-instruction">左上のQRコードを読み取って携帯電話を接続してください</div>
+                        <div class="title-difficulty" id="title-difficulty">
+                            <button id="title-difficulty-normal" class="difficulty-button active" type="button">ノーマル</button>
+                            <button id="title-difficulty-hard" class="difficulty-button" type="button">ハード</button>
+                        </div>
+                        <div class="title-countdown" id="title-countdown">参加プレイヤーを待っています</div>
+                        <div class="title-players" id="title-players">参加プレイヤー: 0人</div>
+                    </div>
+                </div>
+                <div class="overlay-notice" id="return-notice" aria-live="polite">
+                    <div class="notice-card">
+                        <div class="notice-title">タイトルに戻ります</div>
+                        <div class="notice-text">プレイヤーがいなくなったため、まもなくタイトル画面へ戻ります</div>
+                        <div class="notice-countdown"><span id="return-notice-seconds">10</span> 秒</div>
+                    </div>
+                </div>
+                <div class="overlay-bottom" id="overlay-bottom"></div>
+                <div class="overlay-clear" id="overlay-clear" aria-live="polite">
+                    <div class="overlay-clear-card">
+                        <div class="clear-title">STAGE CLEAR</div>
+                        <div class="clear-subtitle">全員でクリア！</div>
+                        <div class="clear-detail">
+                            <span id="overlay-clear-score">0 / 100</span>
+                            <span class="clear-divider">-</span>
+                            <span id="overlay-clear-time">00:00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="overlay-clear" id="overlay-gameover" aria-live="polite" style="display:none;">
+                    <div class="overlay-clear-card" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(15, 23, 42, 0.95);">
+                        <div class="clear-title" style="color: #ef4444; text-shadow: 0 0 20px rgba(239, 68, 68, 0.4);">TIME UP</div>
+                        <div class="clear-subtitle">GAME OVER</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/asset/scripts/sprites.js"></script>
+        <script type="module" src="/src/host.js"></script>
+    </body>
+</html>

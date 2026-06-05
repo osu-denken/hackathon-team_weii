@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Controller (P2P) - "phone ∧ shoot"</title>
+      <script type="module" crossorigin src="/assets/main-DrVv7OPF.js"></script>
+      <link rel="modulepreload" crossorigin href="/assets/bundler-u0X9IHml.js">
+      <link rel="stylesheet" crossorigin href="/assets/main-C9j3C1mp.css">
+    </head>
+    <body>
+        <div id="fs" onclick="this.style.display='none'; document.body.classList.remove('fs-active'); document.documentElement.classList.remove('fs-active');">
+            ↑↓<br>SWIPE<br>
+            <span style="font-size: 14px; font-weight: normal;">(Tap to cancel)</span>
+        </div>
+        <button id="btn-fullscreen" class="btn-floating top-right btn-square" title="全画面表示">
+            <svg id="icon-fullscreen-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <svg id="icon-fullscreen-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;display:none;">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+        </button>
+        <button id="btn-reset-position" class="btn-floating bottom-right" disabled>傾きリセット</button>
+        <div class="main-layout">
+            <div class="left-panel">
+                <!-- Room ID 入力欄 -->
+                <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
+                    <div style="font-size:11px;color:#888;">Room ID (ホスト画面を参照)</div>
+                    <input type="text" id="ws-url" value="" placeholder="Room IDを入力"
+                        style="width:100%;box-sizing:border-box;padding:8px 10px;background:#1a1a1a;border:1px solid #444;color:#fff;font-size:14px;">
+                </div>
+
+                <!-- キャラ選択・名前入力パネル（JOIN前のみ表示） -->
+                <div id="customization-panel" style="display:flex;flex-direction:column;gap:8px;">
+                    <input id="player-name-input" type="text" maxlength="12" placeholder="名前（最大12文字）"
+                        style="width:100%;box-sizing:border-box;padding:8px 10px;background:#1a1a1a;border:1px solid #444;color:#fff;font-size:14px;">
+                    <div style="font-size:11px;color:#888;margin-bottom:2px;">キャラクター選択</div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                        <button id="char-prev" style="flex-shrink:0;width:32px;height:32px;background:#2a2a2a;border:1px solid #555;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8249;</button>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                            <img id="char-preview" src="" alt="" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;display:block;">
+                            <span id="char-label" style="font-size:11px;color:#aaa;"></span>
+                        </div>
+                        <button id="char-next" style="flex-shrink:0;width:32px;height:32px;background:#2a2a2a;border:1px solid #555;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+                    </div>
+                </div>
+
+                <button id="btn-join" class="btn-flat join-state">JOIN</button>
+
+                <div class="player-card-bottom" id="player-info" style="visibility: hidden; width:100%;">
+                    <div class="pcb-left" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                        <div id="pcb-meter" class="pcb-item-meter" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);flex-shrink:0;">
+                            <div id="pcb-icon" class="pcb-icon" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;transition:all 0.2s;background-size:180%;background-position:center 20%;image-rendering:pixelated;background-repeat:no-repeat;border:2px solid #1e293b;"></div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;gap:2px;">
+                            <div id="pcb-name" class="pcb-name" style="font-weight:700;transition:color 0.2s;white-space:nowrap;font-size:14px;"></div>
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <div id="pcb-status" class="pcb-status" style="font-size:12px;color:#cfeffd;white-space:nowrap;"></div>
+                                <div id="pcb-respawn" class="pcb-respawn" style="display:none;font-size:12px;font-weight:700;color:#f87171;white-space:nowrap;"></div>
+                            </div>
+                            <div id="pcb-hp-blocks" class="pcb-hp-blocks" style="display:flex;gap:2px;flex-wrap:wrap;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="difficulty-controls" id="difficulty-controls" style="display: none;">
+                    <button id="difficulty-normal" class="difficulty-btn active" type="button">ノーマル</button>
+                    <button id="difficulty-hard" class="difficulty-btn" type="button">ハード</button>
+                </div>
+
+                <div class="item-section" id="item-section" style="display:none;">
+                    <button id="btn-use-item" class="item-slot" disabled>
+                        <img id="item-icon" alt="" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="controller-area">
+                <button id="btn-shoot" disabled>SHOOT</button>
+            </div>
+        </div>
+        
+        <script src="/asset/scripts/sprites.js"></script>
+    </body>
+</html>
