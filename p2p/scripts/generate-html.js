@@ -15,7 +15,7 @@ try {
   // Replace script
   hostHtml = hostHtml.replace('<script type="module" src="main.js"></script>', '<script type="module" src="/src/host.js"></script>');
   // Replace title
-  hostHtml = hostHtml.replace('<title>Viewer of "phone ∧ shoot"</title>', '<title>Host (P2P) - "phone ∧ shoot"</title>');
+//  hostHtml = hostHtml.replace('<title>Viewer of "phone ∧ shoot"</title>', '<title>Host (P2P) - "phone ∧ shoot"</title>');
   // Remove CSS link (handled by Vite import in JS)
   hostHtml = hostHtml.replace(/<link rel="stylesheet" href="styles\.css"[^>]*>/, '');
   // Make asset scripts relative
@@ -40,7 +40,7 @@ try {
   // Replace script
   clientHtml = clientHtml.replace('<script type="module" src="main.js"></script>', '<script type="module" src="/src/client.js"></script>');
   // Replace title
-  clientHtml = clientHtml.replace('<title>Controller of "phone ∧ shoot"</title>', '<title>Controller (P2P) - "phone ∧ shoot"</title>');
+//  clientHtml = clientHtml.replace('<title>Controller of "phone ∧ shoot"</title>', '<title>Controller (P2P) - "phone ∧ shoot"</title>');
   // Remove CSS link (handled by Vite import in JS)
   clientHtml = clientHtml.replace(/<link rel="stylesheet" href="styles\.css[^>]*>/, '');
   // Make asset scripts relative
