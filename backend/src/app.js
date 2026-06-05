@@ -9,6 +9,7 @@ import path from 'path';
 import * as config from './constants/systemConfig.js';
 import { sendRaw, send, sendError } from './utilites/NetworkUtil.js';
 import { PayloadBuilder } from './utilites/PayloadBuilder.js';
+import { MessageHandler } from './systems/MessageHandler.js';
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.get('/api/client-url', (req, res) => {
 });
 
 const stage = new Stage();
-const socketToPlayerId = new Map();
+const messageHandler = new MessageHandler(stage, { send, sendError });
 const viewers = new Set(); // モニター用のWebSocket接続
 
 let lastViewerPayload = null;
@@ -69,20 +70,20 @@ const sendState = (isDelta = true) => {
 
 // タイトルリセット時に全プレイヤーのスマホに通知しsocketToPlayerIdをクリアする
 const handleGameReset = () => {
-  socketToPlayerId.forEach((id, ws) => {
+  messageHandler.socketToPlayerId.forEach((id, ws) => {
     send(ws, { type: 'gameReset' });
   });
-  socketToPlayerId.clear();
+  messageHandler.clear();
   lastPlayerPayloads.clear();
   lastViewerPayload = null;
 };
 
 let lastPlayerPayloads = new Map();
 
-// 各プレイヤー(スマートフォン)に自分の状態を送る
+// 各プレイヤー(スマートフォン)に自身の状態を送る
 const sendStateToPlayers = (isDelta = true) => {
   const now = Date.now();
-  socketToPlayerId.forEach((id, ws) => {
+  messageHandler.socketToPlayerId.forEach((id, ws) => {
     const player = stage.getPlayer(id);
     if (!player) return;
 
@@ -110,71 +111,6 @@ const sendStateToPlayers = (isDelta = true) => {
   });
 };
 
-const handleJoin = (ws, msg) => {
-  if (!msg.id) {
-    sendError(ws, 'missing id');
-    return;
-  }
-
-  const name = typeof msg.name === 'string' ? msg.name.trim().slice(0, 12) : '';
-  const characterNumber = (Number.isInteger(msg.characterNumber) && msg.characterNumber >= 1 && msg.characterNumber <= 8)
-    ? msg.characterNumber : null;
-
-  const player = stage.addPlayer(msg.id, Date.now(), { name, characterNumber });
-  socketToPlayerId.set(ws, player.id);
-
-  if (ws.readyState === WebSocket.OPEN) {
-    send(ws, {
-      type: 'joinAck',
-      player: {
-        id: player.id,
-        number: player.number,
-        color: player.color,
-        name: player.name,
-        characterNumber: player.characterNumber,
-      },
-    });
-  }
-};
-
-const handleLeave = (ws) => {
-  const id = socketToPlayerId.get(ws);
-  if (id) {
-    stage.removePlayer(id);
-    lastPlayerPayloads.delete(id);
-  }
-
-  socketToPlayerId.delete(ws);
-};
-
-const handleMove = (ws, msg) => {
-  const id = socketToPlayerId.get(ws);
-  if (!id) return;
-
-  stage.movePlayer(id, msg.delta, Date.now());
-};
-
-const handleShoot = (ws) => {
-  const id = socketToPlayerId.get(ws);
-  if (!id) return;
-
-  stage.shootPlayer(id, Date.now());
-};
-
-const handleUseItem = (ws) => {
-  const id = socketToPlayerId.get(ws);
-  if (!id) return;
-
-  stage.useHeldItem(id, Date.now());
-};
-
-const handleResetPosition = (ws) => {
-  const id = socketToPlayerId.get(ws);
-  if (!id) return;
-
-  stage.resetPlayerPosition(id, Date.now());
-};
-
 const parseMsg = (ws, raw) => {
   let msg;
   try {
@@ -189,15 +125,15 @@ const parseMsg = (ws, raw) => {
     return;
   }
 
-  // console.log('Received message:', msg);
+  const now = Date.now();
 
   switch (msg.type) {
     case 'join':
-      handleJoin(ws, msg);
+      messageHandler.handleJoin(ws, msg);
       break;
     case 'viewer':
       viewers.add(ws);
-      send(ws, stage.buildViewerPayload(Date.now()));
+      send(ws, stage.buildViewerPayload(now));
       break;
     case 'setDifficulty':
       if (typeof msg.difficulty === 'string') {
@@ -205,20 +141,22 @@ const parseMsg = (ws, raw) => {
         sendState(false);
       }
       break;
-    case 'leave':
-      handleLeave(ws);
+    case 'leave': {
+      const id = messageHandler.handleLeave(ws);
+      if (id) lastPlayerPayloads.delete(id);
       break;
+    }
     case 'move':
-      handleMove(ws, msg);
+      messageHandler.handleMove(ws, msg, now);
       break;
     case 'shoot':
-      handleShoot(ws);
+      messageHandler.handleShoot(ws, now);
       break;
     case 'useItem':
-      handleUseItem(ws);
+      messageHandler.handleUseItem(ws, now);
       break;
     case 'resetPosition':
-      handleResetPosition(ws);
+      messageHandler.handleResetPosition(ws, now);
       break;
     default:
       sendError(ws, 'unknown type');
@@ -236,7 +174,8 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     viewers.delete(ws);
-    handleLeave(ws);
+    const id = messageHandler.handleLeave(ws);
+    if (id) lastPlayerPayloads.delete(id);
   });
 });
 
