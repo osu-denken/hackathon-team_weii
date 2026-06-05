@@ -44,7 +44,7 @@ peer.on('open', (id) => {
   
   // Create Join URL (e.g., https://domain.com/p2p/?room=xyz)
   const currentUrl = new URL(window.location.href);
-  const clientUrl = `${currentUrl.origin}${currentUrl.pathname.replace('/host.html', '/index.html')}?room=${id}`;
+  const clientUrl = `${currentUrl.origin}${currentUrl.pathname.replace('/host.html', '/client.html')}?room=${id}`;
   
   const roomIdDisplay = document.getElementById('room-id-display');
   if (roomIdDisplay) {
@@ -149,13 +149,7 @@ setInterval(() => {
   stage.update(now);
 
   if ((wasStarted || wasPlayers > 0) && !stage.gameStarted && stage.players.size === 0 && stage.mode === 'title') {
-    // Reset players logic if needed
-    for (const [peerId, playerId] of peerIdToPlayerId.entries()) {
-      const conn = connectedPeers.get(peerId);
-      if (conn) conn.send({ type: 'kicked', message: 'Game Reset' });
-    }
-    peerIdToPlayerId.clear();
-    playerToPeerId.clear();
+    handleGameReset();
   }
 
   // Update Monitor UI state
@@ -178,7 +172,7 @@ setInterval(() => {
   updateGameUI();
 
   // Send state to connected players
-  for (const [peerId, playerId] of peerIdToPlayerId.entries()) {
+  for (const [peerId, playerId] of messageHandler.socketToPlayerId.entries()) {
     const conn = connectedPeers.get(peerId);
     if (conn) {
       const playerPayload = stage.buildPlayerPayload(playerId, now);

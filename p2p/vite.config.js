@@ -37,6 +37,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        client: resolve(__dirname, 'client.html'),
         host: resolve(__dirname, 'host.html')
       }
     }
