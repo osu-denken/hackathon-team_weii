@@ -9,12 +9,15 @@ import { state, serverInfo, MAX_PLAYERS } from '../../frontend/state.js';
 import { loadSprites } from '../../frontend/assets.js';
 import { elements, setDifficultyUI, updateGameUI, showStageTransition, setConnected } from '../../frontend/ui.js';
 import { draw, resize } from '../../frontend/render.js';
+import { initViewer, processViewerPayload, setViewerConnected } from '../../frontend/core.js';
 
-// Setup frontend rendering
-window.addEventListener('resize', resize);
-resize();
-loadSprites();
-draw(); // Start render loop
+// Setup frontend rendering (Viewer Core)
+const networkAdapter = {
+  sendDifficulty: (diff) => {
+    stage.setDifficulty(diff);
+  }
+};
+initViewer(networkAdapter);
 
 // Initialize Game Stage (The Backend)
 const stage = new Stage();
@@ -39,18 +42,18 @@ const peer = new Peer({
 });
 
 peer.on('open', (id) => {
-  console.log('Host Peer ID is: ' + id);
-  setConnected(true);
-  
+  console.log('PeerJS Host connection established. ID:', id);
+  setViewerConnected(true);
+
   // Create Join URL (e.g., https://domain.com/p2p/?room=xyz)
   const currentUrl = new URL(window.location.href);
   const clientUrl = `${currentUrl.origin}${currentUrl.pathname.replace('/host.html', '/client.html')}?room=${id}`;
-  
+
   const roomIdDisplay = document.getElementById('room-id-display');
   if (roomIdDisplay) {
     roomIdDisplay.textContent = id;
   }
-  
+
   if (elements.qrOverlay) {
     elements.qrOverlay.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(clientUrl)}`;
   }
@@ -145,7 +148,7 @@ setInterval(() => {
   const wasStarted = stage.gameStarted;
   const wasPlayers = stage.players.size;
   const now = Date.now();
-  
+
   stage.update(now);
 
   if ((wasStarted || wasPlayers > 0) && !stage.gameStarted && stage.players.size === 0 && stage.mode === 'title') {
@@ -153,23 +156,14 @@ setInterval(() => {
   }
 
   // Update Monitor UI state
-  const prevStage = state.game.stage;
   const payload = stage.buildViewerPayload(now); // Full state payload
-  
-  state.players = Array.isArray(payload.players) ? payload.players.slice(0, MAX_PLAYERS) : [];
-  state.enemies = Array.isArray(payload.enemies) ? payload.enemies : [];
-  state.bullets = Array.isArray(payload.bullets) ? payload.bullets : [];
-  state.items = Array.isArray(payload.items) ? payload.items : [];
-  if (payload.game) {
-    state.game = { ...state.game, ...payload.game };
-    state.game.lastUpdateTime = payload.serverTime || now;
-    serverInfo.serverTimeOffset = 0; // Host IS the server, so offset is 0
-  }
+  serverInfo.serverTimeOffset = 0; // Host IS the server, so offset is 0
 
-  if (payload.game && typeof payload.game.stage === 'number' && payload.game.stage > prevStage) {
-    showStageTransition(payload.game.stage, payload.game.stageLabel);
-  }
-  updateGameUI();
+  processViewerPayload({
+    type: 'update',
+    isDelta: false,
+    ...payload,
+  });
 
   // Send state to connected players
   for (const [peerId, playerId] of messageHandler.socketToPlayerId.entries()) {
