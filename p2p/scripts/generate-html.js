@@ -25,7 +25,7 @@ try {
     `<div class="overlay-qr">
                     <img id="qr-overlay" alt="QR" />
                 </div>
-                <div id="room-id-display" style="position: absolute; left: 12px; top: 180px; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; font-size: 14px; border-radius: 4px; z-index: 50; user-select: all; font-family: monospace; white-space: nowrap;">Room ID 取得中...</div>`
+                <div id="room-id-display" style="position: absolute; left: 12px; top: 180px; color: white; padding: 4px 8px; font-size: 14px; border-radius: 4px; z-index: 50; user-select: all; font-family: monospace; white-space: nowrap;">Room ID 取得中...</div>`
   );
 
   fs.writeFileSync(path.resolve(p2pDir, 'host.html'), hostHtml);
