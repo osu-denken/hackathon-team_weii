@@ -109,7 +109,7 @@ export const renderPlayerSummary = () => {
       if (typeof validCharNum !== 'number' || validCharNum < 1 || validCharNum > 8) {
           validCharNum = 1;
       }
-      const spriteUrl = `/asset/images/character-${validCharNum}.png`;
+      const spriteUrl = `./asset/images/character-${validCharNum}.png`;
       
       icon.style.backgroundImage = `url('${spriteUrl}')`;
       icon.style.backgroundColor = isDead ? 'rgba(239,68,68,0.5)' : color;

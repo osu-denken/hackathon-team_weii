@@ -22,9 +22,8 @@ window.itemSpritePaths = {
 };
 
 window.guideSpritePaths = {
-  controller: imagesBase + 'guide_controller.png',
-  device: imagesBase + 'guide_device.png',
-  player: imagesBase + 'guide_player.png',
+  arrow: imagesBase + 'arrow.png',
+  phone: imagesBase + 'phone.png',
 };
 window.bulletSpritePath = imagesBase + 'bullet.png';
 window.enemyBulletSpritePath = imagesBase + 'enemy_bullet.png';

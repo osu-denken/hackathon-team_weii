@@ -169,8 +169,12 @@ setInterval(() => {
   for (const [peerId, playerId] of messageHandler.socketToPlayerId.entries()) {
     const conn = connectedPeers.get(peerId);
     if (conn) {
-      const playerPayload = stage.buildPlayerPayload(playerId, now);
-      conn.send({ type: 'update', ...playerPayload });
+      const player = stage.getPlayer(playerId);
+      if (player) {
+        const playerState = stage.buildPlayerState(player, now);
+        playerState.type = 'update';
+        conn.send(playerState);
+      }
     }
   }
 

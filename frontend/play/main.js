@@ -14,12 +14,12 @@ const btnUseItem = document.getElementById('btn-use-item');
 const itemIcon = document.getElementById('item-icon');
 
 // const itemIconMap = {
-//   health_potion: '/asset/images/health_potion.png',
-//   health_increase: '/asset/images/heart_increase.png',
-//   score_up: '/asset/images/score_up.png',
-//   shield: '/asset/images/shield.png',
-//   triple_shot: '/asset/images/triple_shot.png',
-//   empty: '/asset/images/empty.png',
+//   health_potion: './asset/images/health_potion.png',
+//   health_increase: './asset/images/heart_increase.png',
+//   score_up: './asset/images/score_up.png',
+//   shield: './asset/images/shield.png',
+//   triple_shot: './asset/images/triple_shot.png',
+//   empty: './asset/images/empty.png',
 // };
 
 const playerNameInput = document.getElementById('player-name-input');
@@ -40,7 +40,7 @@ const updateCharPreview = () => {
         if (charLabel) charLabel.textContent = '自動選択';
     } else {
         charPreview.style.display = 'block';
-        charPreview.src = `/asset/images/character-${selectedCharacterNumber}.png`;
+        charPreview.src = `./asset/images/character-${selectedCharacterNumber}.png`;
         charPreview.alt = `キャラ ${selectedCharacterNumber}`;
         if (charLabel) charLabel.textContent = `${selectedCharacterNumber} / ${CHAR_COUNT}`;
     }
