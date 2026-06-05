@@ -40,6 +40,8 @@ const connectPeer = (targetRoomId, joinData, onGameReset) => {
             console.log('Connected to host:', targetRoomId);
             updateUI(true);
             if (elements.customizationPanel) elements.customizationPanel.style.display = 'none';
+            const roomIdPanel = document.getElementById('room-id-panel');
+            if (roomIdPanel) roomIdPanel.style.display = 'none';
             if (elements.itemSection) elements.itemSection.style.display = 'flex';
             conn.send(joinData);
         });
@@ -65,6 +67,8 @@ const connectPeer = (targetRoomId, joinData, onGameReset) => {
         conn.on('close', () => {
             console.log('Connection closed');
             if (elements.customizationPanel) elements.customizationPanel.style.display = 'flex';
+            const roomIdPanel = document.getElementById('room-id-panel');
+            if (roomIdPanel) roomIdPanel.style.display = 'flex';
             if (elements.itemSection) elements.itemSection.style.display = 'none';
             updateUI(false);
             updatePlayerInfo(null, false);
@@ -79,6 +83,8 @@ const connectPeer = (targetRoomId, joinData, onGameReset) => {
         console.error("Peer Error:", err);
         alert("P2P接続エラー。ホストが起動しているか確認してください。");
         if (elements.customizationPanel) elements.customizationPanel.style.display = 'flex';
+        const roomIdPanel = document.getElementById('room-id-panel');
+        if (roomIdPanel) roomIdPanel.style.display = 'flex';
         if (elements.itemSection) elements.itemSection.style.display = 'none';
         updateUI(false);
     });
@@ -139,6 +145,8 @@ if (elements.charNextBtn) {
 
 const handleGameReset = () => {
     if (elements.customizationPanel) elements.customizationPanel.style.display = 'flex';
+    const roomIdPanel = document.getElementById('room-id-panel');
+    if (roomIdPanel) roomIdPanel.style.display = 'flex';
     if (elements.itemSection) elements.itemSection.style.display = 'none';
     updateUI(false);
     updatePlayerInfo(null, false);
