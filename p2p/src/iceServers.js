@@ -64,5 +64,45 @@ export function watchIceState(conn, label) {
   if (!pc) return;
   pc.addEventListener('iceconnectionstatechange', () => {
     debugLog('[' + label + '] ice: ' + pc.iceConnectionState);
+    if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+      logSelectedRoute(pc, label);
+    }
   });
+}
+
+// 実際に使われている経路 (直接 / STUN / TURN中継) を表示する
+async function logSelectedRoute(pc, label) {
+  try {
+    const stats = await pc.getStats();
+    const byId = new Map();
+    stats.forEach((s) => byId.set(s.id, s));
+
+    let pair = null;
+    stats.forEach((s) => {
+      if (s.type === 'transport' && s.selectedCandidatePairId) pair = byId.get(s.selectedCandidatePairId);
+    });
+    if (!pair) {
+      // selectedCandidatePairId 非対応のブラウザ向け
+      stats.forEach((s) => {
+        if (s.type === 'candidate-pair' && s.state === 'succeeded' && (s.nominated || s.selected)) pair = s;
+      });
+    }
+    if (!pair) return debugLog('[' + label + '] route: 不明');
+
+    const local = byId.get(pair.localCandidateId);
+    const remote = byId.get(pair.remoteCandidateId);
+    const kinds = { host: '直接(同一ネットワーク)', srflx: '直接(STUN)', prflx: '直接', relay: 'TURN中継' };
+    const type = local?.candidateType;
+    let text = '[' + label + '] route: ' + (kinds[type] || type || '不明');
+    if (type === 'relay') {
+      // url が取れる環境 (Chrome 等) では、どの TURN を使ったかも出す
+      const server = local.url ? (local.url.includes('cloudflare') ? 'Cloudflare' : 'PeerJS') : '';
+      text += ' ' + (local.relayProtocol || local.protocol || '') + (server ? ' / ' + server : '');
+    } else if (remote?.candidateType === 'relay') {
+      text += ' (相手側がTURN中継)';
+    }
+    debugLog(text);
+  } catch (err) {
+    debugLog('[' + label + '] route: 取得失敗 ' + err);
+  }
 }
