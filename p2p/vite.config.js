@@ -20,6 +20,12 @@ export default defineConfig({
           dest: 'play'
         },
         {
+          // 印刷用の簡易ガイド。docs/ では ../asset/ を参照しているので、dist 直下に置く形に直す
+          src: '../docs/guide.html',
+          dest: '',
+          transform: (contents) => contents.toString().replaceAll('../asset/', './asset/')
+        },
+        {
           src: 'README.md',
           dest: ''
         },
