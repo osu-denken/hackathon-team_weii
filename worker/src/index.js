@@ -47,7 +47,9 @@ export default {
     );
 
     if (!res.ok) {
-      return new Response('failed to generate credentials', {
+      // 原因の切り分け用 (401/403: トークン不正, 404: Turn Token ID 不正)
+      console.error('cloudflare turn api error', res.status, await res.text());
+      return new Response(`failed to generate credentials (upstream ${res.status})`, {
         status: 502,
         headers: corsHeaders(origin)
       });
