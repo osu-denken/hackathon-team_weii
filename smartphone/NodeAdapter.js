@@ -36,7 +36,10 @@ class NodeAdapter extends NetworkAdapter {
         this._ws.onmessage = (e) => {
             try {
                 const data = JSON.parse(e.data);
-                if (data.type === 'gameReset') {
+                if (data.type === 'joinRejected') {
+                    alert('満員のため参加できません');
+                    this._ws.close();
+                } else if (data.type === 'gameReset') {
                     resetCallback();
                 } else {
                     handleNetworkPayload(data, currentState);

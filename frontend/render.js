@@ -170,14 +170,17 @@ const drawEnemy = (enemy, width, height) => {
   ctx.strokeRect(x - 24, y - radius - 18, 48, 8);
 };
 
+// shieldUntil などはサーバー時刻なので、端末の時計とのずれを補正して比較する
+const serverNow = () => Date.now() - serverInfo.serverTimeOffset;
+
 const drawPlayer = (player, index, width, height) => {
   const isDead = player.dead ?? false;
   if (isDead) {
-    const respawnRemainingMs = player.deadUntil && player.deadUntil > Date.now() ? player.deadUntil - Date.now() : 0;
+    const respawnRemainingMs = player.deadUntil && player.deadUntil > serverNow() ? player.deadUntil - serverNow() : 0;
     if (respawnRemainingMs > 3000) {
       return;
     }
-    if (Math.floor(Date.now() / 100) % 2 === 0) {
+    if (Math.floor(serverNow() / 100) % 2 === 0) {
       return;
     }
   }
@@ -195,12 +198,12 @@ const drawPlayer = (player, index, width, height) => {
   const color = sampledColor || fallbackColor;
   const spriteSize = 70;
   const lastControlAt = player.lastControlAt ?? 0;
-  const idleMs = Date.now() - lastControlAt;
+  const idleMs = serverNow() - lastControlAt;
   const guideVisible = !isDead && idleMs >= IDLE_GUIDE_DELAY_MS;
 
   const shieldUntil = player.shieldUntil ?? 0;
-  const hasShield = shieldUntil > Date.now();
-  const shieldPulse = hasShield ? (Math.sin(Date.now() / 150) * 0.5 + 0.5) : 0;
+  const hasShield = shieldUntil > serverNow();
+  const shieldPulse = hasShield ? (Math.sin(serverNow() / 150) * 0.5 + 0.5) : 0;
 
   if (sprite && sprite.complete) {
     ctx.save();
@@ -275,7 +278,7 @@ const drawPlayer = (player, index, width, height) => {
   if (guideVisible) {
     const guideFade = Math.min(1, (idleMs - IDLE_GUIDE_DELAY_MS) / IDLE_GUIDE_FADE_MS);
     const guideAlpha = Math.max(0, Math.min(1, guideFade));
-    const bob = Math.sin(Date.now() / 240 + index) * 5;
+    const bob = Math.sin(serverNow() / 240 + index) * 5;
     const guideBaseY = barY - 34 + bob;
     const phone = guideSpriteCache.get('phone');
     const arrow = guideSpriteCache.get('arrow');
@@ -287,7 +290,7 @@ const drawPlayer = (player, index, width, height) => {
     ctx.save();
     ctx.globalAlpha = guideAlpha;
 
-    let rotate = Math.sin(Date.now() / 260 + index) * 0.12;
+    let rotate = Math.sin(serverNow() / 260 + index) * 0.12;
 
     if (arrow && arrow.complete) {
       ctx.save();
@@ -357,6 +360,27 @@ const drawStars = (width, height) => {
   ctx.restore();
 };
 
+const formulaCache = new Map();
+const FORMULA_CACHE_LIMIT = 500;
+
+const compileFormula = (entity) => {
+  const key = entity.fx + '|' + entity.fy;
+  let fn = formulaCache.get(key);
+  if (!fn) {
+    try {
+      fn = new Function('t', 'startX', 'startY', 'vx', 'vy',
+        `return { x: ${entity.fx}, y: ${entity.fy} };`
+      );
+    } catch (e) {
+      console.error("Failed to compile entity formula:", e);
+      fn = () => ({ x: entity.x, y: entity.y });
+    }
+    if (formulaCache.size >= FORMULA_CACHE_LIMIT) formulaCache.clear();
+    formulaCache.set(key, fn);
+  }
+  return fn;
+};
+
 export const draw = () => {
   const rect = canvas.getBoundingClientRect();
   const gameScale = getGameScale();
@@ -384,14 +408,7 @@ export const draw = () => {
   const getRenderCoords = (entity) => {
     if (entity.isPredictable) {
       if (!entity._calc && entity.fx && entity.fy) {
-        try {
-          entity._calc = new Function('t', 'startX', 'startY', 'vx', 'vy',
-            `return { x: ${entity.fx}, y: ${entity.fy} };`
-          );
-        } catch (e) {
-          console.error("Failed to compile entity formula:", e);
-          entity._calc = () => ({ x: entity.x, y: entity.y });
-        }
+        entity._calc = compileFormula(entity);
       }
 
       if (entity._calc) {

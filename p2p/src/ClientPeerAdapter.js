@@ -76,7 +76,11 @@ class ClientPeerAdapter extends NetworkAdapter {
 
             this._conn.on('data', (data) => {
                 try {
-                    if (data && data.type === 'kicked') {
+                    if (data && data.type === 'joinRejected') {
+                        alert('満員のため参加できません');
+                        this.sendLeave();
+                        handleDisconnectUI();
+                    } else if (data && data.type === 'kicked') {
                         resetCallback();
                     } else if (data && data.type === 'gameReset') {
                         resetCallback();

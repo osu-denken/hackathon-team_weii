@@ -5,14 +5,14 @@ import * as config from '../../backend/src/constants/systemConfig.js';
 import { MessageHandler } from '../../backend/src/systems/MessageHandler.js';
 
 // Import frontend logic to reuse the exact same monitor UI
-import { state, serverInfo } from '../../frontend/state.js';
+import { state, serverInfo, MAX_PLAYERS } from '../../frontend/state.js';
 import { elements, setDifficultyUI, setConnected } from '../../frontend/ui.js';
 import { initViewer, processViewerPayload, setViewerConnected } from '../../frontend/core.js';
 import HostPeerAdapter from './HostPeerAdapter.js';
 import { fetchPeerConfig, watchIceState, debugLog } from './iceServers.js';
 
 // Initialize Game Stage (The Backend)
-const stage = new Stage();
+const stage = new Stage({ maxPlayers: MAX_PLAYERS });
 const connectedPeers = new Map(); // peerId -> connection
 
 // Setup frontend rendering (Viewer Core)

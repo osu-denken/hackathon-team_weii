@@ -1,4 +1,4 @@
-import { state, MAX_PLAYERS } from './state.js';
+import { state, serverInfo, MAX_PLAYERS } from './state.js';
 import { spriteColors } from './assets.js';
 
 export const elements = {
@@ -42,6 +42,8 @@ export const formatTime = (ms) => {
   return `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
 };
 
+const serverNow = () => Date.now() - serverInfo.serverTimeOffset;
+
 export const renderPlayerSummary = () => {
   if (!elements.overlayBottom) return;
 
@@ -83,7 +85,7 @@ export const renderPlayerSummary = () => {
     const score = Math.floor(player.score ?? 0);
     const isDead = player.dead ?? false;
     const deadUntil = player.deadUntil ?? 0;
-    const respawnRemainingMs = isDead && deadUntil > Date.now() ? deadUntil - Date.now() : 0;
+    const respawnRemainingMs = isDead && deadUntil > serverNow() ? deadUntil - serverNow() : 0;
     const respawnSec = Math.ceil(respawnRemainingMs / 1000);
 
     const bottom = elements.overlayBottom.children[index];
@@ -135,7 +137,7 @@ export const renderPlayerSummary = () => {
       status.textContent = isDead ? `リスポーンまで` : `${score}pt`;
     }
 
-    const now = Date.now();
+    const now = serverNow();
     const shieldUntil = player.shieldUntil || 0;
     const tripleShotUntil = player.tripleShotUntil || 0;
     const scoreDoubleUntil = player.scoreDoubleUntil || 0;
@@ -235,8 +237,8 @@ export const updateGameUI = () => {
   if (elements.overlayScoreFill) elements.overlayScoreFill.style.width = `${percent}%`;
   if (elements.overlayScoreText) elements.overlayScoreText.textContent = `${percent}%`;
   if (elements.overlayTime) elements.overlayTime.textContent = formatTime(timeRemainingMs);
-  if (elements.overlayStage) elements.overlayStage.textContent = stageLabel + '/3' || `Stage ${stage || 1}/3`;
-  if (elements.overlayPlayerCount) elements.overlayPlayerCount.textContent = `${playerCount} / ${MAX_PLAYERS}`;
+  if (elements.overlayStage) elements.overlayStage.textContent = `${stageLabel || `Stage ${stage || 1}`}/3`;
+  if (elements.overlayPlayerCount) elements.overlayPlayerCount.textContent = `${playerCount} / ${Number.isFinite(MAX_PLAYERS) ? MAX_PLAYERS : '∞'}`;
 
   if (elements.returnNoticeOverlay) {
     elements.returnNoticeOverlay.classList.toggle('show', showReturnNotice);

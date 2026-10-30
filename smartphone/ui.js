@@ -236,7 +236,7 @@ export const updatePlayerInfo = (player, isConnected) => {
                 elements.pcbMeter.dataset.hash = meterHash;
                 elements.pcbMeter.style.background = `conic-gradient(${meterColor} 0% ${roundedPercentage}%, rgba(255,255,255,0.2) ${roundedPercentage}% 100%)`;
             }
-            if (elements.pcbStatus) {
+            if (elements.pcbStatus && !isDead) {
                 elements.pcbStatus.textContent = `${score}pt`;
                 elements.pcbStatus.style.color = meterColor;
             }

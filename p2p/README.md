@@ -41,6 +41,15 @@ npm run build
 
 例: `https://osu-denken.github.io/phone-and-shoot/client/?room=xxxxxxxx&debug=1`
 
+## URL パラメータ
+| パラメータ | 対象 | 内容 |
+|---|---|---|
+| `debug=1` | ホスト / コントローラー / プレイ | 画面の左下に接続状況を表示する |
+| `maxPlayers=N` | ホスト | 同時に参加できる人数。既定は `4`、`-1` で無制限。満員のときの参加は断られる |
+| `room=ID` | コントローラー | 接続先のルーム ID（ホストの QR コードに含まれる） |
+
+例: `https://osu-denken.net/phone-and-shoot/host/?maxPlayers=8&debug=1`
+
 ### TURN サーバー（任意）
 会場のネットワークによっては、PeerJS 標準の TURN では接続できないことがあります。その場合は、TURN の認証情報を返す Cloudflare Worker（`../worker/`）をデプロイし、ビルド時に環境変数 `VITE_TURN_CREDENTIALS_URL`（`.env.example` 参照）にその URL を指定してください。未設定、または取得に失敗した場合は PeerJS の標準設定で動作します。
 

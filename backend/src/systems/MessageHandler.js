@@ -22,6 +22,10 @@ export class MessageHandler {
     let player = this.stage.getPlayer(msg.id);
     if (!player) {
       player = this.stage.addPlayer(msg.id, Date.now(), { name, characterNumber, color: msg.color });
+      if (!player) {
+        this.send(wsOrPeerId, { type: 'joinRejected', reason: 'full', maxPlayers: this.stage.maxPlayers });
+        return null;
+      }
     }
     
     this.socketToPlayerId.set(wsOrPeerId, player.id);

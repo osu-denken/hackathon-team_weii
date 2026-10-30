@@ -25,11 +25,17 @@ import {
 } from './constants/gameConfig.js';
 
 const CHARACTER_COUNT = 8;
+const DEFAULT_MAX_PLAYERS = 4;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 class Stage {
-  constructor() {
+  /**
+   * @param {object} [options]
+   * @param {number} [options.maxPlayers] 同時に参加できる人数 (Infinity で無制限)
+   */
+  constructor({ maxPlayers = DEFAULT_MAX_PLAYERS } = {}) {
+    this.maxPlayers = maxPlayers;
     this.players = new Map();
     this.enemies = new Map();
     this.bullets = new Map();
@@ -90,6 +96,9 @@ class Stage {
       if (characterNumber) existing.characterNumber = characterNumber;
       return existing;
     }
+
+    // 満員のときは参加させない (すでに参加している人の再参加は上で返している)
+    if (this.players.size >= this.maxPlayers) return null;
 
     if (this.players.size === 0) {
       if (this.mode === 'playing' && this.pausedAt !== null && this.gameStarted && this.gameStartAt !== null) {

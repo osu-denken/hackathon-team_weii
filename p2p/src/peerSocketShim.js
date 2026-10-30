@@ -70,6 +70,11 @@ class PeerSocket extends EventTarget {
   // ホストは 'update' で自分のプレイヤー情報を送ってくる (一部の項目のみの場合がある)
   _onData(data) {
     if (!data || typeof data !== 'object') return;
+    if (data.type === 'joinRejected') {
+      alert('満員のため参加できません');
+      this.close();
+      return;
+    }
     if (data.type === 'kicked' || data.type === 'gameReset') {
       this.close();
       return;
