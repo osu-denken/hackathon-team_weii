@@ -33,7 +33,10 @@ export class PayloadBuilder {
       };
     }
 
-    const timeRemainingMs = Math.max(0, stageConfig.timeLimitMs - (now - stage.gameStartAt));
+    // 最終ステージをクリアしたあとは、クリアした時点の残り時間で止める
+    const timeRemainingMs = stage.stageCleared && stage.clearTimeRemainingMs !== null
+      ? stage.clearTimeRemainingMs
+      : Math.max(0, stageConfig.timeLimitMs - (now - stage.gameStartAt));
     const cleared = stageScore >= stageConfig.targetScore;
     const gameOver = stage.gameOver;
     const returnToTitleRemainingMs = stage.emptySince === null
@@ -52,6 +55,7 @@ export class PayloadBuilder {
       timeRemainingMs,
       cleared,
       gameOver,
+      timeBonus: stage.lastTimeBonus,
       difficulty: stage.difficulty,
       stageNumber: stage.getStageNumber(stageScore, stageConfig.targetScore),
       showReturnNotice,

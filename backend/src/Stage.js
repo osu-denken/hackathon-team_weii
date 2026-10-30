@@ -27,6 +27,8 @@ import {
 
 const CHARACTER_COUNT = 8;
 const DEFAULT_MAX_PLAYERS = 4;
+// ステージクリア時に、残り時間 1 秒あたりで全員に加算するスコア
+const TIME_BONUS_PER_SECOND = 0.5;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -65,6 +67,8 @@ class Stage {
     this.gameOverAt = null;
     this.lastPredictionSync = Date.now();
     this.lastUpdateAt = Date.now();
+    this.lastTimeBonus = 0;
+    this.clearTimeRemainingMs = null;
   }
 
   // 敵の出現位置やアイテムの抽選に使う乱数。シードがあれば毎回同じ展開になる
@@ -95,6 +99,8 @@ class Stage {
     this.gameOverAt = null;
     this.lastPredictionSync = now;
     this.lastUpdateAt = now;
+    this.lastTimeBonus = 0;
+    this.clearTimeRemainingMs = null;
   }
 
   addPlayer(id, now = Date.now(), { name = '', characterNumber = null } = {}) {
@@ -285,6 +291,7 @@ class Stage {
 
     if (this.stageScore >= stageConfig.targetScore && !this.stageCleared) {
       this.stageCleared = true;
+      this.awardTimeBonus(timeRemainingMs);
       this.nextStage(now);
     }
     this.handlePlayerDeaths(now);
@@ -306,6 +313,17 @@ class Stage {
       this.bulletCounter = 0;
       this.itemCounter = 0;
     }
+  }
+
+  // 早くクリアするほど得点が増える。参加している全員に同じだけ加算する
+  awardTimeBonus(timeRemainingMs) {
+    const bonus = Math.floor((timeRemainingMs / 1000) * TIME_BONUS_PER_SECOND);
+    this.lastTimeBonus = bonus;
+    this.clearTimeRemainingMs = timeRemainingMs;
+    if (bonus <= 0) return;
+    this.players.forEach((player) => {
+      player.score += bonus;
+    });
   }
 
   nextStage(now) {

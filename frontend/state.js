@@ -24,6 +24,7 @@ export const state = {
     timeRemainingMs: 0,
     cleared: false,
     gameOver: false,
+    timeBonus: 0,
     showReturnNotice: false,
     returnToTitleRemainingMs: 0,
     showTitle: true,

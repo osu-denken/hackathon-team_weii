@@ -22,6 +22,9 @@ export const elements = {
   overlayClear: document.getElementById('overlay-clear'),
   overlayClearScore: document.getElementById('overlay-clear-score'),
   overlayClearTime: document.getElementById('overlay-clear-time'),
+  overlayClearBonus: document.getElementById('overlay-clear-bonus'),
+  overlayClearResults: document.getElementById('overlay-clear-results'),
+  overlayGameOverResults: document.getElementById('overlay-gameover-results'),
   qrOverlay: document.getElementById('qr-overlay')
 };
 
@@ -213,6 +216,56 @@ export const renderPlayerSummary = () => {
   });
 };
 
+// スコアの高い順に並べた結果の一覧 (同点は同じ順位)
+const renderResults = (container) => {
+  if (!container) return;
+
+  const players = [...state.players].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  const hash = players
+    .map((p) => p.id + ':' + p.name + ':' + p.characterNumber + ':' + Math.floor(p.score ?? 0))
+    .join('|');
+  if (container.dataset.hash === hash) return;
+  container.dataset.hash = hash;
+
+  container.innerHTML = '';
+  let rank = 0;
+  let prevScore = null;
+  players.forEach((player, index) => {
+    const score = Math.floor(player.score ?? 0);
+    if (score !== prevScore) {
+      rank = index + 1;
+      prevScore = score;
+    }
+    const number = player.number ?? index + 1;
+    const charNum = player.characterNumber || number;
+    const validCharNum = typeof charNum === 'number' && charNum >= 1 && charNum <= 8 ? charNum : 1;
+    const color = spriteColors.get(charNum) || player.color || '#38bdf8';
+
+    const row = document.createElement('div');
+    row.className = 'result-row' + (rank === 1 ? ' first' : '');
+
+    const rankEl = document.createElement('div');
+    rankEl.className = 'result-rank';
+    rankEl.textContent = rank + '位';
+
+    const icon = document.createElement('div');
+    icon.className = 'result-icon';
+    icon.style.backgroundImage = "url('../asset/images/character-" + validCharNum + ".png')";
+    icon.style.backgroundColor = color;
+
+    const name = document.createElement('div');
+    name.className = 'result-name';
+    name.textContent = player.name || 'P' + number;
+
+    const scoreEl = document.createElement('div');
+    scoreEl.className = 'result-score';
+    scoreEl.textContent = score + ' pt';
+
+    row.append(rankEl, icon, name, scoreEl);
+    container.appendChild(row);
+  });
+};
+
 export const updateGameUI = () => {
   const {
     stageScore,
@@ -220,6 +273,7 @@ export const updateGameUI = () => {
     timeRemainingMs,
     cleared,
     gameOver,
+    timeBonus,
     showTitle,
     showReturnNotice,
     returnToTitleRemainingMs,
@@ -252,6 +306,10 @@ export const updateGameUI = () => {
       elements.overlayClear.classList.add('show');
       if (elements.overlayClearScore) elements.overlayClearScore.textContent = `${stageScore} / ${targetScore}`;
       if (elements.overlayClearTime) elements.overlayClearTime.textContent = formatTime(timeRemainingMs);
+      if (elements.overlayClearBonus) {
+        elements.overlayClearBonus.textContent = timeBonus > 0 ? 'TIME BONUS +' + timeBonus : '';
+      }
+      renderResults(elements.overlayClearResults);
     } else {
       elements.overlayClear.classList.remove('show');
     }
@@ -261,6 +319,7 @@ export const updateGameUI = () => {
     if (gameOver && !showTitle && !showReturnNotice && !waitingForStart) {
       elements.overlayGameOver.style.display = 'flex';
       elements.overlayGameOver.classList.add('show');
+      renderResults(elements.overlayGameOverResults);
     } else {
       elements.overlayGameOver.style.display = 'none';
       elements.overlayGameOver.classList.remove('show');

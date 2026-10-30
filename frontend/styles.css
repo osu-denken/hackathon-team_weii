@@ -504,6 +504,70 @@ canvas { z-index: 0; }
   display: flex;
 }
 
+.clear-bonus {
+  margin-top: 10px;
+  color: #fbbf24;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.clear-results {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clear-results:empty {
+  display: none;
+}
+
+.result-row {
+  display: grid;
+  grid-template-columns: 3.2em 36px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #eaf6ff;
+  text-align: left;
+}
+
+.result-row.first {
+  border-color: rgba(251, 191, 36, 0.55);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.result-rank {
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.result-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #1e293b;
+  background-size: 180%;
+  background-position: center 20%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.result-name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-score {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 .player-card-bottom {
   pointer-events: auto;
   min-width: 120px;
