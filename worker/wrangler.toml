@@ -1,0 +1,9 @@
+name = "phone-and-shoot-turn"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# 秘密情報は wrangler secret put で登録する (リポジトリには入れない)
+#   npx wrangler secret put TURN_KEY_ID
+#   npx wrangler secret put TURN_API_TOKEN
+# [vars]
+# ALLOWED_ORIGINS = "https://example.github.io"

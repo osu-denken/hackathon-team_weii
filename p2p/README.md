@@ -36,5 +36,13 @@ npm run build
 この `dist/` フォルダ内のすべてのファイルを、お好みの静的ホスティングサービスにアップロードするだけで公開が完了します。
 （※ビルド時に `asset/` フォルダの画像なども自動でコピー・内包されます）
 
+## デバッグ（接続できないとき）
+ホスト画面・コントローラー画面のURLの末尾に `?debug=1`（すでに `?room=…` が付いている場合は `&debug=1`）を付けて開くと、画面の左下に接続状況（ICE の状態など）が表示されます。通常は何も表示されません。
+
+例: `https://osu-denken.github.io/phone-and-shoot/client/?room=xxxxxxxx&debug=1`
+
+### TURN サーバー（任意）
+会場のネットワークによっては、PeerJS 標準の TURN では接続できないことがあります。その場合は、TURN の認証情報を返す Cloudflare Worker（`../worker/`）をデプロイし、ビルド時に環境変数 `VITE_TURN_CREDENTIALS_URL`（`.env.example` 参照）にその URL を指定してください。未設定、または取得に失敗した場合は PeerJS の標準設定で動作します。
+
 ## 通信方式について
 現在は **PeerJS** を利用したWebRTC（P2P DataChannel）によって通信を行っており、パブリックなシグナリングサーバー（`0.peerjs.com`）を利用して接続を確立しています。

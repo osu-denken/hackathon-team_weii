@@ -43,6 +43,8 @@ export default defineConfig({
     open: '/host/'
   },
   build: {
+    // host.js でトップレベル await を使うため
+    target: 'es2022',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),

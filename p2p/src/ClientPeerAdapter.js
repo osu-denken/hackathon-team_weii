@@ -1,4 +1,5 @@
 import Peer from 'peerjs';
+import { fetchPeerConfig, watchIceState, debugLog, isDebug } from './iceServers.js';
 import NetworkAdapter from '../../smartphone/NetworkAdapter.js';
 import { handleNetworkPayload, handleDisconnectUI, handleConnectUI } from '../../smartphone/core.js';
 
@@ -19,7 +20,7 @@ class ClientPeerAdapter extends NetworkAdapter {
      * @param {object} joinData     - ホストへ送信する join ペイロード
      * @param {function} onGameReset - ゲームリセット時のコールバック
      */
-    connect(targetRoomId, joinData, onGameReset) {
+    async connect(targetRoomId, joinData, onGameReset) {
         const currentState = { player: null, game: null };
 
         const resetCallback = () => {
@@ -28,7 +29,8 @@ class ClientPeerAdapter extends NetworkAdapter {
             if (onGameReset) onGameReset();
         };
 
-        this._peer = new Peer({ host: '0.peerjs.com', port: 443, secure: true });
+        const peerConfig = await fetchPeerConfig();
+        this._peer = new Peer({ host: '0.peerjs.com', port: 443, secure: true, config: peerConfig });
 
         this._peer.on('open', (id) => {
             console.log('My Peer ID is: ' + id);
@@ -66,7 +68,8 @@ class ClientPeerAdapter extends NetworkAdapter {
 
         this._peer.on('error', (err) => {
             console.error('Peer Error:', err);
-            alert('P2P接続エラー。ホストが起動しているか確認してください。');
+            debugLog('[client] peer error: ' + err.type);
+            alert('P2P接続エラー。ホストが起動しているか確認してください。' + (isDebug() ? '(' + err.type + ')' : ''));
             handleDisconnectUI();
         });
     }

@@ -9,6 +9,7 @@ import { state, serverInfo } from '../../frontend/state.js';
 import { elements, setDifficultyUI, setConnected } from '../../frontend/ui.js';
 import { initViewer, processViewerPayload, setViewerConnected } from '../../frontend/core.js';
 import HostPeerAdapter from './HostPeerAdapter.js';
+import { fetchPeerConfig, watchIceState } from './iceServers.js';
 
 // Initialize Game Stage (The Backend)
 const stage = new Stage();
@@ -45,7 +46,8 @@ const peer = new Peer(roomId, {
   // Use public PeerJS server
   host: '0.peerjs.com',
   port: 443,
-  secure: true
+  secure: true,
+  config: await fetchPeerConfig()
 });
 
 peer.on('open', (id) => {
@@ -68,6 +70,7 @@ peer.on('open', (id) => {
 
 peer.on('connection', (conn) => {
   console.log('Client connected:', conn.peer);
+  watchIceState(conn, 'host');
   connectedPeers.set(conn.peer, conn);
 
   conn.on('data', (data) => {
