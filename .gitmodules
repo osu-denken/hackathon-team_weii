@@ -1,0 +1,3 @@
+[submodule "p2p/dist"]
+	path = p2p/dist
+	url = https://github.com/osu-denken/phone-and-shoot
