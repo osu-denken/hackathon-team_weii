@@ -15,6 +15,11 @@ export default defineConfig({
           dest: ''
         },
         {
+          // play/ から ./asset/... で参照されるため
+          src: '../asset',
+          dest: 'play'
+        },
+        {
           src: 'README.md',
           dest: ''
         },
@@ -51,7 +56,8 @@ export default defineConfig({
         client: resolve(__dirname, 'client/index.html'),
         host: resolve(__dirname, 'host/index.html'),
         clientRedirect: resolve(__dirname, 'client.html'),
-        hostRedirect: resolve(__dirname, 'host.html')
+        hostRedirect: resolve(__dirname, 'host.html'),
+        play: resolve(__dirname, 'play/index.html')
       }
     }
   }

@@ -86,6 +86,23 @@ try {
   fs.writeFileSync(path.resolve(p2pDir, 'client.html'), clientRedirect);
   console.log('Successfully generated redirect p2p/client.html -> client/');
 
+  // 3. Generate play/index.html from frontend/play/index.html (PCでホストしながらキーボード操作できる画面)
+  const playHtmlPath = path.resolve(__dirname, '../../frontend/play/index.html');
+  let playHtml = fs.readFileSync(playHtmlPath, 'utf8');
+
+  // ホスト画面は同じ階層の host/ を iframe で表示する
+  playHtml = playHtml.replace('src="/viewer/"', 'src="../host/"');
+  // CSS は JS から import (Vite 経由) するので link を外す
+  playHtml = playHtml.replace(/<link rel="stylesheet" href="\.\/styles\.css"[^>]*>/, '');
+  // asset はサブパスでも解決できるよう相対パスにする
+  playHtml = playHtml.replace(/src="\/asset\//g, 'src="../asset/');
+  playHtml = playHtml.replace('<script src="./main.js?v=2"></script>', '<script type="module" src="/src/play.js"></script>');
+
+  const playDir = path.resolve(p2pDir, 'play');
+  if (!fs.existsSync(playDir)) fs.mkdirSync(playDir, { recursive: true });
+  fs.writeFileSync(path.resolve(playDir, 'index.html'), playHtml);
+  console.log('Successfully generated p2p/play/index.html from frontend/play/index.html');
+
 } catch (err) {
   console.error('Error generating HTML files:', err);
   process.exit(1);

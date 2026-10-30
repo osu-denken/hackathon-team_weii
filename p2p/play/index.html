@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Desktop Play of "phone ∧ shoot"</title>
+		
+	</head>
+	<body>
+		<div class="play-shell">
+			<main class="play-main">
+				<section class="viewer-panel" aria-label="viewer">
+					<iframe src="../host/" title="viewer" tabindex="-1"></iframe>
+					<div class="iframe-block" aria-hidden="true"></div>
+				</section>
+
+				<aside class="control-panel" aria-label="controls">
+					<section class="control-card">
+						<div class="status-list">
+							<div class="status-row"><span>Player</span><strong id="player-state">-</strong></div>
+							<div class="status-row"><span>Badge</span><strong id="player-badge">-</strong></div>
+							<div class="status-row"><span>Held Item</span><strong id="item-state">none</strong></div>
+							<div class="status-row"><span>Detail</span><strong id="player-detail">waiting...</strong></div>
+						</div>
+					</section>
+
+					<section class="control-card">
+						<div class="item-box">
+							<img id="item-icon" src="../asset/images/empty.png" alt="item" />
+						</div>
+					</section>
+
+					<section id="customization-section" class="control-card">
+						<div style="display:flex;flex-direction:column;gap:10px;">
+							<input id="player-name-input" type="text" maxlength="12" placeholder="名前（最大12文字）"
+								style="width:100%;box-sizing:border-box;padding:8px 10px;background:#0f172a;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:13px;border-radius:4px;">
+							<div style="font-size:11px;color:#64748b;">キャラクター選択</div>
+							<div style="display:flex;align-items:center;gap:8px;">
+								<button id="char-prev" style="flex-shrink:0;width:32px;height:32px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:18px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;">&#8249;</button>
+								<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+									<img id="char-preview" src="" alt="" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;display:block;">
+									<span id="char-label" style="font-size:11px;color:#64748b;"></span>
+								</div>
+								<button id="char-next" style="flex-shrink:0;width:32px;height:32px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;font-size:18px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+							</div>
+						</div>
+					</section>
+
+					<section class="button-row">
+						<button id="btn-join" class="action-button primary" type="button">JOIN</button>
+						<button id="btn-shoot" class="action-button" type="button" disabled>SHOOT</button>
+						<button id="btn-use-item" class="action-button" type="button" disabled>USE ITEM</button>
+					</section>
+
+					<section class="controls-help">
+						<h2>Key Bindings</h2>
+						<div class="key-grid">
+							<div class="key-row"><span><span class="key">A</span> / <span class="key">←</span></span><span>move left</span></div>
+							<div class="key-row"><span><span class="key">D</span> / <span class="key">→</span></span><span>move right</span></div>
+							<div class="key-row"><span><span class="key">Space</span></span><span>shoot</span></div>
+							<div class="key-row"><span><span class="key">E</span> / <span class="key">Enter</span></span><span>use item</span></div>
+						</div>
+					</section>
+				</aside>
+			</main>
+		</div>
+        <script src="../asset/scripts/sprites.js"></script>
+		<script type="module" src="/src/play.js"></script>
+	</body>
+</html>
