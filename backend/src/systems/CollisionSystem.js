@@ -11,7 +11,10 @@ export class CollisionSystem {
         return;
       }
 
-      stage.enemies.forEach((enemy) => {
+      // 1 発の弾は最初に当たった敵 1 体にだけ当たる (倒した敵は対象外)
+      for (const enemy of stage.enemies.values()) {
+        if (enemiesToRemove.has(enemy.id)) continue;
+
         const dx = Math.abs(bullet.x - enemy.x);
         const dy = Math.abs(bullet.y - enemy.y);
         if (dx <= BULLET_HIT_RANGE && dy <= BULLET_HIT_RANGE) {
@@ -21,8 +24,9 @@ export class CollisionSystem {
             enemiesToRemove.add(enemy.id);
             kills.push({ ownerId: bullet.ownerId, enemy });
           }
+          break;
         }
-      });
+      }
     });
 
     bulletsToRemove.forEach((id) => stage.bullets.delete(id));
@@ -77,7 +81,10 @@ export class CollisionSystem {
 
   static handleEnemyTouches(stage, now) {
     stage.enemies.forEach((enemy, enemyId) => {
-      stage.players.forEach((player) => {
+      // 1 体の敵が当たるのは最初に接触した生存プレイヤー 1 人だけ
+      for (const player of stage.players.values()) {
+        if (player.isDead()) continue;
+
         const dx = Math.abs(enemy.x - player.x);
         const dy = Math.abs(enemy.y - player.y);
         if (dx <= PLAYER_HIT_RANGE && dy <= PLAYER_HIT_RANGE) {
@@ -88,14 +95,17 @@ export class CollisionSystem {
             player.damage(attack);
           }
           stage.enemies.delete(enemyId);
+          break;
         }
-      });
+      }
     });
   }
 
   static handleItemPickup(stage) {
     for (const [itemId, itemEntity] of stage.itemEntities.entries()) {
       for (const player of stage.players.values()) {
+        if (player.isDead()) continue;
+
         const dx = Math.abs(itemEntity.x - player.x);
         // アイテムの描画がY座標より上（画面上）にズレているため、
         // 当たり判定の中心点を上にシフトしつつ、判定範囲も少し広げる

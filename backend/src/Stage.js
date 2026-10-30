@@ -24,6 +24,8 @@ import {
   DIFFICULTY_SETTINGS
 } from './constants/gameConfig.js';
 
+const CHARACTER_COUNT = 8;
+
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 class Stage {
@@ -109,7 +111,8 @@ class Stage {
       color,
       maxHp: DEFAULT_HP,
       name: name || `P${number}`,
-      characterNumber: characterNumber || number,
+      // キャラ画像は 1〜8 の 8 種類なので、9 人目以降は先頭に戻す
+      characterNumber: characterNumber || ((number - 1) % CHARACTER_COUNT) + 1,
     });
 
     this.players.set(id, player);
