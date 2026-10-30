@@ -16,21 +16,25 @@
             <a href="./host/">ホスト画面（ゲーム画面）を開く</a>
         </li>
         <li>
-            <strong>PCでホストしながらキーボードで遊ぶ:</strong><br>
-            <a href="./play/">プレイ画面（ホスト＋キーボード操作）を開く</a>
-        </li>
-        <li>
             <strong>プレイヤーとして参加する（スマホ推奨）:</strong><br>
             <a href="./client/">コントローラー画面を開く</a><br>
             （ホスト画面に表示されるQRコードを読み取ると自動で接続されます）
         </li>
+        <li>
+            <strong>PCでホストしながらキーボードで遊ぶ:</strong><br>
+            <a href="./play/">プレイ画面（ホスト＋キーボード操作）を開く</a>
+        </li>
     </ul>
 
-    <h2>うまく接続できないとき</h2>
+    <h2>デバッグ</h2>
     <p>
-        ホスト画面・コントローラー画面のURLの末尾に <code>?debug=1</code>
+        ホスト画面、コントローラー画面のURLの末尾に <code>?debug=1</code>
         （すでに <code>?room=…</code> が付いている場合は <code>&amp;debug=1</code>）を付けて開くと、
         画面の左下に接続状況が表示されます。
+        <br>
+        <a href="./host/?debug=1">ホスト画面（デバッグモード）</a><br>
+        <a href="./client/?debug=1">コントローラー画面（デバッグモード）</a><br>
+        <a href="./play/?debug=1">プレイ画面（デバッグモード）</a><br>
     </p>
 </body>
 </html>
