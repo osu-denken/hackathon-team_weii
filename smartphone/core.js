@@ -138,10 +138,16 @@ export const setupController = (networkAdapter) => {
 
             networkAdapter.connect(targetRoom, joinData, handleGameReset);
 
-            setTimeout(() => {
+            // 接続に時間がかかっている間 (TURN取得やICE確立) は CONNECTING のままにして、二重に接続しないようにする
+            const refreshJoinButton = () => {
+                if (networkAdapter.isConnecting && networkAdapter.isConnecting()) {
+                    setTimeout(refreshJoinButton, 500);
+                    return;
+                }
                 elements.btnJoin.disabled = false;
                 elements.btnJoin.textContent = networkAdapter.isConnected() ? 'LEAVE' : 'JOIN';
-            }, 1500);
+            };
+            setTimeout(refreshJoinButton, 1500);
         });
     }
 
@@ -183,7 +189,8 @@ export const setupController = (networkAdapter) => {
         if (_isHolding) return;
         _isHolding = true;
         networkAdapter.sendShoot();
-        _shootTimer = setInterval(networkAdapter.sendShoot, SHOOT_INTERVAL_MS);
+        // sendShoot 内で this を使うので、メソッドを直接渡さずアロー関数で呼ぶ
+        _shootTimer = setInterval(() => networkAdapter.sendShoot(), SHOOT_INTERVAL_MS);
         if (elements.btnShoot) elements.btnShoot.classList.add('active');
     }
 

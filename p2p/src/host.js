@@ -9,7 +9,7 @@ import { state, serverInfo } from '../../frontend/state.js';
 import { elements, setDifficultyUI, setConnected } from '../../frontend/ui.js';
 import { initViewer, processViewerPayload, setViewerConnected } from '../../frontend/core.js';
 import HostPeerAdapter from './HostPeerAdapter.js';
-import { fetchPeerConfig, watchIceState } from './iceServers.js';
+import { fetchPeerConfig, watchIceState, debugLog } from './iceServers.js';
 
 // Initialize Game Stage (The Backend)
 const stage = new Stage();
@@ -136,8 +136,20 @@ peer.on('error', (err) => {
   setConnected(false);
 });
 
+// シグナリングサーバーとの接続が切れると、新しい参加者が接続できなくなる (既存の接続は維持される)
+// ので、自動で再接続する
 peer.on('disconnected', () => {
   setConnected(false);
+  // 再接続の間隔は 10 秒から始めて、失敗するたびに倍にする (最大 60 秒)
+  let delay = 10000;
+  const tryReconnect = () => {
+    if (peer.destroyed || !peer.disconnected) return;
+    debugLog('[host] シグナリングに再接続中');
+    peer.reconnect();
+    delay = Math.min(delay * 2, 60000);
+    setTimeout(tryReconnect, delay);
+  };
+  setTimeout(tryReconnect, delay);
 });
 
 // UI Event Listeners
