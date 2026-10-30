@@ -21,6 +21,13 @@
 
 <img width="1919" height="1199" alt="image" src="https://github.com/user-attachments/assets/734bacab-c780-4ecd-bc75-2adda2da4eb2" />
 
+## セットアップ
+リポジトリをローカルに持ってくる
+
+```bash
+git clone --recurse-submodules git@github.com:osu-denken/hackathon-team_weii.git
+```
+
 ## 工夫点
 - Client-Side Prediction - 処理負荷軽減と通信負荷軽減のため、プレイヤー以外の動きはあらかじめ決定しておき、フロントエンドに関数式そのものを送るようにした
 - P2P - サーバーが必要であるNode.jsと異なって、p2p/にはPeerJSを用いてブラウザ側でホスティングできるように
