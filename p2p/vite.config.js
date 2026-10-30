@@ -1,0 +1,56 @@
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+export default defineConfig({
+  base: './',
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: '../asset',
+          dest: ''
+        },
+        {
+          src: 'README.md',
+          dest: ''
+        },
+        {
+          src: '../asset/images/favicon.ico',
+          dest: ''
+        }
+      ]
+    })
+  ],
+  publicDir: resolve(__dirname, '../backend/public'),
+  resolve: {
+    alias: [
+      {
+        find: /.*\/constants\/gameConfig\.js$/,
+        replacement: resolve(__dirname, './src/mock/gameConfig.js')
+      },
+      {
+        find: /.*\/constants\/systemConfig\.js$/,
+        replacement: resolve(__dirname, './src/mock/systemConfig.js')
+      }
+    ]
+  },
+  server: {
+    port: 5173,
+    open: '/host/'
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        client: resolve(__dirname, 'client/index.html'),
+        host: resolve(__dirname, 'host/index.html'),
+        clientRedirect: resolve(__dirname, 'client.html'),
+        hostRedirect: resolve(__dirname, 'host.html')
+      }
+    }
+  }
+});
