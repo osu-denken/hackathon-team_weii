@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>phone ∧ shoot</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 16mm; }
+
+  html { background: #fff; }
+
+  body {
+    margin: 0 auto;
+    width: 178mm;
+    color: #000;
+    font-family: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+    font-size: 10pt;
+    line-height: 1.55;
+  }
+
+  /* 題名とキャラクター */
+  .head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 4mm; }
+  h1 { margin: 0; font-size: 32pt; line-height: 1.1; }
+  h1 small { display: block; margin-bottom: 1mm; font-size: 12pt; font-weight: 400; }
+  .guide-chars { display: flex; gap: 2mm; }
+  .guide-chars img { width: 13mm; height: 13mm; display: block; }
+
+  .lead { margin: 0 0 2mm; font-size: 11pt; }
+
+  h2 { margin: 4mm 0 1mm; font-size: 13pt; line-height: 1.3; }
+
+  /* 画面に出てくるボタン名 */
+  .ui { padding: 0 1.2mm; border: 0.3mm solid #000; font-weight: 700; white-space: nowrap; }
+
+  /* 手順 */
+  ol { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  ol li { position: relative; padding-left: 8mm; counter-increment: step; }
+  ol li + li { margin-top: 1mm; }
+  ol li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 13pt;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  ul { margin: 0; padding-left: 1.2em; }
+  li { text-wrap: pretty; }
+  ul li + li { margin-top: 1mm; }
+
+  table { border-collapse: collapse; font-size: 9.5pt; }
+  th, td { padding: 0.6mm 6mm 0.6mm 0; text-align: left; vertical-align: middle; }
+  th { font-weight: 700; border-bottom: 0.3mm solid #000; white-space: nowrap; }
+
+  .ops { width: 100%; }
+  .ops td:first-child { width: 62mm; font-weight: 700; }
+
+  .rules { display: flex; gap: 10mm; align-items: flex-start; }
+  .rules ul { flex: 1; }
+
+  .items { width: 100%; }
+  .items img { width: 7mm; height: 7mm; display: block; image-rendering: pixelated; }
+  .items td.img { width: 9mm; padding-right: 2mm; }
+  .items td.name { width: 28mm; font-weight: 700; white-space: nowrap; }
+
+  .trouble { width: 100%; }
+  .trouble td { padding-bottom: 1.2mm; vertical-align: top; }
+  .trouble td:first-child { width: 66mm; font-weight: 700; }
+
+  h2, table, ul, ol { break-inside: avoid; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>phone ∧ shoot</h1>
+    <div class="guide-chars">
+      <img src="../asset/images/character-1.png" alt="">
+      <img src="../asset/images/character-2.png" alt="">
+    </div>
+  </div>
+
+  <h2>遊び方</h2>
+  <ol>
+    <li>モニターの左上にあるQRコードを、スマホのカメラで読み取る。</li>
+    <li>名前とキャラクターを選んで、<span class="ui">JOIN</span>ボタンを押す。センサーの使用を聞かれたら「許可」を選ぶ。</li>
+    <li>カウントダウンが終わったら、スタート！</li>
+  </ol>
+
+  <h2>操作</h2>
+  <table class="ops">
+    <tr><th>スマホ</th><th>動き</th></tr>
+    <tr><td>左右に傾ける</td><td>キャラクターが左右に動く（大きく傾けるほど速い）</td></tr>
+    <tr><td><span class="ui">SHOOT</span>ボタンをタップ</td><td>弾を撃つ（押し続けると連射）</td></tr>
+    <tr><td>アイテムのアイコンをタップ</td><td>持っているアイテムを使う</td></tr>
+    <tr><td><span class="ui">傾きリセット</span>ボタンをタップ</td><td>動きがずれたときに、今の持ち方を「まっすぐ」にする</td></tr>
+  </table>
+
+  <h2>ルール</h2>
+  <div class="rules">
+    <ul>
+      <li>全3ステージ。制限時間内にスコアが目標に届けばクリア</li>
+      <li>敵や敵の弾に当たるとHPが減る</li>
+      <li>0になると倒れるが、10秒後に復活する</li>
+      <li>大型の敵を倒すと、アイテムが出る</li>
+      <li>早くクリアするほど、ボーナス点がもらえる</li>
+    </ul>
+    <table>
+      <tr><th>ステージ</th><th>目標スコア</th><th>制限時間</th></tr>
+      <tr><td>1</td><td>100</td><td>120秒</td></tr>
+      <tr><td>2</td><td>150</td><td>150秒</td></tr>
+      <tr><td>3</td><td>200</td><td>200秒</td></tr>
+    </table>
+  </div>
+
+  <h2>アイテム</h2>
+  <table class="items">
+    <!-- <tr><th colspan="2">アイテム</th><th>効果</th><th>備考</th></tr> -->
+    <tr><td class="img"><img src="../asset/images/health_potion.png" alt=""></td><td class="name">回復薬</td><td>拾うとすぐHPが2回復</td></tr>
+    <tr><td class="img"><img src="../asset/images/heart_increase.png" alt=""></td><td class="name">ハート</td><td>拾うとすぐ最大HPが1増える</td></tr>
+    <tr><td class="img"><img src="../asset/images/shield.png" alt=""></td><td class="name">シールド</td><td>拾ってアイコンをタップすると、5秒間、攻撃を1回防ぐ</td></tr>
+    <tr><td class="img"><img src="../asset/images/triple_shot.png" alt=""></td><td class="name">3連弾</td><td>拾ってアイコンをタップすると、5秒間、弾が3方向に出る</td></tr>
+    <tr><td class="img"><img src="../asset/images/score_up.png" alt=""></td><td class="name">スコア2倍</td><td>拾ってアイコンをタップすると、8秒間、得点が2倍</td></tr>
+  </table>
+
+  <h2>困ったとき</h2>
+  <table class="trouble">
+    <tr><th>症状</th><th>対処</th></tr>
+    <tr><td><span class="ui">JOIN</span>ボタンを押しても参加できない</td><td>スマホの Wi-Fi をオフにして、モバイル回線でもう一度<span class="ui">JOIN</span>ボタンを押す。それでもだめなら、スタッフに声をかけてください</td></tr>
+    <tr><td>「満員のため参加できません」と出る</td><td>参加人数がいっぱいです。次の参加までお待ちください</td></tr>
+    <tr><td>動きがずれる、止まらない</td><td><span class="ui">傾きリセット</span>ボタンを押す</td></tr>
+    <tr><td>iPhone でセンサーが使えない</td><td>ページを再読み込みして、もう一度<span class="ui">JOIN</span>ボタンを押し、「許可」を選ぶ</td></tr>
+  </table>
+</body>
+</html>
