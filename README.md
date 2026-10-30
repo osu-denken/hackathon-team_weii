@@ -61,11 +61,12 @@ git clone --recurse-submodules git@github.com:osu-denken/hackathon-team_weii.git
 |---|---|---|
 | `debug=1` | ホスト / コントローラー / プレイ | 画面の左下に接続状況 (ICE の状態、使われている経路など) を表示する |
 | `maxPlayers=N` | ホスト | 同時に参加できる人数。既定は `4`、`-1` で無制限。満員のときの参加は断られる |
+| `seed=N` | ホスト | 乱数のシード (整数)。敵の出現位置とアイテムの出方が毎回同じになる。不具合の再現や動作確認用。未指定なら毎回ランダム |
 | `room=ID` | コントローラー | 接続先のルーム ID (ホストの QR コードに含まれる) |
 
 例: `https://osu-denken.net/phone-and-shoot/host/?maxPlayers=8&debug=1`
 
-サーバー版 (Node) では、環境変数 `MAX_PLAYERS` で同じ人数の上限を変更できます (`-1` で無制限)。
+サーバー版 (Node) では、環境変数 `MAX_PLAYERS` で人数の上限 (`-1` で無制限)、`SEED` で乱数のシードを変更できます。
 
 # 起動手順
 バックエンドを起動すると自動的にフロントエンド側もパスが通されます。<br>

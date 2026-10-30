@@ -23,7 +23,7 @@ export class SpawnSystem {
     
     const enemy = new EnemyEntity({
       id: `enemy-${stage.enemyCounter++}`,
-      x: (Math.random() * 6) - 3,
+      x: (stage.random() * 6) - 3,
       y: 12,
       type,
       hp,

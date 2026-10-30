@@ -7,6 +7,7 @@ import { TICK_MS, RESYNC_INTERVAL_MS } from './constants/systemConfig.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
 import { SpawnSystem } from './systems/SpawnSystem.js';
 import { PayloadBuilder } from './utilites/PayloadBuilder.js';
+import { createSeededRandom } from './utilites/Random.js';
 
 import {
   X_MIN,
@@ -33,9 +34,12 @@ class Stage {
   /**
    * @param {object} [options]
    * @param {number} [options.maxPlayers] 同時に参加できる人数 (Infinity で無制限)
+   * @param {number|null} [options.seed] 乱数のシード (null なら毎回ランダム)
    */
-  constructor({ maxPlayers = DEFAULT_MAX_PLAYERS } = {}) {
+  constructor({ maxPlayers = DEFAULT_MAX_PLAYERS, seed = null } = {}) {
     this.maxPlayers = maxPlayers;
+    this.seed = seed;
+    this.resetRandom();
     this.players = new Map();
     this.enemies = new Map();
     this.bullets = new Map();
@@ -61,6 +65,11 @@ class Stage {
     this.gameOverAt = null;
     this.lastPredictionSync = Date.now();
     this.lastUpdateAt = Date.now();
+  }
+
+  // 敵の出現位置やアイテムの抽選に使う乱数。シードがあれば毎回同じ展開になる
+  resetRandom() {
+    this.random = this.seed === null ? Math.random : createSeededRandom(this.seed);
   }
 
   resetToTitle(now = Date.now()) {
@@ -286,6 +295,8 @@ class Stage {
       || this.startCountdownAt === null) return;
 
     if (now - this.startCountdownAt >= this.startCountdownMs) {
+      // 参加の順番などに左右されないよう、ゲーム開始時に乱数を初期化する
+      this.resetRandom();
       this.gameStarted = true;
       this.gameStartAt = now;
       this.enemies.clear();
@@ -434,7 +445,7 @@ class Stage {
     if (this.itemEntities.size >= ITEM_SPAWN_LIMIT)
       return;
 
-    const item = ItemFactory.random();
+    const item = ItemFactory.random(this.random);
     const itemEntity = new ItemEntity({
       id: `item-${this.itemCounter++}`,
       item,

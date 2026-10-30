@@ -3,6 +3,7 @@ import http from 'http';
 import https from 'https';
 import WebSocket, { WebSocketServer } from 'ws';
 import { Stage } from './Stage.js';
+import { parseSeed } from './utilites/Random.js';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -32,12 +33,13 @@ app.get('/api/client-url', (req, res) => {
   res.json({ clientUrl: config.buildClientUrl(req) });
 });
 
-// 同時に参加できる人数。環境変数 MAX_PLAYERS で変更できる (-1 で無制限、既定は 4)
+// 同時に参加できる人数は環境変数 MAX_PLAYERS (-1 で無制限、既定は 4)、
+// 乱数のシードは環境変数 SEED で指定できる
 const maxPlayersEnv = Number(process.env.MAX_PLAYERS);
 const stage = new Stage(
   Number.isFinite(maxPlayersEnv) && process.env.MAX_PLAYERS !== ''
-    ? { maxPlayers: maxPlayersEnv < 0 ? Infinity : Math.max(1, Math.floor(maxPlayersEnv)) }
-    : {}
+    ? { maxPlayers: maxPlayersEnv < 0 ? Infinity : Math.max(1, Math.floor(maxPlayersEnv)), seed: parseSeed(process.env.SEED) }
+    : { seed: parseSeed(process.env.SEED) }
 );
 const messageHandler = new MessageHandler(stage, { send, sendError });
 const viewers = new Set(); // モニター用のWebSocket接続

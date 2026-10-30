@@ -40,3 +40,11 @@ export const state = {
 export const serverInfo = {
   serverTimeOffset: 0
 };
+
+// 乱数のシード。URL の ?seed=整数 を付けると、敵の出現位置とアイテムの出方が毎回同じになる
+export const SEED = (() => {
+  const raw = new URLSearchParams(window.location.search).get('seed');
+  if (raw === null || raw === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.floor(n) : null;
+})();

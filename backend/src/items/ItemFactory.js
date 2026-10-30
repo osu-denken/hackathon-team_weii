@@ -5,8 +5,8 @@ import { ShieldItem } from './ShieldItem.js';
 import { TripleShotItem } from './TripleShotItem.js';
 
 class ItemFactory {
-  static random() {
-    if (Math.random() < 0.08) {
+  static random(random = Math.random) {
+    if (random() < 0.08) {
       return new HealthIncreaseItem();
     }
     
@@ -16,7 +16,7 @@ class ItemFactory {
       () => new ShieldItem(),
       () => new TripleShotItem(),
     ];
-    const index = Math.floor(Math.random() * factories.length);
+    const index = Math.floor(random() * factories.length);
     
     return factories[index]();
   }
